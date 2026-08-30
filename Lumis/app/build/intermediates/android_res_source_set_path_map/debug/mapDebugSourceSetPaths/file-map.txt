@@ -1,0 +1,8 @@
+com.example.lumis.app-pngs-0 /home/cifera/AndroidStudioProjects/Lumis/app/build/generated/res/pngs/debug
+com.example.lumis.app-updated_navigation_xml-1 /home/cifera/AndroidStudioProjects/Lumis/app/build/generated/updated_navigation_xml/debug
+com.example.lumis.app-packageDebugResources-2 /home/cifera/AndroidStudioProjects/Lumis/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.example.lumis.app-packageDebugResources-3 /home/cifera/AndroidStudioProjects/Lumis/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.example.lumis.app-debug-4 /home/cifera/AndroidStudioProjects/Lumis/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.example.lumis.app-debug-5 /home/cifera/AndroidStudioProjects/Lumis/app/src/debug/res
+com.example.lumis.app-main-6 /home/cifera/AndroidStudioProjects/Lumis/app/src/main/res
+gradleHome-0 /home/cifera/.gradle
