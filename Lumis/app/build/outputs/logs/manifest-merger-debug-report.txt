@@ -23,6 +23,8 @@ MERGED from [androidx.compose.ui:ui-test-manifest:1.10.4] /home/cifera/.gradle/c
 MERGED from [androidx.activity:activity:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/33686089d2d681a693b33a73f3b8fe3e/transformed/activity-1.8.2/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.activity:activity-ktx:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/c38ed9e40a608e1ee8191a0385cfc43c/transformed/activity-ktx-1.8.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.activity:activity-compose:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/409bed41d913d264a040c676ff5611f7/transformed/activity-compose-1.8.2/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/0b72673dfcad922bcb45414c918de071/transformed/material-icons-extended-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/cee9e8a3eb9b90dbb70f394be44608cf/transformed/material-icons-core-release/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/f61c4eea381c821a188aa3044930cde7/transformed/ui/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.runtime:runtime-annotation-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/9928a309d711da9aa3e171d54b5c0f85/transformed/runtime-annotation/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.runtime:runtime-retain-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/b92a5bba7131d08be8d86e1a9de33e10/transformed/runtime-retain/AndroidManifest.xml:2:1-7:12
@@ -180,6 +182,10 @@ MERGED from [androidx.activity:activity-ktx:1.8.2] /home/cifera/.gradle/caches/9
 MERGED from [androidx.activity:activity-ktx:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/c38ed9e40a608e1ee8191a0385cfc43c/transformed/activity-ktx-1.8.2/AndroidManifest.xml:5:5-44
 MERGED from [androidx.activity:activity-compose:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/409bed41d913d264a040c676ff5611f7/transformed/activity-compose-1.8.2/AndroidManifest.xml:5:5-44
 MERGED from [androidx.activity:activity-compose:1.8.2] /home/cifera/.gradle/caches/9.5.0/transforms/409bed41d913d264a040c676ff5611f7/transformed/activity-compose-1.8.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/0b72673dfcad922bcb45414c918de071/transformed/material-icons-extended-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/0b72673dfcad922bcb45414c918de071/transformed/material-icons-extended-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/cee9e8a3eb9b90dbb70f394be44608cf/transformed/material-icons-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-core-android:1.7.8] /home/cifera/.gradle/caches/9.5.0/transforms/cee9e8a3eb9b90dbb70f394be44608cf/transformed/material-icons-core-release/AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/f61c4eea381c821a188aa3044930cde7/transformed/ui/AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/f61c4eea381c821a188aa3044930cde7/transformed/ui/AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.runtime:runtime-annotation-android:1.10.4] /home/cifera/.gradle/caches/9.5.0/transforms/9928a309d711da9aa3e171d54b5c0f85/transformed/runtime-annotation/AndroidManifest.xml:5:5-44

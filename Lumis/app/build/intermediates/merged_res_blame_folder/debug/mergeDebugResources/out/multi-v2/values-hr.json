@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.lumis.app-mergeDebugResources-37:/values-hr/values-hr.xml",
+            "outputFile": "com.example.lumis.app-mergeDebugResources-39:/values-hr/values-hr.xml",
             "map": [
                 {
                     "source": "/home/cifera/.gradle/caches/9.5.0/transforms/d7540bb90ff41d9f47be7754c1ca61a6/transformed/material/res/values-hr/values-hr.xml",
