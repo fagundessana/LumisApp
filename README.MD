@@ -1,7 +1,7 @@
 # Lumis - App de Serviços de Limpeza
 
 ## 📱 Sobre o Aplicativo
-O **Lumis** é um aplicativo Android desenvolvido para facilitar a contratação, gerenciamento e agendamento de serviços de limpeza em ambientes **residenciais, empresariais e urbanos**.  
+A **Lumis** é um aplicativo Android desenvolvido para facilitar a contratação, gerenciamento e agendamento de serviços de limpeza em ambientes **residenciais, empresariais e urbanos**.  
 O objetivo é conectar clientes e prestadores de serviço com praticidade, transparência e eficiência diretamente na palma da mão.
 
 ---
@@ -45,7 +45,7 @@ O objetivo é conectar clientes e prestadores de serviço com praticidade, trans
 
 ## 📜 Licença
 Este projeto está licenciado sob a licença MIT.  
-Sinta-se livre para usar, modificar e distribuir, desde que mantidos os devidos créditos.
+Sinta-se livre para usar, modificar e distribuir, **desde que mantidos os devidos créditos**.
 
 ---
 
