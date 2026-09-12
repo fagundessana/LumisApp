@@ -17,10 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.lumis.ui.theme.LumisTheme
+import com.example.lumis.view.theme.LumisTheme
 import kotlinx.coroutines.delay
-import com.example.lumis.ui.SplashScreen
-import com.example.lumis.ui.MainScaffold
+import com.example.lumis.view.SplashScreen
+import com.example.lumis.view.MainScaffold
 
 private const val SPLASH_DURATION_MS = 1800L
 class MainActivity : ComponentActivity() {
