@@ -9,6 +9,9 @@ val LumisGreenLight = Color(0xFFE7F5EC)
 val LumisTeal = Color(0xFF3DBEA9)
 val LumisTealLight = Color(0xFFE6F7F4)
 val LumisBlueAccent = Color(0xFF4A6CF7)
+val LumisGreenVivid = Color(0xFF50BF87)
+val LumisBlue = Color(0xFF508ABF)
+val LumisGreySecondary = Color(0xFF666666)
 
 // Neutros
 val LumisBackground = Color(0xFFF7F8FA)

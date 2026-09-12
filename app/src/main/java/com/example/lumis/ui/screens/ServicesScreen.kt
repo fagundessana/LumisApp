@@ -1,6 +1,6 @@
 package com.example.lumis.ui.screens
 
-import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,414 +10,408 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.ui.components.*
+import com.example.lumis.R
 import com.example.lumis.ui.theme.*
 
-// ======== DATA CLASSES ========
-data class CleaningType(
-    val id: String,
-    val title: String,
-    val description: String,
-    val price: String,
-    val priceFrom: Boolean = true,
-    val icon: ImageVector
+// ---------------------------------------------------------
+// MODELO DE SERVIÇO
+// ---------------------------------------------------------
+
+data class Servico(
+    val nome: String,
+    val descricao: String,
+    val preco: String
 )
 
-data class PlanInfo(
-    val id: String,
-    val title: String,
-    val description: String,
-    val price: String,
-    val period: String,
-    val features: List<String>,
-    val isPopular: Boolean = false
-)
+// ---------------------------------------------------------
+// TELA PRINCIPAL (SERVIÇOS)
+// ---------------------------------------------------------
 
-// ======== MOCK DATA - SERVIÇOS ========
-private val cleaningTypes = listOf(
-    CleaningType(
-        id = "padrao",
-        title = "Limpeza Padrão",
-        description = "Limpeza completa da rotina para sua casa sempre organizada, com foco na higienização geral.",
-        price = "R\$ 120,00",
-        icon = Icons.Outlined.Home
-    ),
-    CleaningType(
-        id = "pesada",
-        title = "Limpeza Pesada",
-        description = "Limpeza profunda com foco em gorduras difíceis, reentrâncias e remoção de acúmulos.",
-        price = "R\$ 220,00",
-        icon = Icons.Outlined.Build
-    ),
-    CleaningType(
-        id = "pos_mudanca",
-        title = "Limpeza Pós-Mudança",
-        description = "Ideal para preparar o imóvel antes de entrar ou devolver o imóvel após a mudança.",
-        price = "R\$ 350,00",
-        icon = Icons.Outlined.Inventory
-    ),
-    CleaningType(
-        id = "airbnb",
-        title = "Limpeza Airbnb / Temporada",
-        description = "Preparação expressa e rigorosa entre reservas com o padrão de limpeza hoteleira.",
-        price = "R\$ 180,00",
-        icon = Icons.Outlined.Hotel
-    )
-)
-
-// ======== MOCK DATA - PLANOS ========
-private val plans = listOf(
-    PlanInfo(
-        id = "basico",
-        title = "Básico",
-        description = "Perfeito para quem busca praticidade com economia",
-        price = "R\$ 99,90",
-        period = "/mês",
-        features = listOf(
-            "2 limpezas/mês (até 4 cômodos)",
-            "1 serviço especializado por trimestre",
-            "Atendimento em até 3 dias úteis",
-            "Dicas mensais de organização"
-        )
-    ),
-    PlanInfo(
-        id = "regular",
-        title = "Regular",
-        description = "Equilíbrio perfeito — nosso plano mais escolhido",
-        price = "R\$ 179,90",
-        period = "/mês",
-        features = listOf(
-            "3 limpezas/mês (até 4 cômodos)",
-            "2 serviços especializados por trimestre",
-            "Atendimento em até 2 dias úteis",
-            "Relatórios de impacto ambiental",
-            "Suporte prioritário por WhatsApp"
-        ),
-        isPopular = true
-    ),
-    PlanInfo(
-        id = "premium",
-        title = "Premium",
-        description = "Conforto total e suporte prioritário",
-        price = "R\$ 399,90",
-        period = "/mês",
-        features = listOf(
-            "Limpeza semanal dedicada",
-            "Todos os serviços especializados",
-            "Atendimento em até 24h",
-            "Equipe fixa ou exclusiva"
-        )
-    )
-)
-
-// ======== TELA PRINCIPAL (COM TABS) ========
 @Composable
 fun ServicesScreen() {
-    var selectedTab by remember { mutableStateOf(LumisTab.SERVICOS) }
-    var selectedTypeId by remember { mutableStateOf(cleaningTypes[1].id) }
-    var selectedPlanId by remember { mutableStateOf(plans[1].id) }
+    var servicoSelecionado by remember { mutableStateOf("Limpeza Pesada") }
 
-    val context = LocalContext.current
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = LumisBackground
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(LumisBackground)
+        ) {
+            Topo()
 
-    Scaffold(
-        containerColor = LumisBackground,
-        topBar = {
-            Column(Modifier.background(LumisSurface).statusBarsPadding()) {
-                LumisTopBar()
-                Spacer(Modifier.height(8.dp))
-                LumisTabSelector(selected = selectedTab, onSelected = { selectedTab = it })
-                Spacer(Modifier.height(4.dp))
-            }
-        },
-        bottomBar = {
-            LumisBottomBar(
-                buttonText = if (selectedTab == LumisTab.SERVICOS) "Continuar" else "Assinar plano",
-                onClick = {
-                    if (selectedTab == LumisTab.SERVICOS) {
-                        val selected = cleaningTypes.first { it.id == selectedTypeId }
-                        Toast.makeText(
-                            context,
-                            "Selecionado: ${selected.title} — ${selected.price}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        val selected = plans.first { it.id == selectedPlanId }
-                        Toast.makeText(
-                            context,
-                            "Plano ${selected.title} — ${selected.price}${selected.period}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            Abas()
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFE0E0E0))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(52.dp)
+                            .fillMaxSize()
+                            .background(LumisTeal)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "CATEGORIA",
+                    color = LumisBlue,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Text(
+                    text = "Qual tipo de limpeza você\nprecisa?",
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF333333)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(servicos) { servico ->
+                        CardServico(
+                            servico = servico,
+                            selecionado = servicoSelecionado == servico.nome,
+                            onClick = {
+                                servicoSelecionado = servico.nome
+                            }
+                        )
                     }
                 }
-            )
-        }
-    ) { padding ->
-        when (selectedTab) {
-            LumisTab.SERVICOS -> ServicosTab(
-                modifier = Modifier.padding(padding),
-                selectedTypeId = selectedTypeId,
-                onTypeSelected = { selectedTypeId = it }
-            )
-            LumisTab.PLANOS -> PlanosTab(
-                modifier = Modifier.padding(padding),
-                selectedPlanId = selectedPlanId,
-                onPlanSelected = { selectedPlanId = it }
-            )
+            }
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+                    .height(46.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = LumisGreenVivid
+                )
+            ) {
+                Text(
+                    text = "Continuar",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+            }
+
+            MenuInferior()
         }
     }
 }
 
-// ======== ABA SERVIÇOS ========
-@Composable
-private fun ServicosTab(
-    modifier: Modifier = Modifier,
-    selectedTypeId: String,
-    onTypeSelected: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 16.dp, top = 8.dp)
-    ) {
-        item {
-            LumisScreenHeader(
-                label = "Categoria",
-                title = "Qual tipo de limpeza\nvocê precisa?"
-            )
-        }
-        items(cleaningTypes) { type ->
-            CleaningTypeCard(
-                type = type,
-                isSelected = type.id == selectedTypeId,
-                onClick = { onTypeSelected(type.id) }
-            )
-            Spacer(Modifier.height(12.dp))
-        }
-    }
-}
+// ---------------------------------------------------------
+// LISTA DE SERVIÇOS
+// ---------------------------------------------------------
+
+private val servicos = listOf(
+    Servico(
+        nome = "Limpeza Padrão",
+        descricao = "Limpeza completa de rotina para sua casa com\n" +
+            "aspiração, remoção de pó e higienização geral.",
+        preco = "R$ 120,00"
+    ),
+    Servico(
+        nome = "Limpeza Pesada",
+        descricao = "Limpeza profunda com foco em gorduras difíceis,\n" +
+            "rejuntes, remoção de sujeiras acumuladas.",
+        preco = "R$ 220,00"
+    ),
+    Servico(
+        nome = "Limpeza Pós-Mudança",
+        descricao = "Ideal para preparar o imóvel antes de entrar ou deixar\n" +
+            "impecável para a entrega de chaves.",
+        preco = "R$ 350,00"
+    ),
+    Servico(
+        nome = "Limpeza Airbnb / Temporada",
+        descricao = "Preparação expressa e rigorosa entre reservas de\n" +
+            "hóspedes com arrumação padrão hotelaria.",
+        preco = "R$ 180,00"
+    )
+)
+
+// ---------------------------------------------------------
+// TOPO DA TELA
+// ---------------------------------------------------------
 
 @Composable
-private fun CleaningTypeCard(
-    type: CleaningType,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    LumisCard(
+private fun Topo() {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        isSelected = isSelected,
-        onClick = onClick
+            .height(48.dp)
+            .background(LumisSurface)
+            .statusBarsPadding()
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
         ) {
-            // Ícone circular colorido
+            Image(
+                painter = painterResource(id = R.drawable.lumis),
+                contentDescription = "Logo Lumis",
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
-                    .background(LumisGreenLight),
+                    .background(Color(0xFFEAF0F4)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = type.icon,
-                    contentDescription = null,
-                    tint = LumisGreen,
-                    modifier = Modifier.size(24.dp)
+                    imageVector = Icons.Default.NotificationsNone,
+                    contentDescription = "Notificações",
+                    tint = LumisBlue,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(type.title, style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    type.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LumisTextSecondary
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            SelectionIndicator(isSelected = isSelected)
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                type.price,
-                style = MaterialTheme.typography.titleMedium,
-                color = LumisGreen,
-                fontWeight = FontWeight.Bold
-            )
-            if (type.priceFrom) {
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    "a partir de",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LumisTextTertiary
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFEAF5EF)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Perfil",
+                    tint = LumisGreenVivid,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
     }
 }
 
-@Composable
-private fun SelectionIndicator(isSelected: Boolean) {
-    Box(
-        modifier = Modifier
-            .size(22.dp)
-            .clip(CircleShape)
-            .background(if (isSelected) LumisGreen else LumisSurface)
-            .border(
-                width = if (isSelected) 0.dp else 1.5.dp,
-                color = LumisBorder,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (isSelected) {
-            Icon(
-                Icons.Default.Check,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(14.dp)
-            )
-        }
-    }
-}
-
-// ======== ABA PLANOS ========
-@Composable
-private fun PlanosTab(
-    modifier: Modifier = Modifier,
-    selectedPlanId: String,
-    onPlanSelected: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 16.dp, top = 8.dp)
-    ) {
-        item {
-            LumisScreenHeader(
-                label = "Planos",
-                title = "Escolha o plano ideal\npara você"
-            )
-        }
-        items(plans) { plan ->
-            PlanCard(
-                plan = plan,
-                isSelected = plan.id == selectedPlanId,
-                onClick = { onPlanSelected(plan.id) }
-            )
-            Spacer(Modifier.height(12.dp))
-        }
-    }
-}
+// ---------------------------------------------------------
+// ABAS
+// ---------------------------------------------------------
 
 @Composable
-private fun PlanCard(
-    plan: PlanInfo,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    LumisCard(
+private fun Abas() {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        isSelected = isSelected,
-        onClick = onClick
+            .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
+            .height(29.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .background(Color(0xFFE7E7E7))
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .clip(RoundedCornerShape(7.dp))
+                .background(LumisGreenVivid),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Serviços",
+                color = Color.White,
+                fontSize = 11.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Planos",
+                color = LumisGreySecondary,
+                fontSize = 11.sp
+            )
+        }
+    }
+}
+
+// ---------------------------------------------------------
+// CARD DE SERVIÇO
+// ---------------------------------------------------------
+
+@Composable
+private fun CardServico(
+    servico: Servico,
+    selecionado: Boolean,
+    onClick: () -> Unit
+) {
+    val corBorda = if (selecionado) LumisGreenVivid else Color(0xFFD5D5D5)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(LumisSurface)
+            .border(width = 1.dp, color = corBorda, shape = RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        plan.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = LumisTextPrimary
+            Text(
+                text = servico.nome,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF333333)
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(17.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 1.5.dp,
+                        color = if (selecionado) LumisGreenVivid else Color(0xFF999999),
+                        shape = CircleShape
                     )
-                    if (plan.isPopular) {
-                        Spacer(Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(LumisGreen)
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                "MAIS POPULAR",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    plan.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LumisTextSecondary
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            SelectionIndicator(isSelected = isSelected)
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Preço
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                plan.price,
-                style = MaterialTheme.typography.headlineSmall,
-                color = LumisGreen,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                plan.period,
-                style = MaterialTheme.typography.bodyMedium,
-                color = LumisTextSecondary,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Features
-        plan.features.forEach { feature ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 3.dp)
+                    .background(if (selecionado) LumisGreenVivid else Color.White),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = LumisGreen,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    feature,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LumisTextPrimary
-                )
+                if (selecionado) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selecionado",
+                        tint = Color.White,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
             }
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = servico.descricao,
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
+            color = LumisGreySecondary
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = servico.preco,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = LumisBlue
+        )
+    }
+}
+
+// ---------------------------------------------------------
+// MENU INFERIOR
+// ---------------------------------------------------------
+
+@Composable
+private fun MenuInferior() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(LumisSurface)
+            .navigationBarsPadding()
+            .height(57.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ItemMenu(icone = Icons.Default.Home, texto = "Home", selecionado = false)
+        ItemMenu(icone = Icons.Default.Business, texto = "Cidade", selecionado = false)
+        ItemMenu(icone = Icons.Default.Explore, texto = "Explorar", selecionado = true)
+        ItemMenu(icone = Icons.Default.CalendarMonth, texto = "Agenda", selecionado = false)
+        ItemMenu(icone = Icons.Default.Person, texto = "Perfil", selecionado = false)
+    }
+}
+
+// ---------------------------------------------------------
+// ITEM DO MENU
+// ---------------------------------------------------------
+
+@Composable
+private fun ItemMenu(
+    icone: ImageVector,
+    texto: String,
+    selecionado: Boolean
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            imageVector = icone,
+            contentDescription = texto,
+            modifier = Modifier.size(20.dp),
+            tint = if (selecionado) Color(0xFF777777) else Color(0xFF888888)
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Text(
+            text = texto,
+            fontSize = 8.sp,
+            color = if (selecionado) Color(0xFF555555) else Color(0xFF777777)
+        )
     }
 }
