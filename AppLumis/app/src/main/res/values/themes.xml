@@ -1,0 +1,9 @@
+<resources>
+    <!-- Tema base apenas para a Activity (o visual real é 100% Compose via LumisTheme). -->
+    <style name="Theme.Lumis" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>
