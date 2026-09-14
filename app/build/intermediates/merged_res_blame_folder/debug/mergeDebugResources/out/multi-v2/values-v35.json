@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.example.lumis.app-mergeDebugResources-39:/values-v35/values-v35.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\sidne\\Downloads\\LumisApp\\LumisApp\\app\\src\\main\\res\\values-v35\\themes.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "4",
+                        "startOffsets": "206",
+                        "endLines": "10",
+                        "endColumns": "12",
+                        "endOffsets": "620"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "8",
+                        "endColumns": "12",
+                        "endOffsets": "469"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,118 @@
+[
+    {
+        "merged": "com.example.lumis.app-debug-41:/drawable_banner.png.flat",
+        "source": "com.example.lumis.app-main-43:/drawable/banner.png"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_mulher_limpando.png.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\mulher_limpando.png"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\xml\\data_extraction_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_homem_limpando.png.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\homem_limpando.png"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_mulher_limpand.png.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\mulher_limpand.png"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_mulher.png.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\mulher.png"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-mdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-hdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_lumis.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\lumis.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-mdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_mulher_limpando.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\mulher_limpando.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-debug-41:\\drawable_homem.png.flat",
+        "source": "C:\\Users\\sidne\\.gradle\\daemon\\9.5.0\\com.example.lumis.app-main-43:\\drawable\\homem.png"
+    }
+]
