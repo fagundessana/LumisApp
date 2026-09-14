@@ -9,6 +9,13 @@ int color white 0x0
 int drawable ic_launcher_background 0x0
 int drawable ic_launcher_foreground 0x0
 int drawable lumis 0x0
+int drawable placeholder_clean_1 0x0
+int drawable placeholder_clean_2 0x0
+int drawable placeholder_hero 0x0
+int font merriweather_sans_bold 0x0
+int font montserrat_bold 0x0
+int font montserrat_extrabold 0x0
+int font questrial_regular 0x0
 int mipmap ic_launcher 0x0
 int mipmap ic_launcher_foreground 0x0
 int mipmap ic_launcher_round 0x0

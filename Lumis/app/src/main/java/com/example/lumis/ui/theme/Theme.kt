@@ -1,58 +1,36 @@
+// Tema do grupo: aqui a gente "liga" as cores no Material3.
+// Toda tela que usar LumisTheme ganha as cores e fontes do app de graça.
+
 package com.example.lumis.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Esquema claro: diz pro Material3 qual cor usar em cada lugar
+// (primary = botões, background = fundo, surface = cards...).
+private val LumisLightScheme = lightColorScheme(
+    primary = LumisColors.Primary,
+    onPrimary = LumisColors.OnButton, // texto em cima do botão verde
+    secondary = LumisColors.Secondary,
+    onSecondary = LumisColors.OnButton,
+    tertiary = LumisColors.Tertiary,
+    onTertiary = LumisColors.OnButton,
+    background = LumisColors.Background,
+    onBackground = LumisColors.TextPrimary,
+    surface = LumisColors.White, // cor dos cards
+    onSurface = LumisColors.TextPrimary,
+    surfaceVariant = LumisColors.LightGray,
+    onSurfaceVariant = LumisColors.SecondaryText,
+    outline = LumisColors.Border // cor das bordas
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
-
+// É só embrulhar a tela com LumisTheme { ... } que tudo funciona.
 @Composable
-fun LumisTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+fun LumisTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = LumisLightScheme,
+        typography = LumisTypography, // fontes (tá no Type.kt)
         content = content
     )
 }

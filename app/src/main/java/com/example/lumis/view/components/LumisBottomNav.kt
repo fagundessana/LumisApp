@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 
 enum class NavItem(val label: String, val icon: ImageVector) {
     HOME("Home", Icons.Outlined.Home),
-    CIDADE("Cidade", Icons.Outlined.LocationCity),
+    CIDADE("Cidade Consciente", Icons.Outlined.LocationCity),
     EXPLORAR("Explorar", Icons.Outlined.Search),
     AGENDA("Agenda", Icons.Outlined.CalendarMonth),
     PERFIL("Perfil", Icons.Outlined.Person)

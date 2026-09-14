@@ -160,14 +160,14 @@ fun calcularDesempenho(profile: FuncionarioProfile): NivelDesempenho {
 
 @Composable
 fun FuncionarioProfileScreen(
-    profile: FuncionarioProfile = FuncionarioProfile()
+    profile: FuncionarioProfile = FuncionarioProfile(),
+    onConfigClick: () -> Unit = {}
 ) {
     var periodoSelecionado by remember { mutableStateOf(PeriodoServico.ANO) }
     val context = LocalContext.current
 
     Scaffold(
-        containerColor = ProfileColors.Background,
-        contentWindowInsets = WindowInsets.statusBars
+        containerColor = ProfileColors.Background
     ) { innerPadding ->
         BoxWithConstraints(
             modifier = Modifier
@@ -185,7 +185,8 @@ fun FuncionarioProfileScreen(
                 item {
                     ProfileHeaderSection(
                         profile = profile,
-                        horizontalPadding = horizontalPadding
+                        horizontalPadding = horizontalPadding,
+                        onConfigClick = onConfigClick
                     )
                 }
 
@@ -264,7 +265,8 @@ fun FuncionarioProfileScreen(
 @Composable
 fun ProfileHeaderSection(
     profile: FuncionarioProfile,
-    horizontalPadding: androidx.compose.ui.unit.Dp
+    horizontalPadding: androidx.compose.ui.unit.Dp,
+    onConfigClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         // Fundo azul gradiente
@@ -307,7 +309,7 @@ fun ProfileHeaderSection(
                         .size(40.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.7f))
-                        .clickable { },
+                        .clickable { onConfigClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

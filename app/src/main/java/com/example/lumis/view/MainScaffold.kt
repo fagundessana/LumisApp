@@ -11,13 +11,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.lumis.data.User
 import com.example.lumis.model.Servico
 import com.example.lumis.view.components.AgendaStore
 import com.example.lumis.view.components.AgendaTab
 import com.example.lumis.view.components.AgendamentoRegistro
 import com.example.lumis.view.components.BottomNavBar
 import com.example.lumis.view.components.NavItem
+import com.example.lumis.view.screens.auth.ContaScreen
+import com.example.lumis.view.screens.client_profile.UsuarioProfile
+import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
+import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
+import com.example.lumis.view.screens.home.EmBreveScreen
+import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.services.AgendamentoScreen
 import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
 import com.example.lumis.view.screens.services.PlanosScreen
@@ -34,13 +41,18 @@ sealed class LumisTela {
     data object Imovel : LumisTela()
     data object Adicionais : LumisTela()
     data object Resumo : LumisTela()
+    data object Conta : LumisTela()
 }
 
 @Composable
-fun MainScaffold() {
-    var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.EXPLORAR)) }
+fun MainScaffold(
+    usuario: User,
+    onLogout: () -> Unit
+) {
+    var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
     var servicoEscolhido by remember { mutableStateOf<Servico?>(null) }
+    var servicoInicial by remember { mutableStateOf<String?>(null) }
     var dataEscolhida by remember { mutableStateOf("") }
     var horarioEscolhido by remember { mutableStateOf("") }
     var quartosCount by remember { mutableStateOf(0) }
@@ -51,6 +63,35 @@ fun MainScaffold() {
 
     fun irPara(nova: LumisTela) {
         telaAtual = nova
+    }
+
+    // Mapeia o atalho da Home (categoria/serviço/recomendado) para um serviço existente.
+    // Se não houver correspondência, abre a aba de serviços normalmente.
+    fun abrirServicoPorLegenda(legenda: String) {
+        val label = legenda.lowercase()
+        val mapa = listOf(
+            "limpeza pesada" to "Limpeza Pesada",
+            "pós-mudança" to "Limpeza Pós-Mudança",
+            "pos-mudanca" to "Limpeza Pós-Mudança",
+            "pós-reforma" to "Limpeza Pós-Mudança",
+            "pos-reforma" to "Limpeza Pós-Mudança",
+            "airbnb" to "Limpeza Airbnb / Temporada",
+            "limpeza geral" to "Limpeza Padrão",
+            "residencial" to "Limpeza Padrão",
+            "casas e aptos" to "Limpeza Padrão",
+            "comercial" to "Limpeza Pesada",
+            "escritórios" to "Limpeza Pesada",
+            "empresas" to "Limpeza Pesada",
+            "limpeza padrão" to "Limpeza Padrão",
+            "limpeza" to "Limpeza Padrão",
+            "geral" to "Limpeza Padrão",
+            "expansao" to "Limpeza Padrão",
+            "posreforma" to "Limpeza Pós-Mudança"
+        )
+        servicoInicial = mapa
+            .firstOrNull { label.contains(it.first) }
+            ?.second
+        irPara(LumisTela.Principal(NavItem.EXPLORAR))
     }
 
     Box(
@@ -66,14 +107,35 @@ fun MainScaffold() {
             ) {
                 when (val tela = telaAtual) {
                     is LumisTela.Principal -> when (tela.aba) {
+                        NavItem.HOME -> HomeScreen(
+                            onSeeAllCategories = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                            onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                            onSeeAllRecommended = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                            onDiscountClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                            onCategoryClick = { abrirServicoPorLegenda(it) },
+                            onServiceClick = { abrirServicoPorLegenda(it) },
+                            onHireClick = { abrirServicoPorLegenda(it) }
+                        )
+                        NavItem.CIDADE -> EmBreveScreen()
                         NavItem.AGENDA -> AgendaTab()
-                        NavItem.PERFIL -> FuncionarioProfileScreen()
-                        NavItem.HOME, NavItem.CIDADE, NavItem.EXPLORAR -> ServicesScreen(
+                        NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
+                            UsuarioProfileScreen(
+                                profile = UsuarioProfile(nome = usuario.nomeUsuario),
+                                onConfigClick = { irPara(LumisTela.Conta) }
+                            )
+                        } else {
+                            FuncionarioProfileScreen(
+                                profile = FuncionarioProfile(nome = usuario.nomeUsuario),
+                                onConfigClick = { irPara(LumisTela.Conta) }
+                            )
+                        }
+                        NavItem.EXPLORAR -> ServicesScreen(
                             onAbrirPlanos = { irPara(LumisTela.Planos) },
                             onAbrirAgendamento = { servico ->
                                 servicoEscolhido = servico
                                 irPara(LumisTela.Agendamento(servico))
-                            }
+                            },
+                            servicoInicial = servicoInicial
                         )
                     }
                     is LumisTela.Planos -> PlanosScreen(
@@ -140,6 +202,11 @@ fun MainScaffold() {
                             }
                             irPara(LumisTela.Principal(NavItem.AGENDA))
                         }
+                    )
+                    is LumisTela.Conta -> ContaScreen(
+                        usuario = usuario,
+                        onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
+                        onSair = onLogout
                     )
                 }
             }

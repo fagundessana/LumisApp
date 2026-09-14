@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.controller.ServicesController
 import com.example.lumis.model.Servico
+import com.example.lumis.model.ServicoRepository
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.theme.*
@@ -45,9 +47,18 @@ import com.example.lumis.view.theme.*
 @Composable
 fun ServicesScreen(
     onAbrirPlanos: () -> Unit = {},
-    onAbrirAgendamento: (Servico) -> Unit = {}
+    onAbrirAgendamento: (Servico) -> Unit = {},
+    servicoInicial: String? = null
 ) {
     val controller = remember { ServicesController() }
+
+    LaunchedEffect(servicoInicial) {
+        servicoInicial?.let { nome ->
+            ServicoRepository.todos
+                .firstOrNull { it.nome == nome }
+                ?.let { controller.selecionarServico(it) }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
