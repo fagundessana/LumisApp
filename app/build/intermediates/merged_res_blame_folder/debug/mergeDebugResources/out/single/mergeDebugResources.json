@@ -1,0 +1,134 @@
+[
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_placeholder_hero.png.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/placeholder_hero.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_placeholder_clean_1.png.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/placeholder_clean_1.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_ic_launcher_background.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/font_merriweather_sans_bold.ttf.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/font/merriweather_sans_bold.ttf"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_lumis.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/lumis.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "com.example.lumis.app-debug-43:/drawable_homem_limpando.png.flat",
+        "source": "com.example.lumis.app-main-45:/drawable/homem_limpando.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/font_questrial_regular.ttf.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/font/questrial_regular.ttf"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/font_montserrat_bold.ttf.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/font/montserrat_bold.ttf"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_placeholder_clean_2.png.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/placeholder_clean_2.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/xml_data_extraction_rules.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_mulher_limpando.png.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/mulher_limpando.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.lumis.app-debug-43:/drawable_mulher_limpando.png.flat",
+        "source": "com.example.lumis.app-main-45:/drawable/mulher_limpando.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/drawable_homem_limpando.png.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/drawable/homem_limpando.png"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/xml_backup_rules.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/font_montserrat_extrabold.ttf.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/font/montserrat_extrabold.ttf"
+    },
+    {
+        "merged": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-debug-43:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/home/cifera/.gradle/daemon/9.5.0/com.example.lumis.app-main-45:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    }
+]

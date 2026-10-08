@@ -1,0 +1,29 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color ic_launcher_background
+color purple_200
+color purple_500
+color purple_700
+color teal_200
+color teal_700
+color white
+drawable homem_limpando
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+drawable lumis
+drawable mulher_limpando
+drawable placeholder_clean_1
+drawable placeholder_clean_2
+drawable placeholder_hero
+font merriweather_sans_bold
+font montserrat_bold
+font montserrat_extrabold
+font questrial_regular
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
+string app_name
+style Theme.Lumis
+xml backup_rules
+xml data_extraction_rules
