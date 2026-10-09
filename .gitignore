@@ -1,0 +1,37 @@
+# LumisApp - .gitignore da raiz
+# Protege a raiz (app/, build/, .gradle/, .idea/) e o subprojeto AppLumis/
+# Base copiada de AppLumis/.gitignore + reforco para a raiz
+
+# Gradle
+.gradle/
+build/
+**/build/
+/app/build/
+/build/
+/AppLumis/build/
+/AppLumis/app/build/
+/AppLumis/.gradle/
+
+# Android Studio
+local.properties
+*.iml
+.idea/
+!/.idea/codeStyles/
+!/.idea/inspectionProfiles/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+
+# Kotlin
+.kotlin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keystore
+*.jks
+*.keystore
