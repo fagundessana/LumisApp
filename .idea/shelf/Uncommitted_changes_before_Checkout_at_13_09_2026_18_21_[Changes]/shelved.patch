@@ -1,0 +1,1601 @@
+Index: app/src/main/java/com/example/lumis/view/SplashScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/SplashScreen.kt b/app/src/main/java/com/example/lumis/view/screens/splashscreen/SplashScreen.kt
+rename from app/src/main/java/com/example/lumis/view/SplashScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/splashscreen/SplashScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/SplashScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/splashscreen/SplashScreen.kt	(date 1789331894760)
+@@ -1,28 +1,42 @@
+-package com.example.lumis.view
++package com.example.lumis.view.screens.splashscreen
+ 
++import androidx.compose.animation.core.LinearEasing
++import androidx.compose.animation.core.RepeatMode
++import androidx.compose.animation.core.animateFloat
++import androidx.compose.animation.core.infiniteRepeatable
++import androidx.compose.animation.core.rememberInfiniteTransition
++import androidx.compose.animation.core.tween
++import androidx.compose.foundation.Canvas
+ import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Arrangement
+ import androidx.compose.foundation.layout.Box
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Row
+ import androidx.compose.foundation.layout.Spacer
+ import androidx.compose.foundation.layout.fillMaxSize
+ import androidx.compose.foundation.layout.height
+ import androidx.compose.foundation.layout.size
+ import androidx.compose.foundation.shape.CircleShape
+-import androidx.compose.material3.CircularProgressIndicator
+ import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.geometry.Size
++import androidx.compose.ui.graphics.Brush
+ import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.graphics.StrokeCap
++import androidx.compose.ui.graphics.drawscope.Stroke
++import androidx.compose.ui.graphics.drawscope.rotate
+ import androidx.compose.ui.res.painterResource
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+-import com.example.lumis.R // Certifique-se de que o R correto do seu pacote está importado
++import com.example.lumis.R
+ 
+-// Definição das cores personalizadas
+ val CorPrimaria = Color(0xFF50BF87)
+ val CorSecundaria = Color(0xFF3DBEA9)
+ val CorTerciaria = Color(0xFF508ABF)
+@@ -33,22 +47,14 @@
+         modifier = modifier
+             .fillMaxSize()
+             .background(Color.White),
+-        contentAlignment = Alignment.Center,
++        contentAlignment = Alignment.Center
+     ) {
+         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+-            Box(
+-                modifier = Modifier
+-                    .size(96.dp)
+-                    .clip(CircleShape)
+-                    .background(Color.White),
+-                contentAlignment = Alignment.Center,
+-            ) {
+-                Image(
+-                    painter = painterResource(id = R.drawable.lumis),
+-                    contentDescription = "Logo Lumis",
+-                    modifier = Modifier.size(400.dp)
+-                )
+-            }
++
++            // Container que agrupa os Arcos Giratórios + Logo Centralizada
++            LoadingCircleWithLogo(
++                modifier = Modifier.size(180.dp) // Tamanho total do indicador circular
++            )
+ 
+             Spacer(modifier = Modifier.height(24.dp))
+ 
+@@ -66,10 +72,128 @@
+                 style = MaterialTheme.typography.bodyLarge,
+                 color = CorPrimaria
+             )
++        }
++    }
++}
++
++@Composable
++fun LoadingCircleWithLogo(
++    modifier: Modifier = Modifier
++) {
++    val infiniteTransition = rememberInfiniteTransition(label = "animacao_loading")
++
++    // Rotação contínua dos arcos
++    val rotation by infiniteTransition.animateFloat(
++        initialValue = 0f,
++        targetValue = 360f,
++        animationSpec = infiniteRepeatable(
++            animation = tween(durationMillis = 1800, easing = LinearEasing)
++        ),
++        label = "angulo"
++    )
++
++    // Animação de pulso/opacidade dos 3 pontos
++    val dotAlpha1 by infiniteTransition.animateFloat(
++        initialValue = 0.3f, targetValue = 1f,
++        animationSpec = infiniteRepeatable(
++            animation = tween(600, easing = LinearEasing),
++            repeatMode = RepeatMode.Reverse
++        ),
++        label = "dot1"
++    )
++    val dotAlpha2 by infiniteTransition.animateFloat(
++        initialValue = 0.3f, targetValue = 1f,
++        animationSpec = infiniteRepeatable(
++            animation = tween(600, delayMillis = 200, easing = LinearEasing),
++            repeatMode = RepeatMode.Reverse
++        ),
++        label = "dot2"
++    )
++    val dotAlpha3 by infiniteTransition.animateFloat(
++        initialValue = 0.3f, targetValue = 1f,
++        animationSpec = infiniteRepeatable(
++            animation = tween(600, delayMillis = 400, easing = LinearEasing),
++            repeatMode = RepeatMode.Reverse
++        ),
++        label = "dot3"
++    )
+ 
+-            Spacer(modifier = Modifier.height(32.dp))
++    val gradientOuter = Brush.sweepGradient(
++        colors = listOf(CorPrimaria, CorSecundaria, CorPrimaria)
++    )
++    val gradientInner = Brush.sweepGradient(
++        colors = listOf(CorTerciaria, CorSecundaria, CorTerciaria)
++    )
+ 
+-            CircularProgressIndicator(color = CorTerciaria)
++    Column(
++        horizontalAlignment = Alignment.CenterHorizontally
++    ) {
++        // Box para sobrepor a Logo no centro dos arcos
++        Box(
++            modifier = modifier,
++            contentAlignment = Alignment.Center
++        ) {
++            // Arcos giratórios desenhados no fundo
++            Canvas(modifier = Modifier.fillMaxSize()) {
++                rotate(rotation) {
++                    // Arco externo
++                    drawArc(
++                        brush = gradientOuter,
++                        startAngle = 0f,
++                        sweepAngle = 230f,
++                        useCenter = false,
++                        style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
++                    )
++
++                    // Arco interno
++                    drawArc(
++                        brush = gradientInner,
++                        startAngle = 180f,
++                        sweepAngle = 120f,
++                        useCenter = false,
++                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
++                        topLeft = Offset(10.dp.toPx(), 10.dp.toPx()),
++                        size = Size(
++                            size.width - 20.dp.toPx(),
++                            size.height - 20.dp.toPx()
++                        )
++                    )
++                }
++            }
++
++            // Logo centralizada dentro dos círculos
++            Image(
++                painter = painterResource(id = R.drawable.lumis),
++                contentDescription = "Logo Lumis",
++                modifier = Modifier.size(80.dp)
++            )
++        }
++
++        Spacer(modifier = Modifier.height(24.dp))
++
++        // Três pontos de carregamento na parte inferior do círculo
++        Row(
++            horizontalArrangement = Arrangement.spacedBy(8.dp),
++            verticalAlignment = Alignment.CenterVertically
++        ) {
++            Box(
++                modifier = Modifier
++                    .size(10.dp)
++                    .clip(CircleShape)
++                    .background(CorPrimaria.copy(alpha = dotAlpha1))
++            )
++            Box(
++                modifier = Modifier
++                    .size(10.dp)
++                    .clip(CircleShape)
++                    .background(CorSecundaria.copy(alpha = dotAlpha2))
++            )
++            Box(
++                modifier = Modifier
++                    .size(10.dp)
++                    .clip(CircleShape)
++                    .background(CorTerciaria.copy(alpha = dotAlpha3))
++            )
+         }
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/lumis/view/components/LumisComponents.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.lumis.view.components\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.border\r\nimport androidx.compose.foundation.clickable\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.foundation.shape.CircleShape\r\nimport androidx.compose.foundation.shape.RoundedCornerShape\r\nimport androidx.compose.material.icons.Icons\r\nimport androidx.compose.material.icons.filled.ArrowForward\r\nimport androidx.compose.material.icons.outlined.Notifications\r\nimport androidx.compose.material.icons.outlined.Person\r\nimport androidx.compose.material3.*\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.ui.Alignment\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.draw.clip\r\nimport androidx.compose.ui.graphics.Color\r\nimport androidx.compose.ui.graphics.vector.ImageVector\r\nimport androidx.compose.ui.text.font.FontWeight\r\nimport androidx.compose.ui.text.style.TextAlign\r\nimport androidx.compose.ui.unit.dp\r\nimport androidx.compose.ui.unit.sp\r\nimport com.example.lumis.view.theme.*\r\n\r\nenum class LumisTab { SERVICOS, PLANOS }\r\n\r\n@Composable\r\nfun LumisTopBar(modifier: Modifier = Modifier) {\r\n    Row(\r\n        modifier = modifier\r\n            .fillMaxWidth()\r\n            .padding(horizontal = 20.dp, vertical = 12.dp),\r\n        verticalAlignment = Alignment.CenterVertically,\r\n        horizontalArrangement = Arrangement.SpaceBetween\r\n    ) {\r\n        Row(verticalAlignment = Alignment.CenterVertically) {\r\n            Box(\r\n                modifier = Modifier\r\n                    .size(22.dp)\r\n                    .clip(CircleShape)\r\n                    .background(LumisGreen)\r\n            )\r\n            Spacer(Modifier.width(8.dp))\r\n            Text(\"Lumis\", style = MaterialTheme.typography.titleLarge, color = LumisTextPrimary)\r\n        }\r\n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\r\n            IconCircleButton(icon = Icons.Outlined.Notifications)\r\n            IconCircleButton(icon = Icons.Outlined.Person)\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nprivate fun IconCircleButton(icon: ImageVector) {\r\n    Box(\r\n        modifier = Modifier\r\n            .size(36.dp)\r\n            .clip(CircleShape)\r\n            .background(LumisBackground),\r\n        contentAlignment = Alignment.Center\r\n    ) {\r\n        Icon(icon, contentDescription = null, tint = LumisTextSecondary, modifier = Modifier.size(18.dp))\r\n    }\r\n}\r\n\r\n@Composable\r\nfun LumisTabSelector(\r\n    selected: LumisTab,\r\n    onSelected: (LumisTab) -> Unit,\r\n    modifier: Modifier = Modifier\r\n) {\r\n    Row(\r\n        modifier = modifier\r\n            .fillMaxWidth()\r\n            .padding(horizontal = 20.dp)\r\n            .clip(RoundedCornerShape(50))\r\n            .background(LumisBackground)\r\n            .padding(4.dp)\r\n    ) {\r\n        TabPill(\r\n            text = \"Serviços\",\r\n            isSelected = selected == LumisTab.SERVICOS,\r\n            modifier = Modifier.weight(1f),\r\n            onClick = { onSelected(LumisTab.SERVICOS) }\r\n        )\r\n        TabPill(\r\n            text = \"Planos\",\r\n            isSelected = selected == LumisTab.PLANOS,\r\n            modifier = Modifier.weight(1f),\r\n            onClick = { onSelected(LumisTab.PLANOS) }\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nprivate fun TabPill(\r\n    text: String,\r\n    isSelected: Boolean,\r\n    modifier: Modifier = Modifier,\r\n    onClick: () -> Unit\r\n) {\r\n    Box(\r\n        modifier = modifier\r\n            .clip(RoundedCornerShape(50))\r\n            .background(if (isSelected) LumisGreen else Color.Transparent)\r\n            .clickable { onClick() }\r\n            .padding(vertical = 10.dp),\r\n        contentAlignment = Alignment.Center\r\n    ) {\r\n        Text(\r\n            text = text,\r\n            color = if (isSelected) Color.White else LumisTextSecondary,\r\n            style = MaterialTheme.typography.labelLarge\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nfun LumisScreenHeader(\r\n    label: String,\r\n    title: String,\r\n    modifier: Modifier = Modifier\r\n) {\r\n    Column(modifier = modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {\r\n        Text(\r\n            text = label.uppercase(),\r\n            style = MaterialTheme.typography.labelSmall,\r\n            color = LumisTeal\r\n        )\r\n        Spacer(Modifier.height(6.dp))\r\n        Text(\r\n            text = title,\r\n            style = MaterialTheme.typography.headlineSmall,\r\n            color = LumisTextPrimary\r\n        )\r\n    }\r\n}\r\n\r\n@Composable\r\nfun LumisBottomBar(\r\n    buttonText: String,\r\n    onClick: () -> Unit,\r\n    modifier: Modifier = Modifier,\r\n    subtitle: String? = null,\r\n    showArrow: Boolean = false,\r\n    enabled: Boolean = true\r\n) {\r\n    Column(\r\n        modifier = modifier\r\n            .fillMaxWidth()\r\n            .background(LumisSurface)\r\n            .padding(horizontal = 20.dp, vertical = 16.dp)\r\n    ) {\r\n        Button(\r\n            onClick = onClick,\r\n            enabled = enabled,\r\n            shape = RoundedCornerShape(28.dp),\r\n            colors = ButtonDefaults.buttonColors(\r\n                containerColor = LumisGreen,\r\n                disabledContainerColor = LumisDisabledToggle\r\n            ),\r\n            modifier = Modifier\r\n                .fillMaxWidth()\r\n                .height(52.dp)\r\n        ) {\r\n            Text(buttonText, style = MaterialTheme.typography.labelLarge, color = Color.White)\r\n            if (showArrow) {\r\n                Spacer(Modifier.width(8.dp))\r\n                Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))\r\n            }\r\n        }\r\n        if (subtitle != null) {\r\n            Spacer(Modifier.height(8.dp))\r\n            Text(\r\n                text = subtitle,\r\n                style = MaterialTheme.typography.bodySmall,\r\n                color = LumisTextTertiary,\r\n                modifier = Modifier.fillMaxWidth(),\r\n                textAlign = TextAlign.Center\r\n            )\r\n        }\r\n    }\r\n}\r\n\r\n@Composable\r\nfun LumisCard(\r\n    modifier: Modifier = Modifier,\r\n    isSelected: Boolean = false,\r\n    onClick: (() -> Unit)? = null,\r\n    content: @Composable ColumnScope.() -> Unit\r\n) {\r\n    val borderColor = if (isSelected) LumisSelectedBorder else LumisBorder\r\n    Column(\r\n        modifier = modifier\r\n            .clip(RoundedCornerShape(16.dp))\r\n            .background(LumisSurface)\r\n            .border(width = if (isSelected) 1.5.dp else 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))\r\n            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)\r\n            .padding(16.dp),\r\n        content = content\r\n    )\r\n}\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/components/LumisComponents.kt b/app/src/main/java/com/example/lumis/view/components/LumisComponents.kt
+--- a/app/src/main/java/com/example/lumis/view/components/LumisComponents.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/components/LumisComponents.kt	(date 1789333056158)
+@@ -25,32 +25,6 @@
+ 
+ enum class LumisTab { SERVICOS, PLANOS }
+ 
+-@Composable
+-fun LumisTopBar(modifier: Modifier = Modifier) {
+-    Row(
+-        modifier = modifier
+-            .fillMaxWidth()
+-            .padding(horizontal = 20.dp, vertical = 12.dp),
+-        verticalAlignment = Alignment.CenterVertically,
+-        horizontalArrangement = Arrangement.SpaceBetween
+-    ) {
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            Box(
+-                modifier = Modifier
+-                    .size(22.dp)
+-                    .clip(CircleShape)
+-                    .background(LumisGreen)
+-            )
+-            Spacer(Modifier.width(8.dp))
+-            Text("Lumis", style = MaterialTheme.typography.titleLarge, color = LumisTextPrimary)
+-        }
+-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+-            IconCircleButton(icon = Icons.Outlined.Notifications)
+-            IconCircleButton(icon = Icons.Outlined.Person)
+-        }
+-    }
+-}
+-
+ @Composable
+ private fun IconCircleButton(icon: ImageVector) {
+     Box(
+Index: app/src/main/java/com/example/lumis/view/MainScaffold.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.lumis.view\r\n\r\nimport androidx.compose.foundation.background\r\nimport androidx.compose.foundation.layout.*\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.ui.Modifier\r\nimport com.example.lumis.view.screens.ServicesScreen\r\nimport com.example.lumis.view.theme.LumisBackground\r\n\r\n@Composable\r\nfun MainScaffold() {\r\n    Column(\r\n        modifier = Modifier\r\n            .fillMaxSize()\r\n            .background(LumisBackground)\r\n    ) {\r\n        // Conteúdo principal (Serviços/Planos já tem Tabs + bottom bar interno)\r\n        ServicesScreen()\r\n    }\r\n}\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/MainScaffold.kt b/app/src/main/java/com/example/lumis/view/MainScaffold.kt
+--- a/app/src/main/java/com/example/lumis/view/MainScaffold.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/MainScaffold.kt	(date 1789333028386)
+@@ -1,20 +1,183 @@
+ package com.example.lumis.view
+ 
+ import androidx.compose.foundation.background
+-import androidx.compose.foundation.layout.*
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxSize
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.mutableStateListOf
++import androidx.compose.runtime.remember
+ import androidx.compose.ui.Modifier
+-import com.example.lumis.view.screens.ServicesScreen
++import com.example.lumis.view.components.AgendaTab
++import com.example.lumis.view.components.AgendamentoRegistro
++import com.example.lumis.view.components.AgendaStore
++import com.example.lumis.view.components.BottomNavBar
++import com.example.lumis.view.components.NavItem
++import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
++import com.example.lumis.view.screens.services.AgendamentoScreen
++import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
++import com.example.lumis.view.screens.services.PlanosScreen
++import com.example.lumis.view.screens.services.ResumoPedidoScreen
++import com.example.lumis.view.screens.services.ServicesScreen
++import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
+ import com.example.lumis.view.theme.LumisBackground
++import java.time.LocalDate
++
++sealed class LumisTela {
++    data class Principal(val aba: NavItem) : LumisTela()
++    data object Planos : LumisTela()
++    data class Agendamento(val servico: String? = null) : LumisTela()
++    data class Imovel(
++        val servico: String,
++        val data: String,
++        val horario: String
++    ) : LumisTela()
++    data class Adicionais(
++        val servico: String,
++        val data: String,
++        val horario: String,
++        val quartos: Int,
++        val banheiros: Int,
++        val tamanho: String
++    ) : LumisTela()
++    data class Resumo(
++        val servico: String,
++        val data: String,
++        val horario: String,
++        val quartos: Int,
++        val banheiros: Int,
++        val tamanho: String,
++        val extras: List<String>,
++        val total: Double
++    ) : LumisTela()
++}
+ 
+ @Composable
+ fun MainScaffold() {
++    val pilha = remember { mutableStateListOf<LumisTela>(LumisTela.Principal(NavItem.EXPLORAR)) }
++
++    val navegar: (LumisTela) -> Unit = { nova -> pilha.add(nova) }
++    val voltar: () -> Unit = {
++        if (pilha.size > 1) pilha.removeAt(pilha.lastIndex)
++    }
++    val setAba: (NavItem) -> Unit = { aba ->
++        if (pilha.lastOrNull() is LumisTela.Principal) {
++            pilha[pilha.lastIndex] = LumisTela.Principal(aba)
++        } else {
++            pilha.add(LumisTela.Principal(aba))
++        }
++    }
++
+     Column(
+         modifier = Modifier
+             .fillMaxSize()
+             .background(LumisBackground)
+     ) {
+-        // Conteúdo principal (Serviços/Planos já tem Tabs + bottom bar interno)
+-        ServicesScreen()
+-    }
+-}
++        val atual = pilha.last()
++
++        Box(modifier = Modifier.weight(1f)) {
++            when (atual) {
++                is LumisTela.Principal -> {
++                    when (atual.aba) {
++                        NavItem.EXPLORAR, NavItem.HOME, NavItem.CIDADE -> ServicesScreen(
++                            onAbrirPlanos = { navegar(LumisTela.Planos) },
++                            onContinuar = { servico -> navegar(LumisTela.Agendamento(servico)) }
++                        )
++
++                        NavItem.AGENDA -> AgendaTab()
++
++                        NavItem.PERFIL -> FuncionarioProfileScreen()
++                    }
++                }
++
++                is LumisTela.Planos -> PlanosScreen(onVoltar = voltar)
++
++                is LumisTela.Agendamento -> {
++                    val agora = LocalDate.now()
++                    AgendamentoScreen(
++                        servicoSelecionado = atual.servico,
++                        onBack = voltar,
++                        onConfirm = { dia, horario ->
++                            navegar(
++                                LumisTela.Imovel(
++                                    servico = atual.servico ?: "",
++                                    data = "$dia/${agora.monthValue}/${agora.year}",
++                                    horario = horario
++                                )
++                            )
++                        }
++                    )
++                }
++
++                is LumisTela.Imovel -> ConfiguracaoImovelScreen(
++                    servico = atual.servico,
++                    data = atual.data,
++                    horario = atual.horario,
++                    onBack = voltar,
++                    onConfirm = { quartos, banheiros, tamanho ->
++                        navegar(
++                            LumisTela.Adicionais(
++                                servico = atual.servico,
++                                data = atual.data,
++                                horario = atual.horario,
++                                quartos = quartos,
++                                banheiros = banheiros,
++                                tamanho = tamanho
++                            )
++                        )
++                    }
++                )
++
++                is LumisTela.Adicionais -> ServicosAdicionaisScreen(
++                    servico = atual.servico,
++                    datahora = "${atual.data} ${atual.horario}",
++                    onBack = voltar,
++                    onConfirm = { subtotal, extras ->
++                        navegar(
++                            LumisTela.Resumo(
++                                servico = atual.servico,
++                                data = atual.data,
++                                horario = atual.horario,
++                                quartos = atual.quartos,
++                                banheiros = atual.banheiros,
++                                tamanho = atual.tamanho,
++                                extras = extras,
++                                total = subtotal
++                            )
++                        )
++                    }
++                )
++
++                is LumisTela.Resumo -> ResumoPedidoScreen(
++                    servico = atual.servico,
++                    data = atual.data,
++                    horario = atual.horario,
++                    quartos = atual.quartos,
++                    banheiros = atual.banheiros,
++                    tamanho = atual.tamanho,
++                    extras = atual.extras,
++                    total = atual.total,
++                    onBack = voltar,
++                    onConfirm = {
++                        AgendaStore.registros.add(
++                            AgendamentoRegistro(
++                                servico = atual.servico,
++                                data = atual.data,
++                                horario = atual.horario,
++                                extras = atual.extras,
++                                total = atual.total
++                            )
++                        )
++                        pilha.clear()
++                        pilha.add(LumisTela.Principal(NavItem.AGENDA))
++                    }
++                )
++            }
++        }
++
++        BottomNavBar(
++            selected = if (atual is LumisTela.Principal) atual.aba else NavItem.EXPLORAR,
++            onSelect = setAba
++        )
++    }
++}
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"FrameworkDetectionExcludesConfiguration\">\r\n    <file type=\"web\" url=\"file://$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_25\" default=\"true\" project-jdk-name=\"jbr-25\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/.idea/misc.xml	(date 1789334394031)
+@@ -1,10 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="FrameworkDetectionExcludesConfiguration">
+-    <file type="web" url="file://$PROJECT_DIR$" />
+-  </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="jbr-25" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="temurin-25" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/lumis/view/screens/AgendamentoScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/AgendamentoScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/AgendamentoScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/AgendamentoScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/AgendamentoScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/AgendamentoScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/AgendamentoScreen.kt	(date 1789333390173)
+@@ -1,6 +1,5 @@
+-package com.example.lumis.ui.screens
++package com.example.lumis.view.screens.services
+ 
+-import android.widget.Toast
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
+@@ -10,28 +9,13 @@
+ import androidx.compose.foundation.lazy.grid.items
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+-import androidx.compose.material.icons.Icons
+-import androidx.compose.material.icons.filled.ArrowBackIos
+-import androidx.compose.material.icons.filled.ArrowForwardIos
+-import androidx.compose.material.icons.filled.CalendarMonth
+-import androidx.compose.material.icons.filled.Home
+-import androidx.compose.material.icons.filled.Person
+-import androidx.compose.foundation.Image
+-import androidx.compose.material.icons.filled.AccountCircle
+-import androidx.compose.material.icons.filled.Notifications
+-import androidx.compose.material3.Button
+-import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Icon
+-import androidx.compose.material3.IconButton
+-import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
+-import androidx.compose.ui.res.painterResource
+-import com.example.lumis.R
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+@@ -39,11 +23,10 @@
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+-import com.example.lumis.ui.theme.LumisGreen
+-import com.example.lumis.ui.theme.LumisBackground
+-import com.example.lumis.ui.theme.LumisSurface
+-import com.example.lumis.ui.theme.LumisTextPrimary
+-import com.example.lumis.ui.theme.LumisTextSecondary
++import com.example.lumis.view.components.BotaoContinuar
++import com.example.lumis.view.components.LinhaProgresso
++import com.example.lumis.view.components.LumisTopBar
++import com.example.lumis.view.theme.*
+ import java.time.YearMonth
+ 
+ // ============================================================
+@@ -88,10 +71,10 @@
+         // -------------------------------------------------
+         // TOPO
+         // -------------------------------------------------
+-        TopoAgendamento(
+-            servico = servicoSelecionado,
+-            onBack = onBack
+-        )
++        LumisTopBar(onBack = onBack)
++
++        LinhaProgresso(etapaAtual = 1)
++        Spacer(modifier = Modifier.height(12.dp))
+ 
+         // -------------------------------------------------
+         // CONTEÚDO
+@@ -179,84 +162,10 @@
+         // -------------------------------------------------
+         // BOTÃO CONTINUAR
+         // -------------------------------------------------
+-        Button(
++        BotaoContinuar(
+             onClick = { onConfirm(diaSelecionado, horarioSelecionado) },
+-            modifier = Modifier
+-                .fillMaxWidth()
+-                .padding(horizontal = 20.dp, vertical = 12.dp)
+-                .height(54.dp),
+-            shape = RoundedCornerShape(14.dp),
+-            colors = ButtonDefaults.buttonColors(
+-                containerColor = VerdeLumis
+-            )
+-        ) {
+-            Text(
+-                text = "Continuar",
+-                fontSize = 15.sp,
+-                fontWeight = FontWeight.Bold,
+-                color = Color.White
+-            )
+-        }
+-    }
+-}
+-
+-// ============================================================
+-// TOPO (com serviço selecionado e voltar)
+-// ============================================================
+-
+-@Composable
+-fun TopoAgendamento(
+-    servico: String?,
+-    onBack: () -> Unit
+-) {
+-    Row(
+-        modifier = Modifier
+-            .fillMaxWidth()
+-            .height(56.dp)
+-            .background(LumisSurface)
+-            .padding(horizontal = 16.dp),
+-        verticalAlignment = Alignment.CenterVertically,
+-        horizontalArrangement = Arrangement.SpaceBetween
+-    ) {
+-        // Botão voltar + logo + texto
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            IconButton(onClick = onBack) {
+-                Icon(
+-                    imageVector = Icons.Filled.ArrowBackIos,
+-                    contentDescription = "Voltar",
+-                    tint = LumisTextPrimary,
+-                    modifier = Modifier.size(20.dp)
+-                )
+-            }
+-            Spacer(Modifier.width(6.dp))
+-            Image(
+-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+-                contentDescription = "Logo Lumis",
+-                modifier = Modifier.size(24.dp)
+-            )
+-            Column {
+-                Text(text = "Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = VerdeLumis)
+-                if (servico != null) {
+-                    Text(text = servico, fontSize = 11.sp, color = CinzaTexto)
+-                }
+-            }
+-        }
+-
+-        // Ícones direita
+-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+-            Icon(
+-                imageVector = Icons.Filled.Notifications,
+-                contentDescription = "Notificações",
+-                tint = CinzaTexto,
+-                modifier = Modifier.size(22.dp)
+-            )
+-            Icon(
+-                imageVector = Icons.Filled.AccountCircle,
+-                contentDescription = "Perfil",
+-                tint = VerdeLumis,
+-                modifier = Modifier.size(24.dp)
+-            )
+-        }
++            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
++        )
+     }
+ }
+ 
+Index: app/src/main/java/com/example/lumis/view/screens/ConfiguracaoImovelScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/ConfiguracaoImovelScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/ConfiguracaoImovelScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/ConfiguracaoImovelScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/ConfiguracaoImovelScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/ConfiguracaoImovelScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/ConfiguracaoImovelScreen.kt	(date 1789333416267)
+@@ -1,7 +1,5 @@
+-package com.example.lumis.ui.screens
++package com.example.lumis.view.screens.services
+ 
+-import android.widget.Toast
+-import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
+@@ -18,19 +16,6 @@
+ import androidx.compose.foundation.layout.width
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+-import androidx.compose.material.icons.Icons
+-import androidx.compose.material.icons.filled.AccountCircle
+-import androidx.compose.material.icons.filled.ArrowBackIos
+-import androidx.compose.material.icons.filled.Business
+-import androidx.compose.material.icons.filled.CalendarMonth
+-import androidx.compose.material.icons.filled.Explore
+-import androidx.compose.material.icons.filled.Home
+-import androidx.compose.material.icons.filled.NotificationsNone
+-import androidx.compose.material.icons.filled.Person
+-import androidx.compose.material3.Button
+-import androidx.compose.material3.ButtonDefaults
+-import androidx.compose.material3.Icon
+-import androidx.compose.material3.IconButton
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+@@ -38,22 +23,17 @@
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
+-import androidx.compose.ui.res.painterResource
+-import com.example.lumis.R
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Color
+-import androidx.compose.ui.graphics.vector.ImageVector
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+-import com.example.lumis.ui.theme.LumisBackground
+-import com.example.lumis.ui.theme.LumisBlue
+-import com.example.lumis.ui.theme.LumisGreen
+-import com.example.lumis.ui.theme.LumisSurface
+-import com.example.lumis.ui.theme.LumisTextPrimary
+-import com.example.lumis.ui.theme.LumisTextSecondary
++import com.example.lumis.view.components.BotaoContinuar
++import com.example.lumis.view.components.LinhaProgresso
++import com.example.lumis.view.components.LumisTopBar
++import com.example.lumis.view.theme.*
+ 
+ // =========================================================
+ // TELA DE CONFIGURAÇÃO DO IMÓVEL (3ª etapa)
+@@ -80,10 +60,10 @@
+         // =================================================
+         // TOPO
+         // =================================================
+-        TopBarConfiguracao(
+-            servico = servico,
+-            onBack = onBack
+-        )
++        LumisTopBar(onBack = onBack)
++
++        LinhaProgresso(etapaAtual = 2)
++        Spacer(modifier = Modifier.height(12.dp))
+ 
+         // =================================================
+         // CONTEÚDO
+@@ -177,21 +157,9 @@
+                 .background(LumisSurface)
+                 .padding(horizontal = 20.dp, vertical = 12.dp)
+         ) {
+-            Button(
+-                onClick = { onConfirm(quartos, banheiros, tamanhoSelecionado) },
+-                modifier = Modifier
+-                    .fillMaxWidth()
+-                    .height(52.dp),
+-                shape = RoundedCornerShape(50),
+-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
+-            ) {
+-                Text(
+-                    text = "Continuar",
+-                    fontSize = 15.sp,
+-                    fontWeight = FontWeight.Bold,
+-                    color = Color.White
+-                )
+-            }
++            BotaoContinuar(
++                onClick = { onConfirm(quartos, banheiros, tamanhoSelecionado) }
++            )
+ 
+             Spacer(modifier = Modifier.height(8.dp))
+             Text(
+@@ -205,54 +173,6 @@
+     }
+ }
+ 
+-// =========================================================
+-// TOPO DA TELA
+-// =========================================================
+-
+-@Composable
+-private fun TopBarConfiguracao(
+-    servico: String?,
+-    onBack: () -> Unit
+-) {
+-    Row(
+-        modifier = Modifier
+-            .fillMaxWidth()
+-            .height(56.dp)
+-            .background(LumisSurface)
+-            .padding(horizontal = 16.dp),
+-        verticalAlignment = Alignment.CenterVertically,
+-        horizontalArrangement = Arrangement.SpaceBetween
+-    ) {
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            IconButton(onClick = onBack) {
+-                Icon(
+-                    imageVector = Icons.Filled.ArrowBackIos,
+-                    contentDescription = "Voltar",
+-                    tint = LumisTextPrimary,
+-                    modifier = Modifier.size(20.dp)
+-                )
+-            }
+-            Spacer(Modifier.width(6.dp))
+-            Image(
+-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+-                contentDescription = "Logo Lumis",
+-                modifier = Modifier.size(24.dp)
+-            )
+-            Column {
+-                Text(text = "Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
+-                servico?.let {
+-                    Text(text = it, fontSize = 11.sp, color = LumisTextSecondary)
+-                }
+-            }
+-        }
+-
+-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+-            Icon(Icons.Default.NotificationsNone, contentDescription = "Notificações", tint = LumisTextSecondary, modifier = Modifier.size(22.dp))
+-            Icon(Icons.Default.AccountCircle, contentDescription = "Perfil", tint = LumisGreen, modifier = Modifier.size(24.dp))
+-        }
+-    }
+-}
+-
+ // =========================================================
+ // LINHA CONTADOR (quartos/banheiros)
+ // =========================================================
+Index: app/src/main/java/com/example/lumis/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.lumis\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.activity.enableEdgeToEdge\r\nimport androidx.compose.animation.Crossfade\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.LaunchedEffect\r\nimport androidx.compose.runtime.getValue\r\nimport androidx.compose.runtime.mutableStateOf\r\nimport androidx.compose.runtime.remember\r\nimport androidx.compose.runtime.setValue\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.tooling.preview.Preview\r\nimport com.example.lumis.view.theme.LumisTheme\r\nimport kotlinx.coroutines.delay\r\nimport com.example.lumis.view.SplashScreen\r\nimport com.example.lumis.view.MainScaffold\r\n\r\nprivate const val SPLASH_DURATION_MS = 1800L\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        enableEdgeToEdge()\r\n        setContent {\r\n            LumisTheme {\r\n                var mostrarSplash by remember { mutableStateOf(true) }\r\n\r\n                LaunchedEffect(Unit) {\r\n                    delay(SPLASH_DURATION_MS)\r\n                    mostrarSplash = false\r\n                }\r\n\r\n                Crossfade(targetState = mostrarSplash, label = \"splash\") { splashVisivel ->\r\n                    if (splashVisivel) {\r\n                        SplashScreen()\r\n                    } else {\r\n                        MainScaffold()\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/MainActivity.kt b/app/src/main/java/com/example/lumis/MainActivity.kt
+--- a/app/src/main/java/com/example/lumis/MainActivity.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/MainActivity.kt	(date 1789331319446)
+@@ -1,32 +1,36 @@
+ package com.example.lumis
+ 
+ import android.os.Bundle
++import android.graphics.Color
+ import androidx.activity.ComponentActivity
++import androidx.activity.SystemBarStyle
+ import androidx.activity.compose.setContent
+ import androidx.activity.enableEdgeToEdge
+ import androidx.compose.animation.Crossfade
+-import androidx.compose.foundation.layout.fillMaxSize
+-import androidx.compose.foundation.layout.padding
+-import androidx.compose.material3.Scaffold
+-import androidx.compose.material3.Text
+-import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+ import androidx.compose.runtime.setValue
+-import androidx.compose.ui.Modifier
+-import androidx.compose.ui.tooling.preview.Preview
+ import com.example.lumis.view.theme.LumisTheme
+ import kotlinx.coroutines.delay
+-import com.example.lumis.view.SplashScreen
++import com.example.lumis.view.screens.splashscreen.SplashScreen
+ import com.example.lumis.view.MainScaffold
+ 
+ private const val SPLASH_DURATION_MS = 1800L
+ class MainActivity : ComponentActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-        enableEdgeToEdge()
++        enableEdgeToEdge(
++            statusBarStyle = SystemBarStyle.light(
++                scrim = Color.TRANSPARENT,
++                darkScrim = Color.TRANSPARENT
++            ),
++            navigationBarStyle = SystemBarStyle.light(
++                scrim = Color.TRANSPARENT,
++                darkScrim = Color.TRANSPARENT
++            )
++        )
+         setContent {
+             LumisTheme {
+                 var mostrarSplash by remember { mutableStateOf(true) }
+Index: app/src/main/java/com/example/lumis/view/screens/PlanosScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/PlanosScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/PlanosScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/PlanosScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/PlanosScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/PlanosScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/PlanosScreen.kt	(date 1789332377514)
+@@ -1,4 +1,4 @@
+-package com.example.lumis.ui.screens
++package com.example.lumis.view.screens.services
+ 
+ import android.widget.Toast
+ import androidx.compose.foundation.background
+@@ -12,9 +12,7 @@
+ import androidx.compose.material.icons.Icons
+ import androidx.compose.material.icons.filled.Add
+ import androidx.compose.material.icons.filled.Check
+-import androidx.compose.material.icons.filled.Home
+-import androidx.compose.material.icons.filled.Remove
+-import androidx.compose.material.icons.filled.Check
++import androidx.compose.material.icons.filled.NotificationsNone
+ import androidx.compose.material.icons.filled.Remove
+ import androidx.compose.material3.Button
+ import androidx.compose.material3.ButtonDefaults
+@@ -30,13 +28,9 @@
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.compose.ui.platform.LocalContext
+-import com.example.lumis.ui.theme.LumisBackground
+-import com.example.lumis.ui.theme.LumisGreen
+-import com.example.lumis.ui.theme.LumisGreenDark
+-import com.example.lumis.ui.theme.LumisGreenLight
+-import com.example.lumis.ui.theme.LumisSurface
+-import com.example.lumis.ui.theme.LumisTextPrimary
+-import com.example.lumis.ui.theme.LumisTextSecondary
++import androidx.compose.ui.res.painterResource
++import com.example.lumis.R
++import com.example.lumis.view.theme.*
+ 
+ // ============================================================
+ // TELA DE PLANOS
+@@ -55,7 +49,7 @@
+ )
+ 
+ @Composable
+-fun PlanosScreen() {
++fun PlanosScreen(onVoltar: () -> Unit = {}) {
+     var sel by remember { mutableStateOf("regular") }
+     val lista = listOf(
+         Plano(
+@@ -118,6 +112,9 @@
+             // App Bar / Topo
+             TopBarPlanos()
+ 
++            // Abas (Serviços | Planos) - igual à tela de serviços
++            AbasPlanos(onVoltar = onVoltar)
++
+             // Conteúdo scrollável (lista de planos + faq)
+             LazyColumn(
+                 modifier = Modifier.weight(1f),
+@@ -190,14 +187,14 @@
+                     }
+                 }
+             }
+-        }
+ 
+-        // Botão CTA Principal
+-        CtaComprar(
+-            texto = "Assinar o Plano Regular — R$ 179,90/mês",
+-            selecionadoNome = "${(lista.find { it.id == sel })?.nome ?: "Regular"}",
+-            preco = (lista.find { it.id == sel })?.preco ?: "R$ 179,90"
+-        )
++            // Botão CTA Principal
++            CtaComprar(
++                texto = "Assinar o Plano Regular — R$ 179,90/mês",
++                selecionadoNome = "${(lista.find { it.id == sel })?.nome ?: "Regular"}",
++                preco = (lista.find { it.id == sel })?.preco ?: "R$ 179,90"
++            )
++        }
+     }
+ }
+ 
+@@ -211,29 +208,85 @@
+         modifier = Modifier
+             .fillMaxWidth()
+             .background(LumisSurface)
+-            .padding(horizontal = 16.dp, vertical = 12.dp),
++            .statusBarsPadding()
++            .padding(horizontal = 16.dp, vertical = 8.dp),
+         verticalAlignment = Alignment.CenterVertically,
+         horizontalArrangement = Arrangement.SpaceBetween
+     ) {
+-        // Logo + Texto
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            Box(
+-                modifier = Modifier
+-                    .size(28.dp)
+-                    .clip(CircleShape)
+-                    .background(LumisGreen),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Text("L", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+-            }
+-            Spacer(Modifier.width(10.dp))
+-            Text("Lumis", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
++        Box(
++            modifier = Modifier
++                .size(40.dp)
++                .clip(RoundedCornerShape(12.dp))
++                .background(LumisGreen),
++            contentAlignment = Alignment.Center
++        ) {
++            Icon(
++                painter = painterResource(id = R.drawable.lumis),
++                contentDescription = "Logo Lumis",
++                tint = Color.White,
++                modifier = Modifier.size(26.dp)
++            )
++        }
++
++        Box(
++            modifier = Modifier
++                .size(40.dp)
++                .clip(RoundedCornerShape(12.dp))
++                .background(Color(0xFFEAF0F4)),
++            contentAlignment = Alignment.Center
++        ) {
++            Icon(
++                imageVector = Icons.Default.NotificationsNone,
++                contentDescription = "Notificações",
++                tint = LumisBlue,
++                modifier = Modifier.size(20.dp)
++            )
++        }
++    }
++}
++
++// ============================================================
++// ABAS (Serviços | Planos) - igual à tela de serviços
++// ============================================================
++
++@Composable
++private fun AbasPlanos(onVoltar: () -> Unit = {}) {
++    Row(
++        modifier = Modifier
++            .fillMaxWidth()
++            .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
++            .height(29.dp)
++            .clip(RoundedCornerShape(7.dp))
++            .background(Color(0xFFE7E7E7))
++    ) {
++        Box(
++            modifier = Modifier
++                .weight(1f)
++                .fillMaxSize()
++                .clip(RoundedCornerShape(7.dp))
++                .clickable(onClick = onVoltar),
++            contentAlignment = Alignment.Center
++        ) {
++            Text(
++                text = "Serviços",
++                color = LumisGreySecondary,
++                fontSize = 11.sp
++            )
+         }
+ 
+-        // Notificação + Perfil
+-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+-            Icon(Icons.Default.Add, contentDescription = "Notificações", tint = LumisTextSecondary)
+-            Icon(Icons.Default.Home, contentDescription = "Perfil", tint = LumisGreen)
++        Box(
++            modifier = Modifier
++                .weight(1f)
++                .fillMaxSize()
++                .clip(RoundedCornerShape(7.dp))
++                .background(LumisGreenVivid),
++            contentAlignment = Alignment.Center
++        ) {
++            Text(
++                text = "Planos",
++                color = Color.White,
++                fontSize = 11.sp
++            )
+         }
+     }
+ }
+Index: app/src/main/java/com/example/lumis/view/screens/ResumoPedidoScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/ResumoPedidoScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/ResumoPedidoScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/ResumoPedidoScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/ResumoPedidoScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/ResumoPedidoScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/ResumoPedidoScreen.kt	(date 1789333431467)
+@@ -1,11 +1,8 @@
+-package com.example.lumis.ui.screens
++package com.example.lumis.view.screens.services
+ 
+ import android.widget.Toast
+-import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
+-import androidx.compose.foundation.border
+ import androidx.compose.foundation.layout.Arrangement
+-import androidx.compose.foundation.layout.Box
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.foundation.layout.Row
+ import androidx.compose.foundation.layout.Spacer
+@@ -15,39 +12,23 @@
+ import androidx.compose.foundation.layout.padding
+ import androidx.compose.foundation.layout.size
+ import androidx.compose.foundation.layout.width
+-import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+-import androidx.compose.material.icons.Icons
+-import androidx.compose.material.icons.filled.ArrowBackIos
+-import androidx.compose.material.icons.filled.NotificationsNone
+-import androidx.compose.material.icons.filled.AccountCircle
+-import androidx.compose.material.icons.filled.CheckCircle
+-import androidx.compose.material3.Button
+-import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Card
+ import androidx.compose.material3.CardDefaults
+-import androidx.compose.material3.Icon
+-import androidx.compose.material3.IconButton
+-import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+-import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.platform.LocalContext
+-import androidx.compose.ui.res.painterResource
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+-import com.example.lumis.R
+-import com.example.lumis.ui.theme.LumisBackground
+-import com.example.lumis.ui.theme.LumisBlue
+-import com.example.lumis.ui.theme.LumisGreen
+-import com.example.lumis.ui.theme.LumisSurface
+-import com.example.lumis.ui.theme.LumisTextPrimary
+-import com.example.lumis.ui.theme.LumisTextSecondary
++import com.example.lumis.view.components.BotaoContinuar
++import com.example.lumis.view.components.LinhaProgresso
++import com.example.lumis.view.components.LumisTopBar
++import com.example.lumis.view.theme.*
+ 
+ // ============================================================
+ // TELA DE RESUMO DO PEDIDO (5ª etapa)
+@@ -76,7 +57,10 @@
+         // =============================
+         // TOPO COM BOTÃO VOLTAR + LOGO
+         // =============================
+-        TopBarResumo(onBack = onBack, servico = servico)
++        LumisTopBar(onBack = onBack)
++
++        LinhaProgresso(etapaAtual = 4)
++        Spacer(modifier = Modifier.height(12.dp))
+ 
+         // =============================
+         // CONTEÚDO
+@@ -191,24 +175,13 @@
+                 .background(LumisSurface)
+                 .padding(horizontal = 20.dp, vertical = 12.dp)
+         ) {
+-            Button(
++            BotaoContinuar(
++                texto = "Confirmar Agendamento",
+                 onClick = {
+                     Toast.makeText(context, "Pedido confirmado! ✅", Toast.LENGTH_LONG).show()
+                     onConfirm()
+-                },
+-                modifier = Modifier
+-                    .fillMaxWidth()
+-                    .height(52.dp),
+-                shape = RoundedCornerShape(50),
+-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
+-            ) {
+-                Text(
+-                    text = "Confirmar Agendamento",
+-                    color = Color.White,
+-                    fontSize = 15.sp,
+-                    fontWeight = FontWeight.Bold
+-                )
+-            }
++                }
++            )
+             Spacer(Modifier.height(8.dp))
+             Text(
+                 text = "Cancelamento gratuito até 24h antes",
+@@ -225,60 +198,6 @@
+ // COMPONENTES AUXILIARES
+ // ============================================================
+ 
+-@Composable
+-private fun TopBarResumo(servico: String, onBack: () -> Unit) {
+-    Row(
+-        modifier = Modifier
+-            .fillMaxWidth()
+-            .height(56.dp)
+-            .background(LumisSurface)
+-            .padding(horizontal = 16.dp),
+-        verticalAlignment = Alignment.CenterVertically,
+-        horizontalArrangement = Arrangement.SpaceBetween
+-    ) {
+-        // Voltar + Logo + Nome
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            IconButton(onClick = onBack, modifier = Modifier.size(24.dp)) {
+-                Icon(
+-                    imageVector = Icons.Filled.ArrowBackIos,
+-                    contentDescription = "Voltar",
+-                    tint = LumisTextPrimary,
+-                    modifier = Modifier.size(18.dp)
+-                )
+-            }
+-            Spacer(Modifier.width(8.dp))
+-            Image(
+-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+-                contentDescription = "Logo Lumis",
+-                modifier = Modifier.size(28.dp)
+-            )
+-            Spacer(Modifier.width(6.dp))
+-            Column {
+-                Text("Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
+-                if (servico.isNotBlank()) {
+-                    Text(text = servico, fontSize = 10.sp, color = LumisTextSecondary)
+-                }
+-            }
+-        }
+-
+-        // Ícones direita
+-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+-            Icon(
+-                imageVector = Icons.Default.NotificationsNone,
+-                contentDescription = "Notificações",
+-                tint = LumisTextSecondary,
+-                modifier = Modifier.size(20.dp)
+-            )
+-            Icon(
+-                imageVector = Icons.Default.AccountCircle,
+-                contentDescription = "Perfil",
+-                tint = LumisGreen,
+-                modifier = Modifier.size(22.dp)
+-            )
+-        }
+-    }
+-}
+-
+ @Composable
+ private fun RowBetween(nome: String, valor: String) {
+     Row(
+Index: app/src/main/java/com/example/lumis/view/screens/ServicesScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/ServicesScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/ServicesScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/ServicesScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/ServicesScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/ServicesScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/ServicesScreen.kt	(date 1789333383916)
+@@ -1,6 +1,5 @@
+-package com.example.lumis.view.screens
++package com.example.lumis.view.screens.services
+ 
+-import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
+@@ -10,16 +9,8 @@
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material.icons.Icons
+-import androidx.compose.material.icons.filled.AccountCircle
+-import androidx.compose.material.icons.filled.Business
+-import androidx.compose.material.icons.filled.CalendarMonth
+ import androidx.compose.material.icons.filled.Check
+-import androidx.compose.material.icons.filled.Explore
+-import androidx.compose.material.icons.filled.Home
+ import androidx.compose.material.icons.filled.NotificationsNone
+-import androidx.compose.material.icons.filled.Person
+-import androidx.compose.material3.Button
+-import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Icon
+ import androidx.compose.material3.Surface
+ import androidx.compose.material3.Text
+@@ -29,7 +20,6 @@
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Color
+-import androidx.compose.ui.graphics.vector.ImageVector
+ import androidx.compose.ui.res.painterResource
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+@@ -37,6 +27,7 @@
+ import com.example.lumis.R
+ import com.example.lumis.controller.ServicesController
+ import com.example.lumis.model.Servico
++import com.example.lumis.view.components.BotaoContinuar
+ import com.example.lumis.view.theme.*
+ 
+ // ---------------------------------------------------------
+@@ -44,7 +35,10 @@
+ // ---------------------------------------------------------
+ 
+ @Composable
+-fun ServicesScreen() {
++fun ServicesScreen(
++    onAbrirPlanos: () -> Unit = {},
++    onContinuar: (String) -> Unit = {}
++) {
+     val controller = remember { ServicesController() }
+ 
+     Surface(
+@@ -58,7 +52,7 @@
+         ) {
+             Topo()
+ 
+-            Abas()
++            Abas(onAbrirPlanos = onAbrirPlanos)
+ 
+             Column(
+                 modifier = Modifier
+@@ -115,26 +109,10 @@
+                 }
+             }
+ 
+-            Button(
+-                onClick = { controller.continuar() },
+-                modifier = Modifier
+-                    .fillMaxWidth()
+-                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+-                    .height(46.dp),
+-                shape = RoundedCornerShape(8.dp),
+-                colors = ButtonDefaults.buttonColors(
+-                    containerColor = LumisGreenVivid
+-                )
+-            ) {
+-                Text(
+-                    text = "Continuar",
+-                    color = Color.White,
+-                    fontWeight = FontWeight.Bold,
+-                    fontSize = 13.sp
+-                )
+-            }
+-
+-            MenuInferior()
++            BotaoContinuar(
++                onClick = { onContinuar(controller.servicoSelecionado) },
++                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
++            )
+         }
+     }
+ }
+@@ -148,57 +126,40 @@
+     Row(
+         modifier = Modifier
+             .fillMaxWidth()
+-            .height(48.dp)
+             .background(LumisSurface)
+             .statusBarsPadding()
+-            .padding(horizontal = 14.dp),
++            .padding(horizontal = 16.dp, vertical = 8.dp),
+         verticalAlignment = Alignment.CenterVertically,
+         horizontalArrangement = Arrangement.SpaceBetween
+     ) {
+         Box(
+             modifier = Modifier
+-                .size(32.dp)
+-                .clip(RoundedCornerShape(8.dp))
++                .size(40.dp)
++                .clip(RoundedCornerShape(12.dp))
++                .background(LumisGreen),
++            contentAlignment = Alignment.Center
+         ) {
+-            Image(
++            Icon(
+                 painter = painterResource(id = R.drawable.lumis),
+                 contentDescription = "Logo Lumis",
+-                modifier = Modifier.size(32.dp)
++                tint = Color.White,
++                modifier = Modifier.size(26.dp)
+             )
+         }
+ 
+-        Row(verticalAlignment = Alignment.CenterVertically) {
+-            Box(
+-                modifier = Modifier
+-                    .size(30.dp)
+-                    .clip(CircleShape)
+-                    .background(Color(0xFFEAF0F4)),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Icon(
+-                    imageVector = Icons.Default.NotificationsNone,
+-                    contentDescription = "Notificações",
+-                    tint = LumisBlue,
+-                    modifier = Modifier.size(18.dp)
+-                )
+-            }
+-
+-            Spacer(modifier = Modifier.width(8.dp))
+-
+-            Box(
+-                modifier = Modifier
+-                    .size(30.dp)
+-                    .clip(CircleShape)
+-                    .background(Color(0xFFEAF5EF)),
+-                contentAlignment = Alignment.Center
+-            ) {
+-                Icon(
+-                    imageVector = Icons.Default.AccountCircle,
+-                    contentDescription = "Perfil",
+-                    tint = LumisGreenVivid,
+-                    modifier = Modifier.size(20.dp)
+-                )
+-            }
++        Box(
++            modifier = Modifier
++                .size(40.dp)
++                .clip(RoundedCornerShape(12.dp))
++                .background(Color(0xFFEAF0F4)),
++            contentAlignment = Alignment.Center
++        ) {
++            Icon(
++                imageVector = Icons.Default.NotificationsNone,
++                contentDescription = "Notificações",
++                tint = LumisBlue,
++                modifier = Modifier.size(20.dp)
++            )
+         }
+     }
+ }
+@@ -208,7 +169,7 @@
+ // ---------------------------------------------------------
+ 
+ @Composable
+-private fun Abas() {
++private fun Abas(onAbrirPlanos: () -> Unit = {}) {
+     Row(
+         modifier = Modifier
+             .fillMaxWidth()
+@@ -235,7 +196,9 @@
+         Box(
+             modifier = Modifier
+                 .weight(1f)
+-                .fillMaxSize(),
++                .fillMaxSize()
++                .clip(RoundedCornerShape(7.dp))
++                .clickable(onClick = onAbrirPlanos),
+             contentAlignment = Alignment.Center
+         ) {
+             Text(
+@@ -321,55 +284,4 @@
+             color = LumisBlue
+         )
+     }
+-}
+-
+-// ---------------------------------------------------------
+-// MENU INFERIOR
+-// ---------------------------------------------------------
+-
+-@Composable
+-private fun MenuInferior() {
+-    Row(
+-        modifier = Modifier
+-            .fillMaxWidth()
+-            .background(LumisSurface)
+-            .navigationBarsPadding()
+-            .height(57.dp),
+-        horizontalArrangement = Arrangement.SpaceEvenly,
+-        verticalAlignment = Alignment.CenterVertically
+-    ) {
+-        ItemMenu(icone = Icons.Default.Home, texto = "Home", selecionado = false)
+-        ItemMenu(icone = Icons.Default.Business, texto = "Cidade", selecionado = false)
+-        ItemMenu(icone = Icons.Default.Explore, texto = "Explorar", selecionado = true)
+-        ItemMenu(icone = Icons.Default.CalendarMonth, texto = "Agenda", selecionado = false)
+-        ItemMenu(icone = Icons.Default.Person, texto = "Perfil", selecionado = false)
+-    }
+-}
+-
+-// ---------------------------------------------------------
+-// ITEM DO MENU
+-// ---------------------------------------------------------
+-
+-@Composable
+-private fun ItemMenu(
+-    icone: ImageVector,
+-    texto: String,
+-    selecionado: Boolean
+-) {
+-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+-        Icon(
+-            imageVector = icone,
+-            contentDescription = texto,
+-            modifier = Modifier.size(20.dp),
+-            tint = if (selecionado) Color(0xFF777777) else Color(0xFF888888)
+-        )
+-
+-        Spacer(modifier = Modifier.height(2.dp))
+-
+-        Text(
+-            text = texto,
+-            fontSize = 8.sp,
+-            color = if (selecionado) Color(0xFF555555) else Color(0xFF777777)
+-        )
+-    }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/lumis/view/screens/ServicosAdicionaisScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/lumis/view/screens/ServicosAdicionaisScreen.kt b/app/src/main/java/com/example/lumis/view/screens/services/ServicosAdicionaisScreen.kt
+rename from app/src/main/java/com/example/lumis/view/screens/ServicosAdicionaisScreen.kt
+rename to app/src/main/java/com/example/lumis/view/screens/services/ServicosAdicionaisScreen.kt
+--- a/app/src/main/java/com/example/lumis/view/screens/ServicosAdicionaisScreen.kt	(revision 8a2d1fe4ba542ba2f4da4b16566a19f75eb602c2)
++++ b/app/src/main/java/com/example/lumis/view/screens/services/ServicosAdicionaisScreen.kt	(date 1789333425718)
+@@ -1,7 +1,5 @@
+-package com.example.lumis.ui.screens
++package com.example.lumis.view.screens.services
+ 
+-import android.widget.Toast
+-import androidx.compose.foundation.Image
+ import androidx.compose.foundation.background
+ import androidx.compose.foundation.border
+ import androidx.compose.foundation.clickable
+@@ -19,18 +17,9 @@
+ import androidx.compose.foundation.shape.CircleShape
+ import androidx.compose.foundation.shape.RoundedCornerShape
+ import androidx.compose.material.icons.Icons
+-import androidx.compose.material.icons.filled.AccountCircle
+-import androidx.compose.material.icons.filled.ArrowBackIos
+-import androidx.compose.material.icons.filled.DateRange
+ import androidx.compose.material.icons.filled.Home
+-import androidx.compose.material.icons.filled.NotificationsNone
+-import androidx.compose.material.icons.filled.Person
+ import androidx.compose.material.icons.filled.Star
+-import androidx.compose.material.icons.outlined.FavoriteBorder
+-import androidx.compose.material3.Button
+-import androidx.compose.material3.ButtonDefaults
+ import androidx.compose.material3.Icon
+-import androidx.compose.material3.IconButton
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+@@ -41,21 +30,15 @@
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.graphics.Color
+-import androidx.compose.ui.graphics.painter.Painter
+ import androidx.compose.ui.graphics.vector.ImageVector
+-import androidx.compose.ui.platform.LocalContext
+-import androidx.compose.ui.res.painterResource
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+-import com.example.lumis.R
+-import com.example.lumis.ui.theme.LumisBackground
+-import com.example.lumis.ui.theme.LumisBlue
+-import com.example.lumis.ui.theme.LumisGreen
+-import com.example.lumis.ui.theme.LumisSurface
+-import com.example.lumis.ui.theme.LumisTextPrimary
+-import com.example.lumis.ui.theme.LumisTextSecondary
++import com.example.lumis.view.components.BotaoContinuar
++import com.example.lumis.view.components.LinhaProgresso
++import com.example.lumis.view.components.LumisTopBar
++import com.example.lumis.view.theme.*
+ 
+ // =========================================================
+ // TELA DE SERVIÇOS ADICIONAIS (4ª etapa)
+@@ -91,51 +74,10 @@
+             .fillMaxSize()
+             .background(LumisBackground)
+     ) {
+-        // TopBar com logo
+-        Row(
+-            modifier = Modifier
+-                .fillMaxWidth()
+-                .height(56.dp)
+-                .background(LumisSurface)
+-                .padding(horizontal = 16.dp),
+-            verticalAlignment = Alignment.CenterVertically,
+-            horizontalArrangement = Arrangement.SpaceBetween
+-        ) {
+-            Row(verticalAlignment = Alignment.CenterVertically) {
+-                IconButton(onClick = onBack) {
+-                    Icon(
+-                        imageVector = Icons.Filled.ArrowBackIos,
+-                        contentDescription = "Voltar",
+-                        tint = LumisTextPrimary,
+-                        modifier = Modifier.size(18.dp)
+-                    )
+-                }
+-                Spacer(Modifier.width(6.dp))
+-                Image(
+-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+-                    contentDescription = "Logo Lumis",
+-                    modifier = Modifier.size(24.dp)
+-                )
+-                Column {
+-                    Text("Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
+-                    servico?.let { Text(text = it, fontSize = 11.sp, color = LumisTextSecondary) }
+-                }
+-            }
+-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+-                Icon(
+-                    imageVector = Icons.Default.NotificationsNone,
+-                    contentDescription = null,
+-                    tint = LumisTextSecondary,
+-                    modifier = Modifier.size(20.dp)
+-                )
+-                Icon(
+-                    imageVector = Icons.Default.AccountCircle,
+-                    contentDescription = null,
+-                    tint = LumisGreen,
+-                    modifier = Modifier.size(22.dp)
+-                )
+-            }
+-        }
++        LumisTopBar(onBack = onBack)
++
++        LinhaProgresso(etapaAtual = 3)
++        Spacer(modifier = Modifier.height(12.dp))
+ 
+         Column(
+             modifier = Modifier
+@@ -207,21 +149,9 @@
+                 .background(LumisSurface)
+                 .padding(horizontal = 20.dp, vertical = 12.dp)
+         ) {
+-            Button(
+-                onClick = { onConfirm(subtotal, listaEscolhidos) },
+-                modifier = Modifier
+-                    .fillMaxWidth()
+-                    .height(52.dp),
+-                shape = RoundedCornerShape(50),
+-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
+-            ) {
+-                Text(
+-                    text = "Continuar",
+-                    fontSize = 15.sp,
+-                    fontWeight = FontWeight.Bold,
+-                    color = Color.White
+-                )
+-            }
++            BotaoContinuar(
++                onClick = { onConfirm(subtotal, listaEscolhidos) }
++            )
+             Spacer(Modifier.height(8.dp))
+             Text(
+                 text = "Total: R$ %.2f".format(subtotal).replace(".", ","),
