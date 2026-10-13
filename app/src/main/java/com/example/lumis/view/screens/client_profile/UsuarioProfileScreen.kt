@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,8 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.lumis.R
 import com.example.lumis.view.components.lembreteEmBreve
+import java.io.File
 // Reaproveita a paleta de cores já definida na tela do funcionário,
 // mantendo os dois perfis (funcionário / usuário) com a mesma identidade visual.
 import com.example.lumis.view.screens.employee_profile.ProfileColors
@@ -51,7 +54,8 @@ private val HeaderGreenBottom = Color(0xFFE9F8F0)
 data class UsuarioProfile(
     val nome: String = "Maria de Oliveira",
     val localizacao: String = "São Paulo, Brasil",
-    val fotoUrl: String? = null
+    val fotoUrl: String? = null,
+    val biografia: String = ""
 )
 
 enum class StatusAtividade(val label: String) {
@@ -150,6 +154,10 @@ fun UsuarioProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         Spacer(modifier = Modifier.height(4.dp))
+
+                        if (profile.biografia.isNotBlank()) {
+                            BiografiaSection(biografia = profile.biografia)
+                        }
 
                         MembroLumisCard(onClick = { emBreve() })
 
@@ -295,12 +303,27 @@ fun UsuarioHeaderSection(
                             .background(ProfileColors.Divider),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = "Foto do usuário",
-                            tint = ProfileColors.Primary,
-                            modifier = Modifier.size(40.dp)
-                        )
+                        val fotoFile = profile.fotoUrl
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { File(it) }
+                            ?.takeIf { it.exists() }
+                        if (fotoFile != null) {
+                            AsyncImage(
+                                model = fotoFile,
+                                contentDescription = "Foto do usuário",
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = "Foto do usuário",
+                                tint = ProfileColors.Primary,
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
                     }
                 }
 
@@ -475,6 +498,32 @@ private fun AtalhoItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// BIOGRAFIA (seção opcional — só aparece quando preenchida no Editar Perfil)
+// ---------------------------------------------------------------------------------------------
+
+@Composable
+fun BiografiaSection(biografia: String) {
+    Column {
+        SectionTitle(prefixo = "Sobre", destaque = "mim")
+        Spacer(modifier = Modifier.height(12.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = CardShape,
+            border = BorderStroke(1.dp, ProfileColors.Divider),
+            colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Text(
+                text = biografia,
+                fontSize = 13.sp,
+                color = ProfileColors.TextPrimary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+            )
+        }
     }
 }
 

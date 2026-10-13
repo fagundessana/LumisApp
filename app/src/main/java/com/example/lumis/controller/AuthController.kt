@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import com.example.lumis.data.AppDatabase
 import com.example.lumis.data.User
 
+// Número máximo de caracteres da biografia do perfil.
+const val LIMITE_BIOGRAFIA = 300
+
 // ---------------------------------------------------------
 // CONTROLLER DE AUTENTICAÇÃO (cadastro / login / logout)
 // ---------------------------------------------------------
@@ -94,21 +97,39 @@ class AuthController(context: Context) {
         return null
     }
 
-    // Atualiza nome e localização do usuário logado.
+    // Atualiza nome, localização, telefone, foto e biografia do usuário logado.
+    // Telefone e biografia são opcionais; telefone preenchido exige 10 ou 11 dígitos,
+    // biografia tem no máximo 300 caracteres.
     // Retorna null em caso de sucesso, ou mensagem de erro.
     suspend fun atualizarPerfil(
         nomeUsuario: String,
-        localizacao: String
+        localizacao: String,
+        telefone: String = "",
+        fotoPerfilPath: String = "",
+        biografia: String = ""
     ): String? {
         val atual = usuarioLogado ?: return "Nenhum usuário logado"
         val nomeLimpo = nomeUsuario.trim()
         val locLimpa = localizacao.trim()
+        val telLimpo = telefone.trim()
+        val fotoLimpa = fotoPerfilPath.trim()
+        val bioLimpa = biografia.trim()
 
         if (nomeLimpo.isBlank()) return "Digite seu nome de usuário"
 
+        if (telLimpo.isNotBlank()) {
+            val digitos = telLimpo.filter { it.isDigit() }
+            if (digitos.length !in 10..11) return "Digite um telefone válido com DDD"
+        }
+
+        if (bioLimpa.length > LIMITE_BIOGRAFIA) return "A biografia deve ter no máximo $LIMITE_BIOGRAFIA caracteres"
+
         val atualizado = atual.copy(
             nomeUsuario = nomeLimpo,
-            localizacao = locLimpa
+            localizacao = locLimpa,
+            telefone = telLimpo,
+            fotoPerfilPath = fotoLimpa,
+            biografia = bioLimpa
         )
         database.userDao().atualizar(atualizado)
         usuarioLogado = database.userDao().buscarPorId(atual.id) ?: atualizado
@@ -118,7 +139,13 @@ class AuthController(context: Context) {
     // Atalho rápido usado pela Home/TopLocationBar para salvar só a região.
     suspend fun atualizarLocalizacao(localizacao: String): String? {
         val atual = usuarioLogado ?: return "Nenhum usuário logado"
-        return atualizarPerfil(atual.nomeUsuario, localizacao)
+        return atualizarPerfil(
+            nomeUsuario = atual.nomeUsuario,
+            localizacao = localizacao,
+            telefone = atual.telefone,
+            fotoPerfilPath = atual.fotoPerfilPath,
+            biografia = atual.biografia
+        )
     }
 
     fun logout() {

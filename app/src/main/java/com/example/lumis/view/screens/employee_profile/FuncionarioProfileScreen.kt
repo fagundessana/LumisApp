@@ -40,7 +40,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
+import coil.compose.AsyncImage
 import com.example.lumis.R
+import java.io.File
 import kotlin.math.max
 import kotlin.math.min
 
@@ -87,6 +89,8 @@ data class FuncionarioProfile(
     val nome: String = "Ana Beatriz Santos",
     val localizacao: String = "São Paulo, Brasil",
     val telefone: String = "11 0800-21123",
+    val fotoPath: String? = null,
+    val biografia: String = "",
     val avaliacao: String = "4.8 estrelas",
     val horas: String = "156 horas",
     val meses: String = "12 meses",
@@ -208,6 +212,10 @@ fun FuncionarioProfileScreen(
                         )
 
                         MetricsRow(profile)
+
+                        if (profile.biografia.isNotBlank()) {
+                            SobreMimSection(biografia = profile.biografia)
+                        }
 
                         PerformanceSection(
                             selecionado = calcularDesempenho(profile)
@@ -359,12 +367,27 @@ fun ProfileHeaderSection(
                             .background(ProfileColors.Divider),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.lumis),
-                            contentDescription = "Foto do funcionário",
-                            tint = ProfileColors.Primary,
-                            modifier = Modifier.size(38.dp)
-                        )
+                        val fotoFile = profile.fotoPath
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { File(it) }
+                            ?.takeIf { it.exists() }
+                        if (fotoFile != null) {
+                            AsyncImage(
+                                model = fotoFile,
+                                contentDescription = "Foto do funcionário",
+                                modifier = Modifier
+                                    .size(74.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(id = R.drawable.lumis),
+                                contentDescription = "Foto do funcionário",
+                                tint = ProfileColors.Primary,
+                                modifier = Modifier.size(38.dp)
+                            )
+                        }
                     }
                 }
 
@@ -614,6 +637,36 @@ private fun MetricCard(label: String, value: String, modifier: Modifier = Modifi
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = ProfileColors.TextPrimary
+            )
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// SOBRE MIM (seção opcional — só aparece quando preenchida no Editar Perfil)
+// ---------------------------------------------------------------------------------------------
+
+@Composable
+fun SobreMimSection(biografia: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Sobre mim",
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            color = ProfileColors.TextPrimary
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = CardShape,
+            colors = CardDefaults.cardColors(containerColor = ProfileColors.Background),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Text(
+                text = biografia,
+                fontSize = 13.sp,
+                color = ProfileColors.TextPrimary,
+                modifier = Modifier.padding(16.dp)
             )
         }
     }

@@ -128,7 +128,9 @@ fun MainScaffold(
                             UsuarioProfileScreen(
                                 profile = UsuarioProfile(
                                     nome = usuario.nomeUsuario,
-                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" }
+                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" },
+                                    fotoUrl = usuario.fotoPerfilPath.ifBlank { null },
+                                    biografia = usuario.biografia
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) }
@@ -137,7 +139,10 @@ fun MainScaffold(
                             FuncionarioProfileScreen(
                                 profile = FuncionarioProfile(
                                     nome = usuario.nomeUsuario,
-                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" }
+                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" },
+                                    telefone = usuario.telefone.ifBlank { "Adicionar telefone" },
+                                    fotoPath = usuario.fotoPerfilPath.ifBlank { null },
+                                    biografia = usuario.biografia
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
@@ -25,12 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.example.lumis.data.FotoPerfilHelper
 import com.example.lumis.data.User
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.screens.employee_profile.ProfileColors
+import java.io.File
 
 // ---------------------------------------------------------------------------------------------
 // PÁGINA DE CONTA: permite voltar ao perfil ou desconectar a conta (ir para o login)
@@ -93,12 +98,26 @@ fun ContaScreen(
                                 .background(ProfileColors.Divider),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Person,
-                                contentDescription = null,
-                                tint = ProfileColors.Primary,
-                                modifier = Modifier.size(32.dp)
-                            )
+                            val fotoFile = usuario.fotoPerfilPath
+                                .takeIf { FotoPerfilHelper.fotoExiste(it) }
+                                ?.let { File(it) }
+                            if (fotoFile != null) {
+                                AsyncImage(
+                                    model = fotoFile,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Outlined.Person,
+                                    contentDescription = null,
+                                    tint = ProfileColors.Primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(16.dp))
@@ -123,6 +142,23 @@ fun ContaScreen(
                                     fontSize = 12.sp,
                                     color = ProfileColors.TextSecondary
                                 )
+                            }
+                            if (usuario.telefone.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Call,
+                                        contentDescription = null,
+                                        tint = ProfileColors.TextSecondary,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = usuario.telefone,
+                                        fontSize = 12.sp,
+                                        color = ProfileColors.TextSecondary
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(6.dp))
                             Box(

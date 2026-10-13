@@ -17,5 +17,11 @@ data class User(
 
     val tipoUsuario: String,
 
-    val localizacao: String = ""
+    val localizacao: String = "",
+
+    val telefone: String = "",
+
+    val fotoPerfilPath: String = "",
+
+    val biografia: String = ""
 )
