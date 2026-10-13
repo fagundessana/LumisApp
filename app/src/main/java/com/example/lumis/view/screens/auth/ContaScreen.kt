@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.TravelExplore
@@ -38,6 +40,7 @@ import com.example.lumis.view.screens.employee_profile.ProfileColors
 fun ContaScreen(
     usuario: User,
     onVoltar: () -> Unit,
+    onEditarPerfil: () -> Unit = {},
     onSair: () -> Unit
 ) {
     val rotuloTipo = if (usuario.tipoUsuario == "Cliente") "Cliente" else "Funcionário"
@@ -146,6 +149,79 @@ fun ContaScreen(
                             }
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Card da região onde mora
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(ProfileColors.PrimaryLight),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.LocationOn,
+                                contentDescription = null,
+                                tint = ProfileColors.PrimaryDark,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Sua região",
+                                fontSize = 12.sp,
+                                color = ProfileColors.TextSecondary
+                            )
+                            Text(
+                                text = usuario.localizacao.ifBlank { "Não definida — toque em editar" },
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = ProfileColors.TextPrimary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Botão editar perfil (mesmo padrão pill verde dos perfis)
+                Button(
+                    onClick = onEditarPerfil,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ProfileColors.Primary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Editar perfil",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))

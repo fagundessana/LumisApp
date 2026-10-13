@@ -63,6 +63,7 @@ fun AuthRoot(authController: AuthController) {
             splashVisivel -> SplashScreen()
             usuario != null -> MainScaffold(
                 usuario = usuario,
+                authController = authController,
                 onLogout = { authController.logout() }
             )
             authController.mostrarCadastro -> CadastroScreen(authController)

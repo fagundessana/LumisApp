@@ -3,12 +3,19 @@ package com.example.lumis.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface UserDao {
 
     @Insert
     suspend fun inserir(user: User)
+
+    @Update
+    suspend fun atualizar(user: User)
+
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    suspend fun buscarPorId(id: Int): User?
 
     @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     suspend fun buscarPorEmail(email: String): User?

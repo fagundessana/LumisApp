@@ -136,7 +136,7 @@ fun UsuarioProfileScreen(
                     UsuarioHeaderSection(
                         profile = profile,
                         horizontalPadding = horizontalPadding,
-                        onEditarClick = { emBreve() },
+                        onEditarClick = onEditarClick,
                         onConfigClick = onConfigClick
                     )
                 }

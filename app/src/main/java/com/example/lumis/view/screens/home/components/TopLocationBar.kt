@@ -39,6 +39,7 @@ fun TopLocationBar(
     modifier: Modifier = Modifier,
     address: String = "211B Baker Street, London",
     subtitle: String = "Sua localização atual",
+    onLocationClick: () -> Unit = {},
     onNotificationClick: () -> Unit = {}
 ) {
     Surface(
@@ -46,7 +47,8 @@ fun TopLocationBar(
         shape = RoundedCornerShape(16.dp),
         color = LumisColors.White,
         tonalElevation = 2.dp,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        onClick = onLocationClick
     ) {
         Row(
             modifier = Modifier

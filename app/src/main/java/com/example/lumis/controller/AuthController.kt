@@ -67,7 +67,8 @@ class AuthController(context: Context) {
         nomeUsuario: String,
         senha: String,
         confirmacaoSenha: String,
-        tipoUsuario: String
+        tipoUsuario: String,
+        localizacao: String = ""
     ): String? {
         val dao = database.userDao()
         val emailLimpo = email.trim()
@@ -83,13 +84,41 @@ class AuthController(context: Context) {
                 email = emailLimpo,
                 nomeUsuario = nomeUsuario.trim(),
                 senha = senha,
-                tipoUsuario = tipoUsuario
+                tipoUsuario = tipoUsuario,
+                localizacao = localizacao.trim()
             )
         )
 
         mostrarCadastro = false
         mensagemLogin = "Cadastro realizado com sucesso! Faça login."
         return null
+    }
+
+    // Atualiza nome e localização do usuário logado.
+    // Retorna null em caso de sucesso, ou mensagem de erro.
+    suspend fun atualizarPerfil(
+        nomeUsuario: String,
+        localizacao: String
+    ): String? {
+        val atual = usuarioLogado ?: return "Nenhum usuário logado"
+        val nomeLimpo = nomeUsuario.trim()
+        val locLimpa = localizacao.trim()
+
+        if (nomeLimpo.isBlank()) return "Digite seu nome de usuário"
+
+        val atualizado = atual.copy(
+            nomeUsuario = nomeLimpo,
+            localizacao = locLimpa
+        )
+        database.userDao().atualizar(atualizado)
+        usuarioLogado = database.userDao().buscarPorId(atual.id) ?: atualizado
+        return null
+    }
+
+    // Atalho rápido usado pela Home/TopLocationBar para salvar só a região.
+    suspend fun atualizarLocalizacao(localizacao: String): String? {
+        val atual = usuarioLogado ?: return "Nenhum usuário logado"
+        return atualizarPerfil(atual.nomeUsuario, localizacao)
     }
 
     fun logout() {

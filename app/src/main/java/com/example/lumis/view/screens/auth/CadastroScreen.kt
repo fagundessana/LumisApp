@@ -70,6 +70,7 @@ fun CadastroScreen(
 
     var email by remember { mutableStateOf("") }
     var nomeUsuario by remember { mutableStateOf("") }
+    var localizacao by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmacaoSenha by remember { mutableStateOf("") }
 
@@ -322,6 +323,32 @@ fun CadastroScreen(
         )
 
         // =========================================================
+        // LOCALIZAÇÃO (OPCIONAL)
+        // =========================================================
+
+        CampoCadastro(
+            valor = localizacao,
+            aoMudar = {
+                localizacao = it
+            },
+            placeholder = "Onde você mora? (opcional)"
+        )
+
+        Text(
+            text = "Ex: São Paulo, SP — você pode alterar depois no perfil.",
+            fontSize = 11.sp,
+            color = TextoSecundario,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp)
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        // =========================================================
         // SENHA
         // =========================================================
 
@@ -458,7 +485,8 @@ fun CadastroScreen(
                                 nomeUsuario = nomeUsuario,
                                 senha = senha,
                                 confirmacaoSenha = confirmacaoSenha,
-                                tipoUsuario = tipoUsuario
+                                tipoUsuario = tipoUsuario,
+                                localizacao = localizacao
                             )
 
                             if (erro != null) {
@@ -466,6 +494,7 @@ fun CadastroScreen(
                             } else {
                                 email = ""
                                 nomeUsuario = ""
+                                localizacao = ""
                                 senha = ""
                                 confirmacaoSenha = ""
                             }

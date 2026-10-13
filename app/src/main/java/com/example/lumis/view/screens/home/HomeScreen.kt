@@ -30,6 +30,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     // contentPadding vem do Scaffold (pra não tampar nada com a navbar).
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    localizacao: String = "",
+    onLocationClick: () -> Unit = {},
     // Esses onClick com {} vazio são de propósito: o grupo liga eles depois.
     onSeeAllCategories: () -> Unit = {},
     onSeeAllServices: () -> Unit = {},
@@ -53,7 +55,17 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp) // espaço entre as seções
         ) {
             // 1. Barrinha de endereço + sino + perfil
-            item { TopLocationBar() }
+            item {
+                TopLocationBar(
+                    address = localizacao.ifBlank { "Definir minha região" },
+                    subtitle = if (localizacao.isBlank()) {
+                        "Toque para adicionar"
+                    } else {
+                        "Sua localização atual"
+                    },
+                    onLocationClick = onLocationClick
+                )
+            }
             // 2. Banner verde da promoção "30% OFF"
             item { PromoBanner(onDiscountClick = onDiscountClick) }
             // 3. Bolinhas de categoria (Limpeza, Residencial, Comercial...)

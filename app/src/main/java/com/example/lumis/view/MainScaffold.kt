@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.lumis.controller.AuthController
 import com.example.lumis.data.User
 import com.example.lumis.model.Servico
 import com.example.lumis.view.components.AgendaStore
@@ -23,6 +24,7 @@ import com.example.lumis.view.screens.client_profile.UsuarioProfile
 import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
+import com.example.lumis.view.screens.profile.EditarPerfilScreen
 import com.example.lumis.view.screens.home.EmBreveScreen
 import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.services.AgendamentoScreen
@@ -42,11 +44,13 @@ sealed class LumisTela {
     data object Adicionais : LumisTela()
     data object Resumo : LumisTela()
     data object Conta : LumisTela()
+    data object EditarPerfil : LumisTela()
 }
 
 @Composable
 fun MainScaffold(
     usuario: User,
+    authController: AuthController,
     onLogout: () -> Unit
 ) {
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
@@ -108,6 +112,8 @@ fun MainScaffold(
                 when (val tela = telaAtual) {
                     is LumisTela.Principal -> when (tela.aba) {
                         NavItem.HOME -> HomeScreen(
+                            localizacao = usuario.localizacao,
+                            onLocationClick = { irPara(LumisTela.EditarPerfil) },
                             onSeeAllCategories = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllRecommended = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
@@ -120,12 +126,20 @@ fun MainScaffold(
                         NavItem.AGENDA -> AgendaTab()
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
                             UsuarioProfileScreen(
-                                profile = UsuarioProfile(nome = usuario.nomeUsuario),
+                                profile = UsuarioProfile(
+                                    nome = usuario.nomeUsuario,
+                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" }
+                                ),
+                                onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) }
                             )
                         } else {
                             FuncionarioProfileScreen(
-                                profile = FuncionarioProfile(nome = usuario.nomeUsuario),
+                                profile = FuncionarioProfile(
+                                    nome = usuario.nomeUsuario,
+                                    localizacao = usuario.localizacao.ifBlank { "Adicionar localização" }
+                                ),
+                                onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) }
                             )
                         }
@@ -206,7 +220,14 @@ fun MainScaffold(
                     is LumisTela.Conta -> ContaScreen(
                         usuario = usuario,
                         onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
+                        onEditarPerfil = { irPara(LumisTela.EditarPerfil) },
                         onSair = onLogout
+                    )
+                    is LumisTela.EditarPerfil -> EditarPerfilScreen(
+                        usuario = usuario,
+                        authController = authController,
+                        onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
+                        onSalvo = { irPara(LumisTela.Principal(NavItem.PERFIL)) }
                     )
                 }
             }
@@ -214,6 +235,8 @@ fun MainScaffold(
             BottomNavBar(
                 selected = when (val tela = telaAtual) {
                     is LumisTela.Principal -> tela.aba
+                    is LumisTela.Conta -> NavItem.PERFIL
+                    is LumisTela.EditarPerfil -> NavItem.PERFIL
                     else -> NavItem.EXPLORAR
                 },
                 onSelect = { novaAba -> telaAtual = LumisTela.Principal(novaAba) }

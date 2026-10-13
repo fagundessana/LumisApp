@@ -161,6 +161,7 @@ fun calcularDesempenho(profile: FuncionarioProfile): NivelDesempenho {
 @Composable
 fun FuncionarioProfileScreen(
     profile: FuncionarioProfile = FuncionarioProfile(),
+    onEditarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {}
 ) {
     var periodoSelecionado by remember { mutableStateOf(PeriodoServico.ANO) }
@@ -186,6 +187,7 @@ fun FuncionarioProfileScreen(
                     ProfileHeaderSection(
                         profile = profile,
                         horizontalPadding = horizontalPadding,
+                        onEditarClick = onEditarClick,
                         onConfigClick = onConfigClick
                     )
                 }
@@ -266,6 +268,7 @@ fun FuncionarioProfileScreen(
 fun ProfileHeaderSection(
     profile: FuncionarioProfile,
     horizontalPadding: androidx.compose.ui.unit.Dp,
+    onEditarClick: () -> Unit = {},
     onConfigClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -401,7 +404,7 @@ fun ProfileHeaderSection(
                             color = ProfileColors.Divider,
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .clickable { }
+                        .clickable { onEditarClick() }
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Icon(

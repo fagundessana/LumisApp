@@ -15,5 +15,7 @@ data class User(
 
     val senha: String,
 
-    val tipoUsuario: String
+    val tipoUsuario: String,
+
+    val localizacao: String = ""
 )
