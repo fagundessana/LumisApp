@@ -20,12 +20,12 @@ import com.example.lumis.view.components.AgendamentoRegistro
 import com.example.lumis.view.components.BottomNavBar
 import com.example.lumis.view.components.NavItem
 import com.example.lumis.view.screens.auth.ContaScreen
+import com.example.lumis.view.screens.city.CidadeConscienteScreen
 import com.example.lumis.view.screens.client_profile.UsuarioProfile
 import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
 import com.example.lumis.view.screens.profile.EditarPerfilScreen
-import com.example.lumis.view.screens.home.EmBreveScreen
 import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.services.AgendamentoScreen
 import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
@@ -122,7 +122,7 @@ fun MainScaffold(
                             onServiceClick = { abrirServicoPorLegenda(it) },
                             onHireClick = { abrirServicoPorLegenda(it) }
                         )
-                        NavItem.CIDADE -> EmBreveScreen()
+                        NavItem.CIDADE -> CidadeConscienteScreen()
                         NavItem.AGENDA -> AgendaTab()
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
                             UsuarioProfileScreen(
