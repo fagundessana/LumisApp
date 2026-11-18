@@ -27,7 +27,7 @@ import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.theme.*
-import java.time.YearMonth
+import java.util.Calendar
 
 // ============================================================
 // PALETA (usa as mesmas da Claud e da servicesScreen)
@@ -48,17 +48,22 @@ fun AgendamentoScreen(
     onConfirm: (dia: Int, horario: String) -> Unit = { _, _ -> }
 ) {
 
-    // Data atual / padrão
-    val hoje = YearMonth.now()
-    var ano by remember { mutableStateOf(hoje.year) }
-    var mes by remember { mutableStateOf(hoje.month) }
-    var diaSelecionado by remember { mutableStateOf(15) }
+    // Data atual / padrão (usando Calendar para compatibilidade com API 24)
+    val cal = Calendar.getInstance()
+    val hojeAno = cal.get(Calendar.YEAR)
+    val hojeMes = cal.get(Calendar.MONTH) + 1 // Calendar.MONTH é 0-based
+    val hojeDia = cal.get(Calendar.DAY_OF_MONTH)
+    val diasNoMes = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    var ano by remember { mutableStateOf(hojeAno) }
+    var mes by remember { mutableStateOf(hojeMes) }
+    var diaSelecionado by remember { mutableStateOf(hojeDia) }
 
     // Horário selecionado
     var horarioSelecionado by remember { mutableStateOf("10:00") }
 
-    // Dias do mês atual (simples, sem validar os dias da semana)
-    val dias = (1..mes.length(hoje.isLeapYear)).toList()
+    // Dias do mês atual
+    val dias = (1..diasNoMes).toList()
 
     // Horários disponíveis
     val horarios = listOf("08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00")
@@ -272,8 +277,8 @@ fun HorarioPill(
 // UTIL — nome do mês
 // ============================================================
 
-private fun formatarMes(mes: java.time.Month, ano: Int): String {
-    val nome = when (mes.value) {
+private fun formatarMes(mes: Int, ano: Int): String {
+    val nome = when (mes) {
         1 -> "Janeiro"
         2 -> "Fevereiro"
         3 -> "Março"

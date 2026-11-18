@@ -80,6 +80,7 @@ object LocalizacaoHelper {
         return formatarRegiao(context, local.latitude, local.longitude)
     }
 
+    @Suppress("MissingPermission")
     private suspend fun pedirPosicaoAtual(context: Context, prioridade: Int): Location? =
         suspendCancellableCoroutine { cont ->
             try {
@@ -94,6 +95,7 @@ object LocalizacaoHelper {
             }
         }
 
+    @Suppress("MissingPermission")
     private suspend fun pedirUltimaPosicao(context: Context): Location? =
         suspendCancellableCoroutine { cont ->
             try {

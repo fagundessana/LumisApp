@@ -34,7 +34,7 @@ import com.example.lumis.view.screens.services.ResumoPedidoScreen
 import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
 import com.example.lumis.view.screens.services.ServicesScreen
 import com.example.lumis.view.theme.LumisBackground
-import java.time.YearMonth
+import java.util.Calendar
 
 sealed class LumisTela {
     data class Principal(val aba: NavItem) : LumisTela()
@@ -164,8 +164,10 @@ fun MainScaffold(
                         servicoSelecionado = tela.servico.nome,
                         onBack = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                         onConfirm = { dia, hora ->
-                            val mesAtual = YearMonth.now()
-                            dataEscolhida = "$dia/${mesAtual.monthValue.toString().padStart(2, '0')}/${mesAtual.year}"
+                            val cal = Calendar.getInstance()
+                            val mesAtual = cal.get(Calendar.MONTH) + 1
+                            val anoAtual = cal.get(Calendar.YEAR)
+                            dataEscolhida = "$dia/${mesAtual.toString().padStart(2, '0')}/$anoAtual"
                             horarioEscolhido = hora
                             irPara(LumisTela.Imovel)
                         }
