@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MyLocation
@@ -115,6 +117,8 @@ fun EditarPerfilScreen(
     var bannerPath by remember(usuario.id) { mutableStateOf(usuario.bannerPerfilPath) }
     var bannerPreview by remember { mutableStateOf<Uri?>(null) }
     var salvandoBanner by remember { mutableStateOf(false) }
+    // Arquivo que está sendo enquadrado no editor de banner (null = editor fechado)
+    var arquivoParaRecortar by remember { mutableStateOf<File?>(null) }
     
     var mensagemErro by remember { mutableStateOf("") }
     var salvando by remember { mutableStateOf(false) }
@@ -148,18 +152,12 @@ fun EditarPerfilScreen(
         ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
-        bannerPreview = uri
-        salvandoBanner = true
         mensagemErro = ""
         scope.launch {
             try {
-                bannerPath = FotoPerfilHelper.salvarFotoInterna(context, uri, usuario.id, "banner")
-                bannerPreview = null
+                arquivoParaRecortar = FotoPerfilHelper.copiarOriginalBanner(context, uri, usuario.id)
             } catch (e: Exception) {
-                bannerPreview = null
-                mensagemErro = e.message ?: "Não consegui salvar o banner."
-            } finally {
-                salvandoBanner = false
+                mensagemErro = e.message ?: "Não consegui abrir a imagem."
             }
         }
     }
@@ -221,20 +219,14 @@ fun EditarPerfilScreen(
         ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
         if (success && bannerCameraUri != null) {
-            bannerPreview = bannerCameraUri
-            salvandoBanner = true
             mensagemErro = ""
             scope.launch {
                 try {
-                    bannerPath = FotoPerfilHelper.salvarFotoInterna(context, bannerCameraUri!!, usuario.id, "banner")
-                    bannerPreview = null
-                    bannerCameraUri = null
+                    arquivoParaRecortar = FotoPerfilHelper.promoverBannerTempParaOriginal(context, usuario.id)
                 } catch (e: Exception) {
-                    bannerPreview = null
-                    bannerCameraUri = null
-                    mensagemErro = e.message ?: "Não consegui salvar o banner."
+                    mensagemErro = e.message ?: "Não consegui salvar a foto da câmera."
                 } finally {
-                    salvandoBanner = false
+                    bannerCameraUri = null
                 }
             }
         }
@@ -253,7 +245,7 @@ fun EditarPerfilScreen(
 
     fun abrirCameraBanner() {
         mensagemErro = ""
-        val arquivoBanner = FotoPerfilHelper.arquivoBanner(context, usuario.id)
+        val arquivoBanner = FotoPerfilHelper.arquivoBannerTemp(context, usuario.id)
         bannerCameraUri = androidx.core.content.FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
@@ -348,6 +340,20 @@ fun EditarPerfilScreen(
                 title = { Text(text = "Alterar banner", fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (FotoPerfilHelper.fotoExiste(bannerPath)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    arquivoParaRecortar = FotoPerfilHelper.arquivoParaAjuste(context, usuario.id, bannerPath)
+                                    mostrarDialogoBanner = false
+                                }.padding(vertical = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(imageVector = Icons.Outlined.Crop, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(text = "Ajustar enquadramento", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                            }
+                            androidx.compose.material3.Divider(color = ProfileColors.Divider)
+                        }
                         Row(
                             modifier = Modifier.fillMaxWidth().clickable {
                                 abrirGaleriaBanner()
@@ -480,6 +486,26 @@ fun EditarPerfilScreen(
             LumisTopBar(onBack = onVoltar, onNotificationsClick = onNotificationsClick)
             DialogOpcoesFoto()
             DialogOpcoesBanner()
+            arquivoParaRecortar?.let { arquivo ->
+                BannerCropDialog(
+                    arquivo = arquivo,
+                    onCancelar = { arquivoParaRecortar = null },
+                    onConfirmar = { recorte ->
+                        arquivoParaRecortar = null
+                        salvandoBanner = true
+                        mensagemErro = ""
+                        scope.launch {
+                            try {
+                                bannerPath = FotoPerfilHelper.salvarBannerRecortado(context, recorte, usuario.id)
+                            } catch (e: Exception) {
+                                mensagemErro = e.message ?: "Não consegui salvar o banner."
+                            } finally {
+                                salvandoBanner = false
+                            }
+                        }
+                    }
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -652,7 +678,7 @@ fun EditarPerfilScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .aspectRatio(BANNER_ASPECTO)
                             .clip(RoundedCornerShape(16.dp))
                             .clickable { mostrarDialogoBanner = true },
                         contentAlignment = Alignment.Center
