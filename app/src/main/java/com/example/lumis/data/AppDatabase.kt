@@ -7,10 +7,35 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN localizacao TEXT NOT NULL DEFAULT ''")
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN telefone TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE users ADD COLUMN fotoPerfilPath TEXT NOT NULL DEFAULT ''")
+    }
+}
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN biografia TEXT NOT NULL DEFAULT ''")
+    }
+}
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN bannerPerfilPath TEXT NOT NULL DEFAULT ''")
+    }
+}
+
 /**
  * Acrescenta a tabela de agendamentos sem alterar nem recriar a tabela users.
  */
-val MIGRATION_4_5 = object : Migration(4, 5) {
+val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             """
@@ -41,43 +66,18 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 
 
 /**
- * Migration 5 -> 6: adiciona endereço e forma de pagamento, preservando agendamentos existentes.
+ * Migration 6 -> 7: adiciona endereço e forma de pagamento, preservando agendamentos existentes.
  */
-val MIGRATION_5_6 = object : Migration(5, 6) {
+val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE agendamentos ADD COLUMN endereco TEXT NOT NULL DEFAULT ''")
         db.execSQL("ALTER TABLE agendamentos ADD COLUMN formaPagamento TEXT NOT NULL DEFAULT 'A combinar no atendimento'")
     }
 }
 
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE users ADD COLUMN localizacao TEXT NOT NULL DEFAULT ''")
-    }
-}
-
-val MIGRATION_2_3 = object : Migration(2, 3) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE users ADD COLUMN telefone TEXT NOT NULL DEFAULT ''")
-        db.execSQL("ALTER TABLE users ADD COLUMN fotoPerfilPath TEXT NOT NULL DEFAULT ''")
-    }
-}
-
-val MIGRATION_3_4 = object : Migration(3, 4) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE users ADD COLUMN biografia TEXT NOT NULL DEFAULT ''")
-    }
-}
-
-val MIGRATION_4_5 = object : Migration(4, 5) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE users ADD COLUMN bannerPerfilPath TEXT NOT NULL DEFAULT ''")
-    }
-}
-
 @Database(
     entities = [User::class, Agendamento::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -103,8 +103,10 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_2_3,
                     MIGRATION_3_4,
                     MIGRATION_4_5,
-                    MIGRATION_5_6
-                ).build()
+                    MIGRATION_5_6,
+                    MIGRATION_6_7
+                ).fallbackToDestructiveMigration()
+                .build()
 
                 INSTANCE = instance
 

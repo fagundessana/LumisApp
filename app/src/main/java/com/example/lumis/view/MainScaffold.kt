@@ -164,7 +164,10 @@ fun MainScaffold(
                             onHireClick = { abrirServicoPorLegenda(it) }
                         )
                         NavItem.CIDADE -> CidadeConscienteScreen(onNotificationsClick = { irPara(LumisTela.Notificacoes) })
-                        NavItem.AGENDA -> AgendaTab(onNotificationsClick = { irPara(LumisTela.Notificacoes) }registros = registrosAgenda)
+                        NavItem.AGENDA -> AgendaTab(
+                        registros = registrosAgenda,
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                    )
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
                             UsuarioProfileScreen(
                                 profile = UsuarioProfile(

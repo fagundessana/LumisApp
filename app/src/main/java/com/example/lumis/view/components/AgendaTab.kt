@@ -48,7 +48,10 @@ data class AgendamentoRegistro(
 )
 
 @Composable
-fun AgendaTab(registros: List<AgendamentoRegistro> = emptyList()onNotificationsClick: () -> Unit = {}) {
+fun AgendaTab(
+    registros: List<AgendamentoRegistro> = emptyList(),
+    onNotificationsClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()

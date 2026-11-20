@@ -70,7 +70,8 @@ fun ConfiguracaoImovelScreen(
     tamanhoInicial: String = "60–100m²",
     endereco: String = "",
     onBack: () -> Unit = {},
-    onConfirm: (quartos: Int, banheiros: Int, tamanho: String, endereco: String) -> Unit = { _, _, _, _ -> }
+    onConfirm: (quartos: Int, banheiros: Int, tamanho: String, endereco: String) -> Unit = { _, _, _, _ -> },
+    onNotificationsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var quartos by remember { mutableIntStateOf(quartosInicial) }
