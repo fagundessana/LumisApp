@@ -52,7 +52,7 @@ fun StatusSummaryCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        color = LumisColors.White,
+        color = LumisColors.Surface,
         tonalElevation = 2.dp,
         shadowElevation = 2.dp
     ) {

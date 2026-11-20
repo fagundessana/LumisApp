@@ -33,6 +33,7 @@ import com.example.lumis.R
 import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
+import com.example.lumis.view.theme.TemaApp.corTema
 import java.io.File
 // Reaproveita a paleta de cores já definida na tela do funcionário,
 // mantendo os dois perfis (funcionário / usuário) com a mesma identidade visual.
@@ -46,8 +47,8 @@ private val SmallCardShape = RoundedCornerShape(16.dp)
 private val PillShape = RoundedCornerShape(50)
 
 // Gradiente verde usado no header do perfil de usuário (equivalente ao azul do funcionário)
-private val HeaderGreenTop = Color(0xFFA9E2C4)
-private val HeaderGreenBottom = Color(0xFFE9F8F0)
+private val HeaderGreenTop: Color get() = corTema(claro = Color(0xFFA9E2C4), escuro = Color(0xFF24463A))
+private val HeaderGreenBottom: Color get() = corTema(claro = Color(0xFFE9F8F0), escuro = Color(0xFF262626))
 
 // ---------------------------------------------------------------------------------------------
 // MODELOS DE DADOS (MOCK)

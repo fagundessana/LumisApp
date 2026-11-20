@@ -45,7 +45,7 @@ fun TopLocationBar(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = LumisColors.White,
+        color = LumisColors.Surface,
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
         onClick = onLocationClick
@@ -109,7 +109,7 @@ fun TopLocationBar(
                         .size(8.dp)
                         .clip(CircleShape)
                         .background(LumisColors.Primary)
-                        .border(1.5.dp, LumisColors.White, CircleShape)
+                        .border(1.5.dp, LumisColors.Surface, CircleShape)
                 )
             }
         }
@@ -127,7 +127,7 @@ private fun CircleIconButton(
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = LumisColors.White,
+        color = LumisColors.Surface,
         border = BorderStroke(1.dp, LumisColors.Border),
         modifier = modifier.size(38.dp)
     ) {

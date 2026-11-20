@@ -60,7 +60,7 @@ fun CategorySection(
                         selectedContainerColor = LumisColors.Primary,
                         selectedLabelColor = LumisColors.OnButton,
                         selectedLeadingIconColor = LumisColors.OnButton,
-                        containerColor = LumisColors.White,
+                        containerColor = LumisColors.Surface,
                         labelColor = LumisColors.SecondaryText
                     ),
                     border = if (selected) null else BorderStroke(1.dp, LumisColors.Border),
@@ -87,7 +87,7 @@ fun CategorySection(
                     onClick = onSeeAllClick,
                     shape = RoundedCornerShape(20.dp),
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = LumisColors.White,
+                        containerColor = LumisColors.Surface,
                         labelColor = LumisColors.SecondaryText
                     ),
                     border = BorderStroke(1.dp, LumisColors.Border),

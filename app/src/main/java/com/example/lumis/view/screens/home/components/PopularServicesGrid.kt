@@ -97,7 +97,7 @@ private fun ServiceCard(
                     .clip(RoundedCornerShape(10.dp))
                     .background(
                         if (service.isHighlight) LumisColors.Primary.copy(alpha = 0.35f)
-                        else LumisColors.White
+                        else LumisColors.Surface
                     ),
                 contentAlignment = Alignment.Center
             ) {

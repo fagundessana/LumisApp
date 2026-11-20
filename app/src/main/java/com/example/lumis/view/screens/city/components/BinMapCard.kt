@@ -36,6 +36,7 @@ import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Questrial
+import com.example.lumis.view.theme.TemaApp.corTema
 
 // Card do mapa das lixeiras
 // Fundo simples com marcadores posicionados usando Box com offset fixo
@@ -54,7 +55,7 @@ fun BinMapCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        color = LumisColors.White,
+        color = LumisColors.Surface,
         tonalElevation = 2.dp,
         shadowElevation = 2.dp
     ) {
@@ -80,7 +81,7 @@ fun BinMapCard(
                     .fillMaxWidth()
                     .height(mapHeight)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF0F0EB))
+                    .background(corTema(claro = Color(0xFFF0F0EB), escuro = Color(0xFF2A2D2B)))
             ) {
                 // Marcadores posicionados por fração da largura/altura conhecida
                 markers.forEach { marker ->

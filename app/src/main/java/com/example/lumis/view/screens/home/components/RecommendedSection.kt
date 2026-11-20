@@ -96,7 +96,7 @@ private fun ProfessionalCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = LumisColors.White,
+        color = LumisColors.Surface,
         tonalElevation = 2.dp,
         shadowElevation = 2.dp,
         modifier = modifier.width(172.dp)
@@ -140,7 +140,7 @@ private fun ProfessionalCard(
                         .padding(8.dp)
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(LumisColors.White.copy(alpha = 0.92f)),
+                        .background(LumisColors.Surface.copy(alpha = 0.92f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

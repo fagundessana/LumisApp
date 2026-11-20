@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.view.Window
 import android.view.WindowInsetsController
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +17,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
@@ -94,14 +97,16 @@ fun LumisTheme(
         val activity = context.findActivity() ?: return@SideEffect
         val window = activity.window
         val insetsController = WindowCompat.getInsetsController(window, view)
-        val colorScheme = if (isDark) LumisDarkColorScheme else LumisLightColorScheme
+        val corFundo = (if (isDark) LumisDarkColorScheme else LumisLightColorScheme).background.toArgb()
 
-        // Cores das barras - converte Color para Int ARGB
-        val backgroundColor = colorScheme.background
-        window.statusBarColor = backgroundColor.toArgb()
-        window.navigationBarColor = backgroundColor.toArgb()
-
-        // Aparência dos ícones (claro/escuro)
+        window.statusBarColor = corFundo
+        window.navigationBarColor = corFundo
+        // Fundo da janela acompanha o tema (evita faixa clara atrás das barras)
+        window.setBackgroundDrawable(ColorDrawable(corFundo))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
         insetsController.isAppearanceLightStatusBars = !isDark
         insetsController.isAppearanceLightNavigationBars = !isDark
     }
@@ -122,5 +127,3 @@ private fun Context.findActivity(): Activity? {
     }
     return null
 }
-
-private fun Color.toArgb(): Int = this.value.toInt()
