@@ -33,7 +33,8 @@ import com.example.lumis.view.theme.ModoTema
 @Composable
 fun CidadeConscienteScreen(
     modifier: Modifier = Modifier,
-    model: CidadeUiModel = CidadeUiModel
+    model: CidadeUiModel = CidadeUiModel,
+    onNotificationsClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -41,7 +42,7 @@ fun CidadeConscienteScreen(
             .background(LumisColors.Background)
     ) {
         // LumisTopBar fixo no topo (fora da lista rolável)
-        LumisTopBar()
+        LumisTopBar(onNotificationsClick = onNotificationsClick)
 
         // Lista rolável com os componentes
         LazyColumn(

@@ -84,7 +84,7 @@ fun ResumoPedidoScreen(
         // =============================
         // TOPO
         // =============================
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 4)
 

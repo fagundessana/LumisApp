@@ -48,7 +48,8 @@ data class Plano(
 
 @Composable
 fun PlanosScreen(
-    onVoltarServicos: () -> Unit = {}
+    onVoltarServicos: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     var sel by remember { mutableStateOf("regular") }
     val lista = listOf(
@@ -110,7 +111,7 @@ fun PlanosScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // App Bar / Topo
-            LumisTopBar()
+            LumisTopBar(onNotificationsClick = onNotificationsClick)
 
             // Abas Serviços | Planos
             AbasPlanos(onVoltarServicos = onVoltarServicos)

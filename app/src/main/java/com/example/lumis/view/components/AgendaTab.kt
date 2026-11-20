@@ -48,13 +48,13 @@ data class AgendamentoRegistro(
 )
 
 @Composable
-fun AgendaTab(registros: List<AgendamentoRegistro> = emptyList()) {
+fun AgendaTab(registros: List<AgendamentoRegistro> = emptyList()onNotificationsClick: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LumisBackground)
     ) {
-        LumisTopBar()
+        LumisTopBar(onNotificationsClick = onNotificationsClick)
 
         Column(
             modifier = Modifier

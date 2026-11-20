@@ -48,7 +48,8 @@ private val CinzaTexto = LumisTextSecondary
 fun AgendamentoScreen(
     servicoSelecionado: String? = null,
     onBack: () -> Unit = {},
-    onConfirm: (dia: Int, horario: String) -> Unit = { _, _ -> }
+    onConfirm: (dia: Int, horario: String) -> Unit = { _, _ -> },
+    onNotificationsClick: () -> Unit = {}
 ) {
 
     // Data atual / padrão (usando Calendar para compatibilidade com API 24)
@@ -79,7 +80,7 @@ fun AgendamentoScreen(
         // -------------------------------------------------
         // TOPO
         // -------------------------------------------------
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 1)
         Spacer(modifier = Modifier.height(12.dp))
