@@ -67,9 +67,20 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+/** Acrescenta dados profissionais e avaliação por estrelas, preservando todo o histórico. */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN especialidades TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE users ADD COLUMN regiaoAtuacao TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE users ADD COLUMN experiencia TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE users ADD COLUMN valorMinimoCentavos INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE agendamentos ADD COLUMN avaliacao INTEGER DEFAULT NULL")
+    }
+}
+
 @Database(
     entities = [User::class, Agendamento::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -92,7 +103,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_3_4,
                     MIGRATION_4_5,
                     MIGRATION_5_6,
-                    MIGRATION_6_7
+                    MIGRATION_6_7,
+                    MIGRATION_7_8
                 ).build()
 
                 INSTANCE = instance

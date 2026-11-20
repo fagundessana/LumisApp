@@ -1,990 +1,179 @@
 package com.example.lumis.view.screens.employee_profile
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.lumis.view.theme.LumisTheme
-import com.example.lumis.view.theme.ModoTema
 import coil.compose.AsyncImage
-import com.example.lumis.R
-import java.io.File
-import kotlin.math.max
-import kotlin.math.min
-
-// ---------------------------------------------------------------------------------------------
-// CORES E TOKENS DE DESIGN (baseado no Figma "Lumis 2.0")
-// ---------------------------------------------------------------------------------------------
-
 import com.example.lumis.view.theme.TemaApp.corTema
+import java.io.File
 
 object ProfileColors {
-    val Background: Color get() = corTema(claro = Color(0xFFF5F6FA), escuro = Color(0xFF1E1E1E))
-    val CardBackground: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF262626))
-    val Primary = Color(0xFF3FBF8F)
-    val PrimaryDark = Color(0xFF2FA57A)
-    val PrimaryLight: Color get() = corTema(claro = Color(0xFFDFF6EC), escuro = Color(0xFF1F3A2E))
-
-    val HeaderBlueTop: Color get() = corTema(claro = Color(0xFFBFE0F5), escuro = Color(0xFF1F3A4D))
-    val HeaderBlueBottom: Color get() = corTema(claro = Color(0xFFEAF5FB), escuro = Color(0xFF262F36))
-
-    val TextPrimary: Color get() = corTema(claro = Color(0xFF1E1E1E), escuro = Color(0xFFF9F9FB))
-    val TextSecondary: Color get() = corTema(claro = Color(0xFF8A8A8E), escuro = Color(0xFFA0A0A5))
-    val Divider: Color get() = corTema(claro = Color(0xFFEDEDF2), escuro = Color(0xFF3A3A3C))
-
-    val ChipRedBg: Color get() = corTema(claro = Color(0xFFFBDCDC), escuro = Color(0xFF4A2A2A))
-    val ChipLavenderBg: Color get() = corTema(claro = Color(0xFFE6E1FA), escuro = Color(0xFF332E4D))
-    val ChipLavenderIcon = Color(0xFFC65B7A)
-    val ChipGreenBg: Color get() = corTema(claro = Color(0xFFD9F3E4), escuro = Color(0xFF1F3A2E))
+    val Background: Color get() = corTema(Color(0xFFF5F6FA), Color(0xFF171918))
+    val CardBackground: Color get() = corTema(Color.White, Color(0xFF242725))
+    val Primary = Color(0xFF50BF87)
+    val PrimaryDark = Color(0xFF317252)
+    val PrimaryLight: Color get() = corTema(Color(0xFFE7F5EC), Color(0xFF1F3A2E))
+    val TextPrimary: Color get() = corTema(Color(0xFF1A1A1A), Color(0xFFF2F4F3))
+    val TextSecondary: Color get() = corTema(Color(0xFF666666), Color(0xFFADB5B0))
+    val Divider: Color get() = corTema(Color(0xFFE7E9EC), Color(0xFF3A403C))
+    val ChipRedBg: Color get() = corTema(Color(0xFFFBDCDC), Color(0xFF4A2A2A))
     val ChipGreenIcon = Color(0xFF2E86C1)
-
-    val BadgeRedBg: Color get() = corTema(claro = Color(0xFFF9C8CE), escuro = Color(0xFF4D2A30))
-    val BadgeRedText: Color get() = corTema(claro = Color(0xFFB5495F), escuro = Color(0xFFE58A9C))
-    val BadgeYellowBg: Color get() = corTema(claro = Color(0xFFFCEFC3), escuro = Color(0xFF4A4020))
-    val BadgeYellowText: Color get() = corTema(claro = Color(0xFFB98A1E), escuro = Color(0xFFE0B84A))
-    val BadgeGreenBg: Color get() = corTema(claro = Color(0xFFCDF3E2), escuro = Color(0xFF1F4A38))
-    val BadgeGreenText: Color get() = corTema(claro = Color(0xFF1F9E6E), escuro = Color(0xFF5FD3A0))
+    val BadgeRedText: Color get() = corTema(Color(0xFFB5495F), Color(0xFFFF9BAD))
+    val BadgeGreenText: Color get() = corTema(Color(0xFF1F9E6E), Color(0xFF5FD3A0))
 }
-
-private val CardShape = RoundedCornerShape(20.dp)
-private val PillShape = RoundedCornerShape(50)
-
-// ---------------------------------------------------------------------------------------------
-// MODELO DE DADOS (MOCK)
-// ---------------------------------------------------------------------------------------------
 
 data class FuncionarioProfile(
-    val nome: String = "Ana Beatriz Santos",
-    val localizacao: String = "São Paulo, Brasil",
-    val telefone: String = "11 0800-21123",
+    val nome: String,
+    val localizacao: String,
+    val telefone: String,
     val fotoPath: String? = null,
+    val bannerPath: String? = null,
     val biografia: String = "",
-    val avaliacao: String = "4.8 estrelas",
-    val horas: String = "156 horas",
-    val meses: String = "12 meses",
-    val taxaConclusao: String = "98%",
-    val pontualidade: String = "94%",
-    val desempenhoSelecionado: NivelDesempenho = NivelDesempenho.MUITO_BOM,
-    val avaliacoesPorAno: List<Float> = listOf(0.35f, 0.55f, 0.3f, 0.65f, 0.5f, 0.85f, 0.4f, 0.7f, 0.6f, 0.45f, 0.8f, 0.55f),
-    val avaliacoesPorMes: List<Float> = listOf(0.6f, 0.85f, 0.45f, 0.7f, 0.9f, 0.5f, 0.75f, 0.65f),
-    // Dados hipotético do ano
-    val anoGanhos: String = "R$ 18.720,00",
-    val anoPendentes: String = "R$ 1.240,00",
-    val anoUltimoPagamento: String = "R$ 1.560,00",
-    val anoHorasExtras: String = "84h",
-    val anoBonus: String = "R$ 2.300,00",
-    // Dados hipotético do mês
-    val mesGanhos: String = "R$ 1.560,00",
-    val mesPendentes: String = "R$ 320,00",
-    val mesUltimoPagamento: String = "R$ 1.240,00",
-    val mesHorasExtras: String = "7h",
-    val mesBonus: String = "R$ 190,00",
-    val valorPorServico: String = "R$ 150,00"
+    val especialidades: String = "",
+    val regiaoAtuacao: String = "",
+    val experiencia: String = "",
+    val valorMinimoCentavos: Long = 0,
+    val mediaAvaliacoes: Double? = null,
+    val quantidadeAvaliacoes: Int = 0
 )
-
-enum class NivelDesempenho(val label: String) {
-    RUIM("Ruim"),
-    REGULAR("Regular"),
-    MUITO_BOM("Muito Bom")
-}
-
-enum class PeriodoServico(val label: String) {
-    ANO("ano"),
-    MES("mes")
-}
-
-// Calcula o nível de desempenho a partir dos dados do funcionário
-fun calcularDesempenho(profile: FuncionarioProfile): NivelDesempenho {
-    val conclusao = profile.taxaConclusao.replace("%", "").replace(",", ".").toFloatOrNull() ?: 0f
-    val pontualidade = profile.pontualidade.replace("%", "").replace(",", ".").toFloatOrNull() ?: 0f
-    val avaliacao = profile.avaliacao.filter { it.isDigit() || it == '.' }.toFloatOrNull() ?: 0f
-
-    // Dados de pagamentos
-    fun parseMoeda(valor: String): Float =
-        valor.replace("R$", "").replace(".", "").replace(",", ".").trim().toFloatOrNull() ?: 0f
-
-    val ganhos = parseMoeda(profile.anoGanhos)
-    val bonus = parseMoeda(profile.anoBonus)
-    val ultimoPagamento = parseMoeda(profile.anoUltimoPagamento)
-    val pendentes = parseMoeda(profile.anoPendentes)
-
-    val desempenhoFinanceiro = when {
-        ganhos <= 0f -> 0f
-        else -> {
-            val proporcaoBonus = (bonus / ganhos) * 50f
-            val pagamentoMensal = min(ultimoPagamento / (ganhos / 12f), 1.2f) * 50f
-            val penhora = if (pendentes > 0f) 10f else 0f
-            (proporcaoBonus + pagamentoMensal - penhora).coerceIn(0f, 100f)
-        }
-    }
-
-    val score = conclusao * 0.35f + pontualidade * 0.2f + (avaliacao / 5f) * 100f * 0.15f + desempenhoFinanceiro * 0.3f
-    return when {
-        score >= 80f -> NivelDesempenho.MUITO_BOM
-        score >= 55f -> NivelDesempenho.REGULAR
-        else -> NivelDesempenho.RUIM
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// TELA PRINCIPAL
-// ---------------------------------------------------------------------------------------------
 
 @Composable
 fun FuncionarioProfileScreen(
-    profile: FuncionarioProfile = FuncionarioProfile(),
+    profile: FuncionarioProfile,
     onEditarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {},
     onCalendarioClick: () -> Unit = {}
 ) {
-    var periodoSelecionado by remember { mutableStateOf(PeriodoServico.ANO) }
-    var mostrarAvaliacoes by remember { mutableStateOf(false) }
-
-    Scaffold(
-        containerColor = ProfileColors.Background
-    ) { innerPadding ->
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            val isWideScreen = maxWidth > 600.dp
-            val contentMaxWidth = if (isWideScreen) 460.dp else maxWidth
-            val horizontalPadding = if (isWideScreen) (maxWidth - contentMaxWidth) / 2 else 0.dp
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                item {
-                    ProfileHeaderSection(
-                        profile = profile,
-                        horizontalPadding = horizontalPadding,
-                        onEditarClick = onEditarClick,
-                        onConfigClick = onConfigClick
-                    )
-                }
-
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ProfileColors.CardBackground)
-                            .padding(horizontal = horizontalPadding + 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        ServiceToggleSection(
-                            selecionado = periodoSelecionado,
-                            onSelect = { periodoSelecionado = it }
-                        )
-
-                        MetricsRow(profile)
-
-                        if (profile.biografia.isNotBlank()) {
-                            SobreMimSection(biografia = profile.biografia)
-                        }
-
-                        PerformanceSection(
-                            selecionado = calcularDesempenho(profile)
-                        )
-
-                        val chartData = when (periodoSelecionado) {
-                            PeriodoServico.ANO -> profile.avaliacoesPorAno
-                            PeriodoServico.MES -> profile.avaliacoesPorMes
-                        }
-
-                        AnimatedContent(
-                            targetState = periodoSelecionado,
-                            transitionSpec = {
-                                (fadeIn(tween(300)) + androidx.compose.animation.slideInVertically(
-                                    initialOffsetY = { it / 4 },
-                                    animationSpec = tween(300)
-                                )).togetherWith(
-                                    fadeOut(tween(200)) + androidx.compose.animation.slideOutVertically(
-                                        targetOffsetY = { -it / 4 },
-                                        animationSpec = tween(200)
-                                    )
-                                )
-                            },
-                            label = "periodo"
-                        ) { periodo ->
-                            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                                val data = when (periodo) {
-                                    PeriodoServico.ANO -> profile.avaliacoesPorAno
-                                    PeriodoServico.MES -> profile.avaliacoesPorMes
-                                }
-                                RatingsChartCard(data)
-                                PaymentsCard(profile, periodo)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().background(ProfileColors.Background),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item { CabecalhoProfissional(profile, onEditarClick, onConfigClick) }
+        item {
+            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                if (profile.mediaAvaliacoes != null) {
+                    Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+                        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.Star, null, tint = Color(0xFFFFB800), modifier = Modifier.size(30.dp))
+                            Spacer(Modifier.width(10.dp))
+                            Column {
+                                Text("%.1f de 5".format(profile.mediaAvaliacoes), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                                Text("${profile.quantidadeAvaliacoes} avaliações registradas", color = ProfileColors.TextSecondary)
                             }
                         }
-
-                        ActionButtons(
-                            onCalendarioClick = onCalendarioClick,
-                            onAvaliacoesClick = { mostrarAvaliacoes = true }
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                }
-            }
-        }
-    }
-
-    if (mostrarAvaliacoes) {
-        AlertDialog(
-            onDismissRequest = { mostrarAvaliacoes = false },
-            icon = { Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = ProfileColors.Primary) },
-            title = { Text("Resumo das avaliações") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Média geral: ${profile.avaliacao}")
-                    Text("Taxa de conclusão: ${profile.taxaConclusao}")
-                    Text("Pontualidade: ${profile.pontualidade}")
-                    Text(
-                        "Seu desempenho atual é ${calcularDesempenho(profile).label.lowercase()}.",
-                        color = ProfileColors.TextSecondary
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { mostrarAvaliacoes = false }) { Text("Fechar") }
-            }
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 1. HEADER (fundo azul + container branco com cantos superiores arredondados)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun ProfileHeaderSection(
-    profile: FuncionarioProfile,
-    horizontalPadding: androidx.compose.ui.unit.Dp,
-    onEditarClick: () -> Unit = {},
-    onConfigClick: () -> Unit
-) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        // Fundo azul gradiente
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(ProfileColors.HeaderBlueTop, ProfileColors.HeaderBlueBottom)
-                    )
-                )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding + 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Logo Lumis (XML)
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(ProfileColors.Primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.lumis),
-                        contentDescription = "Logo Lumis",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(26.dp)
-                            .graphicsLayer(scaleX = 0.9f, scaleY = 0.9f)
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
-                        .clickable { onConfigClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Configurações",
-                        tint = ProfileColors.TextPrimary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-
-        // Container branco com cantos superiores arredondados
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 120.dp)
-                .background(
-                    color = ProfileColors.CardBackground,
-                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-                )
-        ) {
-            // Avatar + Info
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = horizontalPadding + 20.dp, end = horizontalPadding + 20.dp, top = 40.dp, bottom = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Avatar circular sobrepondo a transição azul/branco
-                Box(
-                    modifier = Modifier
-                        .offset(y = (-34).dp)
-                        .size(82.dp)
-                        .clip(CircleShape)
-                        .background(ProfileColors.CardBackground)
-                        .border(3.dp, Color.White, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(74.dp)
-                            .clip(CircleShape)
-                            .background(ProfileColors.Divider),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val fotoFile = profile.fotoPath
-                            ?.takeIf { it.isNotBlank() }
-                            ?.let { File(it) }
-                            ?.takeIf { it.exists() }
-                        if (fotoFile != null) {
-                            AsyncImage(
-                                model = fotoFile,
-                                contentDescription = "Foto do funcionário",
-                                modifier = Modifier
-                                    .size(74.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(id = R.drawable.lumis),
-                                contentDescription = "Foto do funcionário",
-                                tint = ProfileColors.Primary,
-                                modifier = Modifier.size(38.dp)
-                            )
-                        }
+                } else {
+                    Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+                        Text("Ainda não há avaliações registradas.", Modifier.padding(16.dp), color = ProfileColors.TextSecondary)
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                InformacaoCard("Sobre mim", profile.biografia.ifBlank { "Adicione uma apresentação ao seu perfil." })
+                InformacaoCard("Especialidades", profile.especialidades.ifBlank { "Especialidades ainda não informadas." })
+                InformacaoCard("Região de atendimento", profile.regiaoAtuacao.ifBlank { profile.localizacao })
+                InformacaoCard("Experiência", profile.experiencia.ifBlank { "Experiência ainda não informada." })
+                if (profile.valorMinimoCentavos > 0) {
+                    InformacaoCard("Valor mínimo", "R$ ${"%.2f".format(profile.valorMinimoCentavos / 100.0).replace('.', ',')} por serviço")
+                }
 
-                // Informações de identificação (alinhadas ao centro do avatar)
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .offset(y = (-34).dp)
+                Button(
+                    onClick = onCalendarioClick,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ProfileColors.Primary)
                 ) {
-                    Text(
-                        text = profile.nome,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp,
-                        color = ProfileColors.TextPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    InfoRow(icon = Icons.Outlined.LocationOn, text = profile.localizacao)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    InfoRow(icon = Icons.Outlined.Call, text = profile.telefone)
+                    Icon(Icons.Outlined.CalendarMonth, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Abrir agenda", fontWeight = FontWeight.Bold)
                 }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                // Botão editar (alinhado ao centro do avatar)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .offset(y = (-34).dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(
-                            width = 1.dp,
-                            color = ProfileColors.Divider,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable { onEditarClick() }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = "Editar",
-                        tint = ProfileColors.Primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "Editar",
-                        fontSize = 10.sp,
-                        color = ProfileColors.Primary
-                    )
-                }
-            }
-
-            // Três métricas
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding + 20.dp)
-                    .padding(bottom = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatChip(
-                    icon = Icons.Filled.Star,
-                    iconTint = Color(0xFFF5B942),
-                    bgColor = ProfileColors.ChipRedBg,
-                    text = profile.avaliacao,
-                    modifier = Modifier.weight(1f)
-                )
-                StatChip(
-                    icon = Icons.Outlined.HourglassBottom,
-                    iconTint = ProfileColors.ChipLavenderIcon,
-                    bgColor = ProfileColors.ChipLavenderBg,
-                    text = profile.horas,
-                    modifier = Modifier.weight(1f)
-                )
-                StatChip(
-                    icon = Icons.Outlined.CalendarMonth,
-                    iconTint = ProfileColors.ChipGreenIcon,
-                    bgColor = ProfileColors.ChipGreenBg,
-                    text = profile.meses,
-                    modifier = Modifier.weight(1f)
-                )
+                Spacer(Modifier.height(20.dp))
             }
         }
     }
 }
 
 @Composable
-private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = ProfileColors.TextSecondary,
-            modifier = Modifier.size(13.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            color = ProfileColors.TextSecondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun StatChip(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconTint: Color,
-    bgColor: Color,
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .clip(PillShape)
-            .background(bgColor)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconTint,
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = ProfileColors.TextPrimary,
-            maxLines = 1
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 2. SERVIÇOS REALIZADOS (TOGGLE ano / mês)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun ServiceToggleSection(
-    selecionado: PeriodoServico,
-    onSelect: (PeriodoServico) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Serviços realizados",
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = ProfileColors.TextPrimary
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(PillShape)
-                .background(ProfileColors.Background)
-                .padding(4.dp)
-        ) {
-            PeriodoServico.values().forEach { periodo ->
-                ToggleOption(
-                    text = periodo.label,
-                    selected = periodo == selecionado,
-                    onClick = { onSelect(periodo) },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+private fun CabecalhoProfissional(profile: FuncionarioProfile, onEditarClick: () -> Unit, onConfigClick: () -> Unit) {
+    Box(Modifier.fillMaxWidth().height(270.dp)) {
+        if (!profile.bannerPath.isNullOrBlank() && File(profile.bannerPath).exists()) {
+            AsyncImage(File(profile.bannerPath), null, Modifier.fillMaxWidth().aspectRatio(2f), contentScale = ContentScale.Crop)
+        } else {
+            Box(Modifier.fillMaxWidth().height(150.dp).background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary))))
         }
-    }
-}
-
-@Composable
-private fun ToggleOption(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val bg = if (selected) ProfileColors.Primary else Color.Transparent
-    val textColor = if (selected) Color.White else ProfileColors.TextSecondary
-
-    Box(
-        modifier = modifier
-            .clip(PillShape)
-            .background(bg)
-            .clickable { onClick() }
-            .padding(vertical = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 3. MÉTRICAS (dois cards separados lado a lado)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun MetricsRow(profile: FuncionarioProfile) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        MetricCard(
-            label = "taxa de conclusão",
-            value = profile.taxaConclusao,
-            modifier = Modifier.weight(1f)
-        )
-        MetricCard(
-            label = "pontualidade",
-            value = profile.pontualidade,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun MetricCard(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = ProfileColors.Background),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                color = ProfileColors.TextSecondary
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = value,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                color = ProfileColors.TextPrimary
-            )
+        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.End) {
+            IconButton(onClick = onEditarClick) { Icon(Icons.Outlined.Edit, "Editar", tint = Color.White) }
+            IconButton(onClick = onConfigClick) { Icon(Icons.Outlined.Settings, "Configurações", tint = Color.White) }
         }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// SOBRE MIM (seção opcional — só aparece quando preenchida no Editar Perfil)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun SobreMimSection(biografia: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Sobre mim",
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = ProfileColors.TextPrimary
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            colors = CardDefaults.cardColors(containerColor = ProfileColors.Background),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        Surface(
+            modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp).fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            color = ProfileColors.CardBackground,
+            shadowElevation = 4.dp
         ) {
-            Text(
-                text = biografia,
-                fontSize = 13.sp,
-                color = ProfileColors.TextPrimary,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 4. DESEMPENHO (BADGES)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun PerformanceSection(
-    selecionado: NivelDesempenho
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Desempenho",
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = ProfileColors.TextPrimary
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            NivelDesempenho.values().forEach { nivel ->
-                val (bg, textColor) = when (nivel) {
-                    NivelDesempenho.RUIM -> ProfileColors.BadgeRedBg to ProfileColors.BadgeRedText
-                    NivelDesempenho.REGULAR -> ProfileColors.BadgeYellowBg to ProfileColors.BadgeYellowText
-                    NivelDesempenho.MUITO_BOM -> ProfileColors.BadgeGreenBg to ProfileColors.BadgeGreenText
+            Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(76.dp).clip(CircleShape).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
+                    if (!profile.fotoPath.isNullOrBlank() && File(profile.fotoPath).exists()) {
+                        AsyncImage(File(profile.fotoPath), profile.nome, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    } else Icon(Icons.Outlined.Person, null, Modifier.size(36.dp), tint = ProfileColors.PrimaryDark)
                 }
-                val isSelected = nivel == selecionado
-                val borderWidth by animateDpAsState(
-                    targetValue = if (isSelected) 2.dp else 0.dp,
-                    animationSpec = tween(250),
-                    label = "border"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .graphicsLayer {
-                            alpha = if (isSelected) 1f else 0.85f
-                        }
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(bg)
-                        .then(
-                            if (borderWidth > 0.dp) Modifier.border(
-                                width = borderWidth,
-                                color = textColor,
-                                shape = RoundedCornerShape(14.dp)
-                            ) else Modifier
-                        )
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = nivel.label,
-                        color = textColor,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center
-                    )
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(profile.nome, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.LocationOn, null, Modifier.size(16.dp), tint = ProfileColors.Primary)
+                        Text(profile.localizacao, color = ProfileColors.TextSecondary)
+                    }
+                    if (profile.telefone.isNotBlank()) Text(profile.telefone, color = ProfileColors.TextSecondary)
                 }
             }
         }
     }
 }
 
-// ---------------------------------------------------------------------------------------------
-// 5. GRÁFICO DE AVALIAÇÕES
-// ---------------------------------------------------------------------------------------------
-
 @Composable
-fun RatingsChartCard(valores: List<Float>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = ProfileColors.Background),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "avaliações ao longo do tempo",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = ProfileColors.TextPrimary
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-            BarChart(
-                values = valores,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            )
+private fun InformacaoCard(titulo: String, conteudo: String) {
+    Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(titulo, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+            Spacer(Modifier.height(5.dp))
+            Text(conteudo, color = ProfileColors.TextSecondary)
         }
-    }
-}
-
-@Composable
-private fun BarChart(values: List<Float>, modifier: Modifier = Modifier) {
-    val barColor = ProfileColors.Primary
-    Canvas(modifier = modifier) {
-        if (values.isEmpty()) return@Canvas
-
-        val maxValue = max(values.max(), 0.01f)
-        val spacing = 10.dp.toPx()
-        val barCount = values.size
-        val barWidth = (size.width - spacing * (barCount - 1)) / barCount
-        val cornerRadius = 6.dp.toPx()
-
-        values.forEachIndexed { index, value ->
-            val barHeight = size.height * (value / maxValue)
-            val left = index * (barWidth + spacing)
-            val top = size.height - barHeight
-
-            drawRoundRect(
-                color = barColor,
-                topLeft = Offset(left, top),
-                size = Size(barWidth, barHeight),
-                cornerRadius = CornerRadius(cornerRadius, cornerRadius)
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 6. PAGAMENTOS
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun PaymentsCard(profile: FuncionarioProfile, periodo: PeriodoServico) {
-    val isAno = periodo == PeriodoServico.ANO
-
-    val ganhos = if (isAno) profile.anoGanhos else profile.mesGanhos
-    val pendentes = if (isAno) profile.anoPendentes else profile.mesPendentes
-    val ultimo = if (isAno) profile.anoUltimoPagamento else profile.mesUltimoPagamento
-    val horasExtras = if (isAno) profile.anoHorasExtras else profile.mesHorasExtras
-    val bonus = if (isAno) profile.anoBonus else profile.mesBonus
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = ProfileColors.Background),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Pagamentos",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = ProfileColors.TextPrimary
-                )
-                Text(
-                    text = if (isAno) "No ano" else "No mês",
-                    fontSize = 12.sp,
-                    color = ProfileColors.Primary,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val itens = listOf(
-                "Ganhos no mês" to ganhos,
-                "Ganhos pendentes" to pendentes,
-                "Último pagamento" to ultimo,
-                "Valor por serviço" to profile.valorPorServico,
-                "Horas extras" to horasExtras,
-                "Bônus" to bonus
-            )
-
-            itens.forEach { (label, valor) ->
-                PaymentRow(label = label, valor = valor)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PaymentRow(label: String, valor: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            fontSize = 13.sp,
-            color = ProfileColors.TextSecondary
-        )
-        Text(
-            text = valor,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = ProfileColors.TextPrimary
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 7. BOTÕES DE AÇÃO
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun ActionButtons(
-    onCalendarioClick: () -> Unit,
-    onAvaliacoesClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Button(
-            onClick = onCalendarioClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = PillShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ProfileColors.Primary,
-                contentColor = Color.White
-            )
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(24.dp))
-                Text(text = "Calendario", fontWeight = FontWeight.Medium, fontSize = 15.sp)
-                Icon(
-                    imageVector = Icons.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        OutlinedButton(
-            onClick = onAvaliacoesClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = PillShape,
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.Transparent,
-                contentColor = ProfileColors.Primary
-            ),
-            border = BorderStroke(1.dp, ProfileColors.Primary)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(24.dp))
-                Text(text = "Verificar suas avaliações", fontWeight = FontWeight.Medium, fontSize = 15.sp)
-                Icon(
-                    imageVector = Icons.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// PREVIEWS
-// ---------------------------------------------------------------------------------------------
-
-@Preview(name = "Celular - Pixel 4", showBackground = true, device = Devices.PIXEL_4)
-@Composable
-fun FuncionarioProfileScreenPreviewPhone() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        FuncionarioProfileScreen()
-    }
-}
-
-@Preview(name = "Celular pequeno", showBackground = true, widthDp = 320, heightDp = 780)
-@Composable
-fun FuncionarioProfileScreenPreviewSmallPhone() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        FuncionarioProfileScreen()
-    }
-}
-
-@Preview(name = "Tablet", showBackground = true, device = Devices.PIXEL_TABLET)
-@Composable
-fun FuncionarioProfileScreenPreviewTablet() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        FuncionarioProfileScreen()
     }
 }

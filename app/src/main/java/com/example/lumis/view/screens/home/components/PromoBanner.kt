@@ -48,6 +48,7 @@ import com.example.lumis.R
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.Montserrat
 import com.example.lumis.view.theme.Questrial
+import androidx.compose.ui.res.stringResource
 
 /**
  * Banner promocional. A gente usa o Coil pra carregar a foto: se um dia
@@ -112,7 +113,7 @@ fun PromoBanner(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Oferta por tempo limitado!",
+                        text = stringResource(R.string.limited_offer),
                         fontFamily = Questrial,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -126,16 +127,18 @@ fun PromoBanner(
                 SpanStyle(color = LumisColors.White, fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold)
             val titleStyleGreen =
                 SpanStyle(color = LumisColors.Primary, fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold)
+            val primeiraLimpeza = stringResource(R.string.first_cleaning)
+            val novosClientes = stringResource(R.string.new_customers)
             Text(
                 text = buildAnnotatedString {
                     withStyle(titleStyleWhite) {
-                        append("Primeira limpeza\n")
+                        append("$primeiraLimpeza\n")
                     }
                     withStyle(titleStyleGreen) {
                         append("30% OFF ")
                     }
                     withStyle(titleStyleWhite) {
-                        append("para novos clientes")
+                        append(novosClientes)
                     }
                 },
                 fontSize = 20.sp,
@@ -155,7 +158,7 @@ fun PromoBanner(
                 modifier = Modifier.height(36.dp)
             ) {
                 Text(
-                    text = "Garantir desconto",
+                    text = stringResource(R.string.claim_discount),
                     fontFamily = Questrial,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold

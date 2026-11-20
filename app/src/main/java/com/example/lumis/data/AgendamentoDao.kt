@@ -21,4 +21,7 @@ interface AgendamentoDao {
 
     @Query("SELECT COUNT(*) FROM agendamentos WHERE usuarioId = :usuarioId AND data = :data AND horario = :horario AND status != 'Cancelado' AND id != :ignorarId")
     suspend fun contarConflitos(usuarioId: Int, data: String, horario: String, ignorarId: Long): Int
+
+    @Query("UPDATE agendamentos SET avaliacao = :estrelas WHERE id = :id AND usuarioId = :usuarioId")
+    suspend fun avaliar(id: Long, usuarioId: Int, estrelas: Int): Int
 }

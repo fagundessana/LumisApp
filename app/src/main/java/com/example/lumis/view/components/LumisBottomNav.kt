@@ -40,21 +40,24 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
+import com.example.lumis.R
 import com.example.lumis.view.theme.LumisGreen
 import com.example.lumis.view.theme.LumisGreenLight
 import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.LumisTextSecondary
 
 enum class NavItem(
-    val label: String,
+    @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
-    HOME("Início", Icons.Rounded.Home, Icons.Outlined.Home),
-    EXPLORAR("Explorar", Icons.Rounded.Search, Icons.Outlined.Search),
-    AGENDA("Agenda", Icons.Rounded.CalendarMonth, Icons.Outlined.CalendarMonth),
-    CIDADE("Cidade", Icons.Rounded.LocationCity, Icons.Outlined.LocationCity),
-    PERFIL("Perfil", Icons.Rounded.Person, Icons.Outlined.Person)
+    HOME(R.string.nav_home, Icons.Rounded.Home, Icons.Outlined.Home),
+    EXPLORAR(R.string.nav_explore, Icons.Rounded.Search, Icons.Outlined.Search),
+    AGENDA(R.string.nav_schedule, Icons.Rounded.CalendarMonth, Icons.Outlined.CalendarMonth),
+    CIDADE(R.string.nav_city, Icons.Rounded.LocationCity, Icons.Outlined.LocationCity),
+    PERFIL(R.string.nav_profile, Icons.Rounded.Person, Icons.Outlined.Person)
 }
 
 @Composable
@@ -95,6 +98,7 @@ private fun LumisNavDestination(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val label = stringResource(item.labelRes)
     val iconColor by animateColorAsState(
         targetValue = if (selected) LumisGreen else LumisTextSecondary,
         label = "navIconColor"
@@ -126,7 +130,7 @@ private fun LumisNavDestination(
         ) {
             Icon(
                 imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                contentDescription = item.label,
+                contentDescription = label,
                 tint = iconColor,
                 modifier = Modifier
                     .size(22.dp)
@@ -137,7 +141,7 @@ private fun LumisNavDestination(
             )
         }
         Text(
-            text = item.label,
+            text = label,
             color = iconColor,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1

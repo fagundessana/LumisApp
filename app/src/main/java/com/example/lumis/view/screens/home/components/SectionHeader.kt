@@ -15,11 +15,13 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.Montserrat
 import com.example.lumis.view.theme.Questrial
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 
 @Composable
 fun SectionHeader(
     title: String,
-    actionLabel: String = "Ver todas",
+    actionLabel: String? = null,
     onActionClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -39,7 +41,7 @@ fun SectionHeader(
         // Botãozinho verde "Ver todas" à direita.
         TextButton(onClick = onActionClick) {
             Text(
-                text = actionLabel,
+                text = actionLabel ?: stringResource(R.string.see_all),
                 fontFamily = Questrial,
                 fontSize = 12.sp,
                 color = LumisColors.Primary

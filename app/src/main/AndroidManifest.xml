@@ -7,6 +7,7 @@
          "Usar localização exata" quando pedimos as duas juntas. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Câmera para tirar foto de perfil -->
     <uses-permission android:name="android.permission.CAMERA" />

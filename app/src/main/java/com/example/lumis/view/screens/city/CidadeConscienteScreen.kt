@@ -23,19 +23,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Eco
-import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Recycling
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -90,8 +84,6 @@ fun CidadeConscienteScreen(
     onNotificationsClick: () -> Unit = {}
 ) {
     var painel by rememberSaveable { mutableStateOf(PainelCidade.ECO_PONTOS) }
-    var mostrarColeta by rememberSaveable { mutableStateOf(false) }
-    var coletaSolicitada by rememberSaveable { mutableStateOf(false) }
     var pontoSelecionado by remember { mutableStateOf<Ecoponto?>(null) }
 
     Column(
@@ -110,16 +102,14 @@ fun CidadeConscienteScreen(
                 LumisPageTitle(
                     eyebrow = "CIDADE CONSCIENTE",
                     title = "Cuidar do bairro começa perto",
-                    subtitle = "Encontre descarte correto, acompanhe o impacto coletivo e solicite uma coleta."
+                    subtitle = "Encontre o descarte correto e acompanhe o impacto coletivo perto de você."
                 )
             }
             item { ImpactoHeroCard() }
-            if (coletaSolicitada) item { ColetaConfirmadaCard() }
             item {
                 AcoesCidade(
                     painel = painel,
                     onEcopontos = { painel = PainelCidade.ECO_PONTOS },
-                    onColeta = { mostrarColeta = true },
                     onDados = { painel = PainelCidade.DADOS }
                 )
             }
@@ -137,16 +127,6 @@ fun CidadeConscienteScreen(
             }
             item { DicaSustentavelCard() }
         }
-    }
-
-    if (mostrarColeta) {
-        SolicitarColetaDialog(
-            onDismiss = { mostrarColeta = false },
-            onConfirm = {
-                coletaSolicitada = true
-                mostrarColeta = false
-            }
-        )
     }
 
     pontoSelecionado?.let { ponto ->
@@ -206,14 +186,12 @@ private fun ImpactoMetrica(valor: String, legenda: String, modifier: Modifier = 
 private fun AcoesCidade(
     painel: PainelCidade,
     onEcopontos: () -> Unit,
-    onColeta: () -> Unit,
     onDados: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("O que você precisa?", style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             AcaoCidadeButton(Icons.Outlined.LocationOn, "Ecopontos", painel == PainelCidade.ECO_PONTOS, onEcopontos, Modifier.weight(1f))
-            AcaoCidadeButton(Icons.Outlined.LocalShipping, "Coleta", false, onColeta, Modifier.weight(1f))
             AcaoCidadeButton(Icons.Outlined.Eco, "Impacto", painel == PainelCidade.DADOS, onDados, Modifier.weight(1f))
         }
     }
@@ -362,66 +340,6 @@ private fun DicaSustentavelCard() {
             Text("Lave embalagens rapidamente e separe tampas antes de levar ao ecoponto.", color = LumisTextPrimary, style = MaterialTheme.typography.bodyMedium)
         }
     }
-}
-
-@Composable
-private fun ColetaConfirmadaCard() {
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(LumisGreenLight).padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = LumisGreenDark)
-        Spacer(Modifier.size(12.dp))
-        Column {
-            Text("Coleta solicitada", color = LumisGreenDark, style = MaterialTheme.typography.titleSmall)
-            Text("Protocolo #LC-2048 • análise em até 1 dia útil", color = LumisTextSecondary, style = MaterialTheme.typography.bodySmall)
-        }
-    }
-}
-
-@Composable
-private fun SolicitarColetaDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    var endereco by remember { mutableStateOf("") }
-    var material by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Outlined.LocalShipping, contentDescription = null, tint = LumisGreen) },
-        title = { Text("Solicitar coleta") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Informe onde está o material. A solicitação ficará registrada para avaliação.", color = LumisTextSecondary)
-                OutlinedTextField(
-                    value = endereco,
-                    onValueChange = { endereco = it },
-                    label = { Text("Endereço") },
-                    leadingIcon = { Icon(Icons.Outlined.LocationOn, contentDescription = null) },
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = material,
-                    onValueChange = { material = it },
-                    label = { Text("Material para coleta") },
-                    placeholder = { Text("Ex.: papelão, eletrônico, móvel") },
-                    leadingIcon = { Icon(Icons.Outlined.Recycling, contentDescription = null) },
-                    singleLine = true
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Schedule, contentDescription = null, tint = LumisTextSecondary, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(8.dp))
-                    Text("Retorno estimado: até 1 dia útil", style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                enabled = endereco.isNotBlank() && material.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
-            ) { Text("Enviar solicitação") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
-    )
 }
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)

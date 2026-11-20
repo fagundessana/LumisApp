@@ -30,6 +30,8 @@ import com.example.lumis.view.screens.home.model.HomePreviewData
 import com.example.lumis.view.screens.home.model.PopularService
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.Questrial
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 
 @Composable
 fun PopularServicesGrid(
@@ -38,7 +40,7 @@ fun PopularServicesGrid(
     onServiceClick: (String) -> Unit = {}
 ) {
     Column(modifier = modifier) {
-        SectionHeader(title = "Serviços populares", onActionClick = onSeeAllClick)
+        SectionHeader(title = stringResource(R.string.popular_services), onActionClick = onSeeAllClick)
         val rows = HomePreviewData.popularServices.chunked(4)
         rows.forEachIndexed { index, row ->
             Row(
@@ -99,14 +101,14 @@ private fun ServiceCard(
             ) {
                 Icon(
                     imageVector = service.icon,
-                    contentDescription = service.label,
+                    contentDescription = stringResource(service.labelRes),
                     tint = if (service.isHighlight) LumisColors.White else content,
                     modifier = Modifier.size(20.dp)
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = service.label,
+                text = stringResource(service.labelRes),
                 fontFamily = Questrial,
                 fontSize = 10.5.sp,
                 lineHeight = 13.sp,

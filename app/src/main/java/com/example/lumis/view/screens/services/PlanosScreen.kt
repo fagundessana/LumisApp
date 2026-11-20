@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.components.LumisPageTitle
+import com.example.lumis.view.components.LumisTab
+import com.example.lumis.view.components.LumisTabSelector
 import com.example.lumis.view.theme.LumisBorder
 import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.*
@@ -41,9 +44,7 @@ data class Plano(
     val preco: String,
     val precoPeriodo: String,
     val caracteristicas: List<String>,
-    val popular: Boolean = false,
-    val corFundo: Color,
-    val corTexto: Color
+    val popular: Boolean = false
 )
 
 @Composable
@@ -64,9 +65,7 @@ fun PlanosScreen(
                 "1 serviço especializado por trimestre",
                 "Atendimento em até 3 dias úteis",
                 "Dicas mensais de organização"
-            ),
-            corFundo = LumisSurface,
-            corTexto = LumisTextPrimary
+            )
         ),
         Plano(
             id = "regular",
@@ -80,9 +79,7 @@ fun PlanosScreen(
                 "Atendimento em até 2 dias úteis",
                 "Suporte prioritário por WhatsApp"
             ),
-            popular = true,
-            corFundo = LumisGreen,
-            corTexto = Color.White
+            popular = true
         ),
         Plano(
             id = "premium",
@@ -96,9 +93,7 @@ fun PlanosScreen(
                 "Atendimento em até 24h",
                 "Equipe fixa ou exclusiva",
                 "Tudo do plano regular + benefícios extras"
-            ),
-            corFundo = Color.Black,
-            corTexto = Color.White
+            )
         )
     )
 
@@ -113,8 +108,11 @@ fun PlanosScreen(
             // App Bar / Topo
             LumisTopBar(onNotificationsClick = onNotificationsClick)
 
-            // Abas Serviços | Planos
-            AbasPlanos(onVoltarServicos = onVoltarServicos)
+            LumisTabSelector(
+                selected = LumisTab.PLANOS,
+                onSelected = { if (it == LumisTab.SERVICOS) onVoltarServicos() },
+                modifier = Modifier.padding(top = 8.dp)
+            )
 
             // Conteúdo scrollável (lista de planos + faq)
             LazyColumn(
@@ -128,24 +126,10 @@ fun PlanosScreen(
                     Column(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                     ) {
-                        Text(
-                            text = "PLANOS",
-                            color = LumisGreen,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = "Escolha o plano ideal para você",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = LumisTextPrimary
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "Compare nossos pacotes encontre o que melhor atende sua rotina",
-                            fontSize = 13.sp,
-                            color = LumisTextSecondary
+                        LumisPageTitle(
+                            eyebrow = "PLANOS LUMIS",
+                            title = "Escolha o plano ideal para você",
+                            subtitle = "Compare os benefícios e encontre a frequência que combina com sua rotina."
                         )
                     }
                 }
@@ -200,53 +184,6 @@ fun PlanosScreen(
 }
 
 // ============================================================
-// ABAS (Serviços | Planos)
-// ============================================================
-
-@Composable
-private fun AbasPlanos(onVoltarServicos: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(50))
-            .background(LumisSurface)
-            .border(1.dp, LumisBorder, RoundedCornerShape(50))
-            .padding(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(50))
-                .clickable { onVoltarServicos() }
-                .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Serviços",
-                color = LumisTextSecondary,
-                fontSize = 13.sp
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(50))
-                .background(LumisGreen)
-                .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Planos",
-                color = Color.White,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-// ============================================================
 // CARD DE PLANO (clicável)
 // ============================================================
 
@@ -261,10 +198,10 @@ private fun PlanCard(
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(if (plano.popular) LumisGreen else LumisSurface)
+            .background(LumisSurface)
             .border(
-                width = if (plano.popular) 0.dp else 1.dp,
-                color = if (plano.popular) Color.Transparent else LumisBorder,
+                width = if (sel) 2.dp else 1.dp,
+                color = if (sel) LumisGreen else LumisBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
@@ -281,13 +218,13 @@ private fun PlanCard(
                         plano.nome,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = plano.corTexto
+                        color = LumisTextPrimary
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         plano.descricao,
                         fontSize = 12.sp,
-                        color = if (plano.popular) LumisGreenLight else LumisTextSecondary
+                        color = LumisTextSecondary
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -295,7 +232,7 @@ private fun PlanCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
-                            .background(LumisSurface)
+                            .background(LumisGreenLight)
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
@@ -316,12 +253,12 @@ private fun PlanCard(
                     plano.preco,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (plano.popular) LumisSurface else LumisGreen
+                    color = LumisGreen
                 )
                 Text(
                     plano.precoPeriodo,
                     fontSize = 12.sp,
-                    color = if (plano.popular) LumisGreenLight else LumisTextSecondary,
+                    color = LumisTextSecondary,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
             }
@@ -336,11 +273,11 @@ private fun PlanCard(
                         Icon(
                             Icons.Default.Check,
                             contentDescription = null,
-                            tint = if (plano.popular) LumisGreenLight else LumisGreen,
+                            tint = LumisGreen,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text(feature, fontSize = 13.sp, color = if (plano.popular) LumisGreenLight else LumisTextPrimary)
+                        Text(feature, fontSize = 13.sp, color = LumisTextPrimary)
                     }
                 }
             }

@@ -43,6 +43,7 @@ import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.services.AgendamentoScreen
 import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
 import com.example.lumis.view.screens.services.PlanosScreen
+import com.example.lumis.view.screens.services.PagamentoScreen
 import com.example.lumis.view.screens.services.ResumoPedidoScreen
 import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
 import com.example.lumis.view.screens.services.ServicesScreen
@@ -58,6 +59,7 @@ sealed class LumisTela {
     data object Imovel : LumisTela()
     data object Adicionais : LumisTela()
     data object Resumo : LumisTela()
+    data object Pagamento : LumisTela()
     data object Conta : LumisTela()
     data object EditarPerfil : LumisTela()
     data object Notificacoes : LumisTela()
@@ -98,6 +100,7 @@ fun MainScaffold(
             .listarPorUsuario(usuario.id)
             .map { salvo ->
                 AgendamentoRegistro(
+                    id = salvo.id,
                     servico = salvo.servico,
                     data = salvo.data,
                     horario = salvo.horario,
@@ -106,7 +109,8 @@ fun MainScaffold(
                         .split('\n')
                         .filter { it.isNotBlank() },
                     total = salvo.totalCentavos / 100.0,
-                    status = salvo.status
+                    status = salvo.status,
+                    avaliacao = salvo.avaliacao
                 )
             }
     }
@@ -171,15 +175,45 @@ fun MainScaffold(
                             onNotificationClick = { irPara(LumisTela.Notificacoes) },
                             onSeeAllCategories = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
-                            onSeeAllRecommended = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onDiscountClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onCategoryClick = { abrirServicoPorLegenda(it) },
-                            onServiceClick = { abrirServicoPorLegenda(it) },
-                            onHireClick = { abrirServicoPorLegenda(it) }
+                            onServiceClick = { abrirServicoPorLegenda(it) }
                         )
                         NavItem.CIDADE -> CidadeConscienteScreen(onNotificationsClick = { irPara(LumisTela.Notificacoes) })
                         NavItem.AGENDA -> AgendaTab(
                             registros = registrosAgenda,
+                            onAvaliar = { id, estrelas ->
+                                scope.launch {
+                                    if (agendamentoRepository.avaliar(id, usuario.id, estrelas)) {
+                                        registrosAgenda = registrosAgenda.map { registro ->
+                                            if (registro.id == id) registro.copy(avaliacao = estrelas) else registro
+                                        }
+                                    }
+                                }
+                            },
+                            onCancelar = { id ->
+                                scope.launch {
+                                    if (agendamentoRepository.atualizarStatus(id, usuario.id, "Cancelado")) {
+                                        registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Cancelado") else it }
+                                    }
+                                }
+                            },
+                            onConcluir = { id ->
+                                scope.launch {
+                                    if (agendamentoRepository.atualizarStatus(id, usuario.id, "Concluído")) {
+                                        registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Concluído") else it }
+                                    }
+                                }
+                            },
+                            onReagendar = { id, data, horario ->
+                                scope.launch {
+                                    if (agendamentoRepository.reagendar(id, usuario.id, data, horario)) {
+                                        registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(data = data, horario = horario) else it }
+                                    } else {
+                                        Toast.makeText(context, "Esse horário já está ocupado.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
                             onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                         )
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
@@ -213,7 +247,14 @@ fun MainScaffold(
                                     localizacao = usuario.localizacao.ifBlank { "Adicionar localização" },
                                     telefone = usuario.telefone.ifBlank { "Adicionar telefone" },
                                     fotoPath = usuario.fotoPerfilPath.ifBlank { null },
-                                    biografia = usuario.biografia
+                                    bannerPath = usuario.bannerPerfilPath.ifBlank { null },
+                                    biografia = usuario.biografia,
+                                    especialidades = usuario.especialidades,
+                                    regiaoAtuacao = usuario.regiaoAtuacao,
+                                    experiencia = usuario.experiencia,
+                                    valorMinimoCentavos = usuario.valorMinimoCentavos,
+                                    mediaAvaliacoes = registrosAgenda.mapNotNull { it.avaliacao }.takeIf { it.isNotEmpty() }?.average(),
+                                    quantidadeAvaliacoes = registrosAgenda.count { it.avaliacao != null }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
@@ -291,7 +332,17 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         formaPagamentoInicial = formaPagamento,
                         onFormaPagamentoChange = { formaPagamento = it },
                         onBack = { irPara(LumisTela.Adicionais) },
-                        onConfirm = { formaPagamento ->
+                        onConfirm = { formaSelecionada ->
+                            formaPagamento = formaSelecionada
+                            irPara(LumisTela.Pagamento)
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                    )
+                    is LumisTela.Pagamento -> PagamentoScreen(
+                        formaPagamento = formaPagamento,
+                        total = totalPedido,
+                        onBack = { irPara(LumisTela.Resumo) },
+                        onConcluir = {
                             val servico = servicoEscolhido
                             if (servico != null) {
                                 val novoAgendamento = Agendamento(
@@ -314,6 +365,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                             .listarPorUsuario(usuario.id)
                                             .map { salvo ->
                                                 AgendamentoRegistro(
+                                                    id = salvo.id,
                                                     servico = salvo.servico,
                                                     data = salvo.data,
                                                     horario = salvo.horario,
@@ -322,7 +374,8 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                                         .split('\n')
                                                         .filter { it.isNotBlank() },
                                                     total = salvo.totalCentavos / 100.0,
-                                                    status = salvo.status
+                                                    status = salvo.status,
+                                                    avaliacao = salvo.avaliacao
                                                 )
                                             }
                                         irPara(LumisTela.Principal(NavItem.AGENDA))

@@ -25,5 +25,13 @@ data class User(
 
     val biografia: String = "",
 
-    val bannerPerfilPath: String = ""
+    val bannerPerfilPath: String = "",
+
+    val especialidades: String = "",
+
+    val regiaoAtuacao: String = "",
+
+    val experiencia: String = "",
+
+    val valorMinimoCentavos: Long = 0
 )

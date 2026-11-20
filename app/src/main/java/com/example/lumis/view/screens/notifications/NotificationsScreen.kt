@@ -60,44 +60,9 @@ data class Notification(
     val lida: Boolean = false
 )
 
-// Dados mockados para demonstração
-private val notificacoesMock = mutableStateListOf<Notification>(
-    Notification(
-        id = 1,
-        titulo = "Agendamento confirmado",
-        descricao = "Sua limpeza residencial foi agendada para 25/08 às 10:00",
-        horario = "2 min atrás",
-        lida = false
-    ),
-    Notification(
-        id = 2,
-        titulo = "Novo profissional disponível",
-        descricao = "Maria Silva está disponível na sua região para limpeza pós-obra",
-        horario = "15 min atrás",
-        lida = false
-    ),
-    Notification(
-        id = 3,
-        titulo = "Pagamento processado",
-        descricao = "O pagamento de R$ 150,00 foi processado com sucesso",
-        horario = "1 hora atrás",
-        lida = true
-    ),
-    Notification(
-        id = 4,
-        titulo = "Promoção especial",
-        descricao = "30% OFF na primeira limpeza para novos clientes",
-        horario = "Ontem",
-        lida = true
-    ),
-    Notification(
-        id = 5,
-        titulo = "Avaliação recebida",
-        descricao = "Você recebeu uma nova avaliação de 5 estrelas!",
-        horario = "2 dias atrás",
-        lida = true
-    )
-)
+// A tela começa vazia até existir uma fonte persistente de notificações reais.
+// Não exibimos eventos, pagamentos ou avaliações inventados.
+private val notificacoesMock = mutableStateListOf<Notification>()
 
 // ---------------------------------------------------------------------------------------------
 // TELA DE NOTIFICAÇÕES

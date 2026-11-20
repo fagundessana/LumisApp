@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.screens.home.model.HomePreviewData
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.Questrial
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 
 @Composable
 fun CategorySection(
@@ -42,7 +44,7 @@ fun CategorySection(
     var selectedId by remember { mutableStateOf("limpeza") }
 
     Column(modifier = modifier) {
-        SectionHeader(title = "Categorias", onActionClick = onSeeAllClick)
+        SectionHeader(title = stringResource(R.string.categories), onActionClick = onSeeAllClick)
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 4.dp)
@@ -73,7 +75,7 @@ fun CategorySection(
                     },
                     label = {
                         Text(
-                            text = category.label,
+                            text = stringResource(category.labelRes),
                             fontFamily = Questrial,
                             fontSize = 13.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal

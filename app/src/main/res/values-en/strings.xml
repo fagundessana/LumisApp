@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lumis</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_schedule">Schedule</string>
+    <string name="nav_city">City</string>
+    <string name="nav_profile">Profile</string>
+    <string name="services">Services</string>
+    <string name="plans">Plans</string>
+    <string name="see_all">See all</string>
+    <string name="categories">Categories</string>
+    <string name="popular_services">Popular services</string>
+    <string name="category_cleaning">Cleaning</string>
+    <string name="category_residential">Residential</string>
+    <string name="category_commercial">Commercial</string>
+    <string name="service_standard">Standard cleaning</string>
+    <string name="service_deep">Deep cleaning</string>
+    <string name="service_moving">Move-in / move-out</string>
+    <string name="service_airbnb">Airbnb / vacation rental</string>
+    <string name="define_region">Set my region</string>
+    <string name="tap_to_add">Tap to add</string>
+    <string name="current_location">Your current location</string>
+    <string name="notifications">Notifications</string>
+    <string name="limited_offer">Limited-time offer!</string>
+    <string name="first_cleaning">First cleaning</string>
+    <string name="new_customers">for new customers</string>
+    <string name="claim_discount">Claim discount</string>
+    <string name="schedule_title">Schedule</string>
+    <string name="scheduled_services">Your scheduled services</string>
+    <string name="no_appointments">No appointments yet</string>
+    <string name="no_appointments_hint">Your confirmed services will appear here.</string>
+    <string name="rate_service">Rate this service</string>
+    <string name="your_rating">Your rating</string>
+    <string name="stars_description">%1$d stars</string>
+    <string name="payment">Payment</string>
+    <string name="payment_simulation">Payment simulation</string>
+    <string name="payment_disclaimer">This is a demo step. No real charge will be made and no payment details are stored.</string>
+    <string name="simulate_payment">Simulate payment</string>
+    <string name="finish_appointment">Finish appointment</string>
+    <string name="demo_environment">Demo environment — do not enter real payment details.</string>
+</resources>

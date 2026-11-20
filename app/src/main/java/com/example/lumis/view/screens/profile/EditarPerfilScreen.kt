@@ -109,6 +109,12 @@ fun EditarPerfilScreen(
     var localizacao by remember(usuario.id) { mutableStateOf(usuario.localizacao) }
     var telefone by remember(usuario.id) { mutableStateOf(TextFieldValue(aplicarMascaraTelefone(usuario.telefone))) }
     var biografia by remember(usuario.id) { mutableStateOf(usuario.biografia.take(LIMITE_BIOGRAFIA)) }
+    var especialidades by remember(usuario.id) { mutableStateOf(usuario.especialidades) }
+    var regiaoAtuacao by remember(usuario.id) { mutableStateOf(usuario.regiaoAtuacao) }
+    var experiencia by remember(usuario.id) { mutableStateOf(usuario.experiencia) }
+    var valorMinimo by remember(usuario.id) {
+        mutableStateOf(if (usuario.valorMinimoCentavos > 0) "%.2f".format(usuario.valorMinimoCentavos / 100.0).replace('.', ',') else "")
+    }
     var fotoPath by remember(usuario.id) { mutableStateOf(usuario.fotoPerfilPath) }
     var fotoPreview by remember { mutableStateOf<Uri?>(null) }
     var salvandoFoto by remember { mutableStateOf(false) }
@@ -464,7 +470,11 @@ fun EditarPerfilScreen(
                 telefone = telefone.text,
                 fotoPerfilPath = fotoPath,
                 bannerPerfilPath = bannerPath,
-                biografia = biografia
+                biografia = biografia,
+                especialidades = especialidades,
+                regiaoAtuacao = regiaoAtuacao,
+                experiencia = experiencia,
+                valorMinimoCentavos = ((valorMinimo.replace(',', '.').toDoubleOrNull() ?: 0.0) * 100).toLong()
             )
             salvando = false
             if (erro != null) {
@@ -819,6 +829,57 @@ fun EditarPerfilScreen(
                             cursorColor = ProfileColors.Primary
                         )
                     )
+                }
+
+                // Campo biografia (opcional, exibida no perfil)
+                if (usuario.tipoUsuario != "Cliente") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground)
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("Informações profissionais", fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                            Text("Esses dados aparecem no seu perfil e substituem informações demonstrativas.", fontSize = 12.sp, color = ProfileColors.TextSecondary)
+                            OutlinedTextField(
+                                value = especialidades,
+                                onValueChange = { especialidades = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Especialidades") },
+                                placeholder = { Text("Ex.: residencial, pós-obra, Airbnb") },
+                                minLines = 2,
+                                shape = FieldShape
+                            )
+                            OutlinedTextField(
+                                value = regiaoAtuacao,
+                                onValueChange = { regiaoAtuacao = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Região de atendimento") },
+                                placeholder = { Text("Ex.: Curitiba e região") },
+                                singleLine = true,
+                                shape = FieldShape
+                            )
+                            OutlinedTextField(
+                                value = experiencia,
+                                onValueChange = { experiencia = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Experiência") },
+                                placeholder = { Text("Conte sua experiência profissional") },
+                                minLines = 2,
+                                shape = FieldShape
+                            )
+                            OutlinedTextField(
+                                value = valorMinimo,
+                                onValueChange = { valorMinimo = it.filter { caractere -> caractere.isDigit() || caractere == ',' || caractere == '.' } },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text("Valor mínimo por serviço") },
+                                prefix = { Text("R$ ") },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                singleLine = true,
+                                shape = FieldShape
+                            )
+                        }
+                    }
                 }
 
                 // Campo biografia (opcional, exibida no perfil)

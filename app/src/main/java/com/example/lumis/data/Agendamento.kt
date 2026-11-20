@@ -35,5 +35,6 @@ data class Agendamento(
     val extras: String = "",
     val totalCentavos: Long,
     val status: String = "Agendado",
-    val criadoEmMillis: Long = System.currentTimeMillis()
+    val criadoEmMillis: Long = System.currentTimeMillis(),
+    val avaliacao: Int? = null
 )

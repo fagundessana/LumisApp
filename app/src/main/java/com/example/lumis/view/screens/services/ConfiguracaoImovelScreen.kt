@@ -1,7 +1,7 @@
 package com.example.lumis.view.screens.services
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,51 +14,52 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.painterResource
-import com.example.lumis.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lumis.data.CepService
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBackground
+import com.example.lumis.view.theme.LumisBlue
 import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisGreen
+import com.example.lumis.view.theme.LumisGreenDark
+import com.example.lumis.view.theme.LumisGreenLight
 import com.example.lumis.view.theme.LumisSurface
-import androidx.compose.ui.platform.LocalContext
-import com.example.lumis.view.theme.*
-
-// =========================================================
-// TELA DE CONFIGURAÇÃO DO IMÓVEL (3ª etapa)
-// =========================================================
+import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.LumisTextSecondary
+import kotlinx.coroutines.delay
 
 @Composable
 fun ConfiguracaoImovelScreen(
@@ -77,246 +78,161 @@ fun ConfiguracaoImovelScreen(
     var quartos by remember { mutableIntStateOf(quartosInicial) }
     var banheiros by remember { mutableIntStateOf(banheirosInicial) }
     var tamanhoSelecionado by remember { mutableStateOf(tamanhoInicial) }
-    var enderecoSelecionado by remember { mutableStateOf(endereco) }
+    var cep by remember { mutableStateOf("") }
+    var logradouro by remember { mutableStateOf(endereco) }
+    var numero by remember { mutableStateOf("") }
+    var complemento by remember { mutableStateOf("") }
+    var bairro by remember { mutableStateOf("") }
+    var cidade by remember { mutableStateOf("") }
+    var uf by remember { mutableStateOf("") }
+    var buscandoCep by remember { mutableStateOf(false) }
+    var erroCep by remember { mutableStateOf<String?>(null) }
+    val cepNumerico = cep.filter(Char::isDigit)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LumisBackground)
-    ) {
+    LaunchedEffect(cepNumerico) {
+        erroCep = null
+        if (cepNumerico.length != 8) return@LaunchedEffect
+        delay(350)
+        buscandoCep = true
+        runCatching { CepService.buscar(cepNumerico) }
+            .onSuccess {
+                logradouro = it.logradouro
+                bairro = it.bairro
+                cidade = it.cidade
+                uf = it.uf
+            }
+            .onFailure { erroCep = it.message ?: "Não foi possível consultar o CEP" }
+        buscandoCep = false
+    }
 
-        // =================================================
-        // TOPO
-        // =================================================
+    Column(Modifier.fillMaxSize().background(LumisBackground)) {
         LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
-
         LinhaProgresso(etapaAtual = 2)
 
-        // =================================================
-        // CONTEÚDO
-        // =================================================
-Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // SUBTÍTULO
-            Text(
-                text = "CONFIGURAÇÃO",
-                color = LumisBlue,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Detalhes do imóvel",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = LumisTextPrimary
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // QUARTOS
-            ContadorLinha(
-                titulo = "Quartos",
-                valor = quartos,
-                onDiminuir = { if (quartos > 1) quartos-- },
-                onAumentar = { quartos++ }
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // BANHEIROS
-            ContadorLinha(
-                titulo = "Banheiros",
-                valor = banheiros,
-                onDiminuir = { if (banheiros > 1) banheiros-- },
-                onAumentar = { banheiros++ }
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // TAMANHO
-            Text(
-                text = "Tamanho aproximado",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LumisTextSecondary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TamanhoPilula(
-                    texto = "Até 60m²",
-                    selecionado = tamanhoSelecionado == "Até 60m²"
-                ) { tamanhoSelecionado = "Até 60m²" }
-
-                TamanhoPilula(
-                    texto = "60–100m²",
-                    selecionado = tamanhoSelecionado == "60–100m²"
-                ) { tamanhoSelecionado = "60–100m²" }
-
-                TamanhoPilula(
-                    texto = "100–150m²",
-                    selecionado = tamanhoSelecionado == "100–150m²"
-                ) { tamanhoSelecionado = "100–150m²" }
+            Column {
+                Text("CONFIGURAÇÃO", color = LumisBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text("Detalhes do imóvel", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = LumisTextPrimary)
+                Text("Conte sobre o espaço e confirme onde será o atendimento.", fontSize = 13.sp, color = LumisTextSecondary)
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            ContadorLinha("Quartos", quartos, { if (quartos > 1) quartos-- }, { quartos++ })
+            ContadorLinha("Banheiros", banheiros, { if (banheiros > 1) banheiros-- }, { banheiros++ })
 
-            TamanhoPilula(
-                texto = "Acima de 150m²",
-                selecionado = tamanhoSelecionado == "Acima de 150m²"
-            ) { tamanhoSelecionado = "Acima de 150m²" }
+            Text("Tamanho aproximado", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TamanhoPilula("Até 60m²", tamanhoSelecionado == "Até 60m²") { tamanhoSelecionado = "Até 60m²" }
+                TamanhoPilula("60–100m²", tamanhoSelecionado == "60–100m²") { tamanhoSelecionado = "60–100m²" }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TamanhoPilula("100–150m²", tamanhoSelecionado == "100–150m²") { tamanhoSelecionado = "100–150m²" }
+                TamanhoPilula("Acima de 150m²", tamanhoSelecionado == "Acima de 150m²") { tamanhoSelecionado = "Acima de 150m²" }
+            }
 
-            Spacer(modifier = Modifier.height(18.dp))
-            Text("Endereço completo do atendimento", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
-            Spacer(modifier = Modifier.height(6.dp))
-            OutlinedTextField(
-                value = enderecoSelecionado,
-                onValueChange = { enderecoSelecionado = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Rua, número, bairro, cidade e CEP") },
-                singleLine = false,
-                minLines = 2,
-                maxLines = 3
-            )
+            Surface(shape = RoundedCornerShape(20.dp), color = LumisSurface, border = BorderStroke(1.dp, LumisBorder)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(LumisGreenLight), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Outlined.LocationOn, null, tint = LumisGreenDark)
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text("Endereço do atendimento", fontWeight = FontWeight.SemiBold, color = LumisTextPrimary)
+                            Text("Digite o CEP para preencher automaticamente", fontSize = 12.sp, color = LumisTextSecondary)
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = cep,
+                        onValueChange = { cep = formatarCep(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("CEP") },
+                        placeholder = { Text("00000-000") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        trailingIcon = {
+                            when {
+                                buscandoCep -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                                cepNumerico.length == 8 && erroCep == null -> Icon(Icons.Outlined.CheckCircle, null, tint = LumisGreen)
+                            }
+                        },
+                        supportingText = erroCep?.let { erro -> { Text(erro, color = Color(0xFFB3261E)) } },
+                        isError = erroCep != null,
+                        singleLine = true
+                    )
+                    OutlinedTextField(logradouro, { logradouro = it }, Modifier.fillMaxWidth(), label = { Text("Rua / avenida") }, singleLine = true)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(numero, { numero = it }, Modifier.weight(0.38f), label = { Text("Número") }, singleLine = true)
+                        OutlinedTextField(complemento, { complemento = it }, Modifier.weight(0.62f), label = { Text("Complemento") }, singleLine = true)
+                    }
+                    OutlinedTextField(bairro, { bairro = it }, Modifier.fillMaxWidth(), label = { Text("Bairro") }, singleLine = true)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(cidade, { cidade = it }, Modifier.weight(0.72f), label = { Text("Cidade") }, singleLine = true)
+                        OutlinedTextField(uf, { uf = it.take(2).uppercase() }, Modifier.weight(0.28f), label = { Text("UF") }, singleLine = true)
+                    }
+                }
+            }
         }
 
-        // =================================================
-        // BOTÃO CONTINUAR + SUBTOTAL
-        // =================================================
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(LumisSurface)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-        ) {
-            BotaoContinuar(
-                onClick = { if (enderecoSelecionado.isNotBlank()) onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoSelecionado.trim()) else Toast.makeText(context, "Informe o endereço do atendimento", Toast.LENGTH_SHORT).show() }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Quartos: $quartos | Banheiros: $banheiros | Tamanho: $tamanhoSelecionado",
-                fontSize = 12.sp,
-                color = LumisTextSecondary,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
+        Column(Modifier.fillMaxWidth().background(LumisSurface).padding(horizontal = 20.dp, vertical = 12.dp)) {
+            BotaoContinuar(onClick = {
+                val enderecoCompleto = montarEndereco(logradouro, numero, complemento, bairro, cidade, uf, cep)
+                when {
+                    cepNumerico.length != 8 -> Toast.makeText(context, "Informe um CEP válido", Toast.LENGTH_SHORT).show()
+                    buscandoCep -> Toast.makeText(context, "Aguarde a consulta do CEP", Toast.LENGTH_SHORT).show()
+                    erroCep != null -> Toast.makeText(context, erroCep, Toast.LENGTH_SHORT).show()
+                    logradouro.isBlank() || numero.isBlank() || bairro.isBlank() || cidade.isBlank() || uf.isBlank() ->
+                        Toast.makeText(context, "Complete os dados do endereço", Toast.LENGTH_SHORT).show()
+                    else -> onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoCompleto)
+                }
+            })
+            Spacer(Modifier.height(8.dp))
+            Text("Quartos: $quartos  •  Banheiros: $banheiros  •  $tamanhoSelecionado", fontSize = 12.sp, color = LumisTextSecondary, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
     }
 }
 
-// =========================================================
-// LINHA CONTADOR (quartos/banheiros)
-// =========================================================
+private fun formatarCep(valor: String): String {
+    val numeros = valor.filter(Char::isDigit).take(8)
+    return if (numeros.length > 5) "${numeros.take(5)}-${numeros.drop(5)}" else numeros
+}
+
+private fun montarEndereco(logradouro: String, numero: String, complemento: String, bairro: String, cidade: String, uf: String, cep: String): String =
+    buildList {
+        add("${logradouro.trim()}, ${numero.trim()}")
+        if (complemento.isNotBlank()) add(complemento.trim())
+        add(bairro.trim())
+        add("${cidade.trim()} - ${uf.trim()}")
+        add("CEP ${formatarCep(cep)}")
+    }.joinToString(" • ")
 
 @Composable
-private fun ContadorLinha(
-    titulo: String,
-    valor: Int,
-    onDiminuir: () -> Unit,
-    onAumentar: () -> Unit
-) {
+private fun ContadorLinha(titulo: String, valor: Int, onDiminuir: () -> Unit, onAumentar: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(LumisSurface)
-            .border(1.dp, LumisBorder, RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(LumisSurface).border(1.dp, LumisBorder, RoundedCornerShape(14.dp)).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = titulo,
-            fontSize = 15.sp,
-            color = LumisTextPrimary
-        )
-
+        Text(titulo, fontSize = 15.sp, color = LumisTextPrimary)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Botão −
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(LumisBorder)
-                    .clickable(onClick = onDiminuir),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "−",
-                    fontSize = 20.sp,
-                    color = LumisTextSecondary
-                )
-            }
-
-            // Valor
-            Text(
-                text = valor.toString(),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = LumisTextPrimary,
-                modifier = Modifier
-                    .width(48.dp)
-                    .padding(horizontal = 8.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-
-            // Botão +
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(LumisGreen)
-                    .clickable(onClick = onAumentar),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "+",
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Box(Modifier.size(32.dp).clip(CircleShape).background(LumisBorder).clickable(onClick = onDiminuir), contentAlignment = Alignment.Center) { Text("−", fontSize = 20.sp, color = LumisTextSecondary) }
+            Text(valor.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = LumisTextPrimary, modifier = Modifier.width(48.dp), textAlign = TextAlign.Center)
+            Box(Modifier.size(32.dp).clip(CircleShape).background(LumisGreen).clickable(onClick = onAumentar), contentAlignment = Alignment.Center) { Text("+", fontSize = 20.sp, color = Color.White, fontWeight = FontWeight.Bold) }
         }
     }
 }
 
-// =========================================================
-// BOTÃO DE TAMANHO
-// =========================================================
-
 @Composable
-private fun TamanhoPilula(
-    texto: String,
-    selecionado: Boolean,
-    onClick: () -> Unit
-) {
+private fun TamanhoPilula(texto: String, selecionado: Boolean, onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (selecionado) LumisGreen else LumisSurface)
-            .border(
-                width = if (selecionado) 0.dp else 1.dp,
-                color = LumisBorder,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.clip(RoundedCornerShape(20.dp)).background(if (selecionado) LumisGreen else LumisSurface)
+            .border(if (selecionado) 0.dp else 1.dp, LumisBorder, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = texto,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (selecionado) Color.White else LumisTextPrimary
-        )
+        Text(texto, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = if (selecionado) Color.White else LumisTextPrimary)
     }
 }

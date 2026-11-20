@@ -26,6 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.view.theme.*
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 
 enum class LumisTab { SERVICOS, PLANOS }
 
@@ -44,13 +46,13 @@ fun LumisTabSelector(
             .padding(4.dp)
     ) {
         TabPill(
-            text = "Serviços",
+            text = stringResource(R.string.services),
             isSelected = selected == LumisTab.SERVICOS,
             modifier = Modifier.weight(1f),
             onClick = { onSelected(LumisTab.SERVICOS) }
         )
         TabPill(
-            text = "Planos",
+            text = stringResource(R.string.plans),
             isSelected = selected == LumisTab.PLANOS,
             modifier = Modifier.weight(1f),
             onClick = { onSelected(LumisTab.PLANOS) }

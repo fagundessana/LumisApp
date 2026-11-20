@@ -77,7 +77,11 @@ fun ServicesScreen(
 
     LaunchedEffect(servicoInicial) {
         servicoInicial?.let { nome ->
-            ServicoRepository.todos.firstOrNull { it.nome == nome }?.let(controller::selecionarServico)
+            ServicoRepository.todos.firstOrNull { it.nome == nome }?.let {
+                controller.selecionarServico(it)
+                busca = it.nome
+                categoria = "Todos"
+            }
         }
     }
 

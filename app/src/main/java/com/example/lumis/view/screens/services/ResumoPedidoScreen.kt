@@ -237,11 +237,11 @@ fun ResumoPedidoScreen(
             ) {
                 BotaoContinuar(
                     onClick = { onConfirm(formaPagamento) },
-                    texto = "Confirmar Agendamento"
+                    texto = "Continuar para pagamento"
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Cancelamentos e reagendamentos ficam registrados na sua agenda local.",
+                    text = "Na próxima etapa você verá uma simulação; nenhuma cobrança real será feita.",
                     fontSize = 11.sp,
                     color = LumisTextSecondary,
                     modifier = Modifier.fillMaxWidth(),

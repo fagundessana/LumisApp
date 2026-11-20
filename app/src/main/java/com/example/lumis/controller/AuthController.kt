@@ -119,7 +119,11 @@ class AuthController(context: Context) {
         telefone: String = "",
         fotoPerfilPath: String = "",
         bannerPerfilPath: String = "",
-        biografia: String = ""
+        biografia: String = "",
+        especialidades: String = "",
+        regiaoAtuacao: String = "",
+        experiencia: String = "",
+        valorMinimoCentavos: Long = 0
     ): String? {
         val atual = usuarioLogado ?: return "Nenhum usuário logado"
         val nomeLimpo = nomeUsuario.trim()
@@ -144,7 +148,11 @@ class AuthController(context: Context) {
             telefone = telLimpo,
             fotoPerfilPath = fotoLimpa,
             bannerPerfilPath = bannerLimpo,
-            biografia = bioLimpa
+            biografia = bioLimpa,
+            especialidades = especialidades.trim(),
+            regiaoAtuacao = regiaoAtuacao.trim(),
+            experiencia = experiencia.trim(),
+            valorMinimoCentavos = valorMinimoCentavos.coerceAtLeast(0)
         )
         database.userDao().atualizar(atualizado)
         usuarioLogado = database.userDao().buscarPorId(atual.id) ?: atualizado
@@ -160,7 +168,11 @@ class AuthController(context: Context) {
             telefone = atual.telefone,
             fotoPerfilPath = atual.fotoPerfilPath,
             bannerPerfilPath = atual.bannerPerfilPath,
-            biografia = atual.biografia
+            biografia = atual.biografia,
+            especialidades = atual.especialidades,
+            regiaoAtuacao = atual.regiaoAtuacao,
+            experiencia = atual.experiencia,
+            valorMinimoCentavos = atual.valorMinimoCentavos
         )
     }
 

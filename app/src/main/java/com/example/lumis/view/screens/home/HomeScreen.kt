@@ -17,11 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.example.lumis.view.screens.home.components.CategorySection
 import com.example.lumis.view.screens.home.components.PopularServicesGrid
 import com.example.lumis.view.screens.home.components.PromoBanner
-import com.example.lumis.view.screens.home.components.RecommendedSection
 import com.example.lumis.view.screens.home.components.TopLocationBar
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 
 // HomeScreen: junta todas as seções em uma lista que rola pra baixo.
 // Usamos LazyColumn (em vez de Column normal) porque ela só desenha o que
@@ -37,11 +38,9 @@ fun HomeScreen(
     // Esses onClick com {} vazio são de propósito: o grupo liga eles depois.
     onSeeAllCategories: () -> Unit = {},
     onSeeAllServices: () -> Unit = {},
-    onSeeAllRecommended: () -> Unit = {},
     onDiscountClick: () -> Unit = {},
     onCategoryClick: (String) -> Unit = {},
-    onServiceClick: (String) -> Unit = {},
-    onHireClick: (String) -> Unit = {}
+    onServiceClick: (String) -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -59,11 +58,11 @@ fun HomeScreen(
             // 1. Barrinha de endereço + sino + perfil
             item {
                 TopLocationBar(
-                    address = localizacao.ifBlank { "Definir minha região" },
+                    address = localizacao.ifBlank { stringResource(R.string.define_region) },
                     subtitle = if (localizacao.isBlank()) {
-                        "Toque para adicionar"
+                        stringResource(R.string.tap_to_add)
                     } else {
-                        "Sua localização atual"
+                        stringResource(R.string.current_location)
                     },
                     onLocationClick = onLocationClick,
                     onNotificationClick = onNotificationClick
@@ -83,13 +82,6 @@ fun HomeScreen(
                 PopularServicesGrid(
                     onSeeAllClick = onSeeAllServices,
                     onServiceClick = onServiceClick
-                )
-            }
-            // 5. Cards de profissionais recomendados
-            item {
-                RecommendedSection(
-                    onSeeAllClick = onSeeAllRecommended,
-                    onHireClick = onHireClick
                 )
             }
         }

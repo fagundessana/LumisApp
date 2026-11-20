@@ -11,4 +11,8 @@ class AgendamentoRepository(private val agendamentoDao: AgendamentoDao) {
     }
     suspend fun horarioEmUso(usuarioId: Int, data: String, horario: String): Boolean =
         agendamentoDao.contarConflitos(usuarioId, data, horario, -1L) > 0
+    suspend fun avaliar(id: Long, usuarioId: Int, estrelas: Int): Boolean {
+        require(estrelas in 1..5)
+        return agendamentoDao.avaliar(id, usuarioId, estrelas) > 0
+    }
 }
