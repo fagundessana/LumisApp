@@ -55,7 +55,8 @@ fun ContaScreen(
     onEditarPerfil: () -> Unit = {},
     onSair: () -> Unit,
     modoTema: ModoTema = ModoTema.SISTEMA,
-    onModoTemaChange: (ModoTema) -> Unit = {}
+    onModoTemaChange: (ModoTema) -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val rotuloTipo = if (usuario.tipoUsuario == "Cliente") "Cliente" else "Funcionário"
 
@@ -69,7 +70,7 @@ fun ContaScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            LumisTopBar(onBack = onVoltar)
+            LumisTopBar(onBack = onVoltar, onNotificationsClick = onNotificationsClick)
 
             Column(
                 modifier = Modifier

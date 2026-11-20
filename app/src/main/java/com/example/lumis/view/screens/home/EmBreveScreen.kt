@@ -33,7 +33,7 @@ import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
 
 @Composable
-fun EmBreveScreen() {
+fun EmBreveScreen(onNotificationsClick: () -> Unit = {}) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = LumisBackground
@@ -43,7 +43,7 @@ fun EmBreveScreen() {
                 .fillMaxSize()
                 .background(LumisBackground)
         ) {
-            LumisTopBar()
+            LumisTopBar(onNotificationsClick = onNotificationsClick)
 
             Column(
                 modifier = Modifier

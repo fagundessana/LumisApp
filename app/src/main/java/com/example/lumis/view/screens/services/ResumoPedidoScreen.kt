@@ -72,7 +72,8 @@ fun ResumoPedidoScreen(
     formaPagamentoInicial: String = "A combinar no atendimento",
     onFormaPagamentoChange: (String) -> Unit = {},
     onConfirm: (formaPagamento: String) -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     var formaPagamento by remember { mutableStateOf(formaPagamentoInicial) }
 
@@ -84,7 +85,7 @@ fun ResumoPedidoScreen(
         // =============================
         // TOPO
         // =============================
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 4)
 

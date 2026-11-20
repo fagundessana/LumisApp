@@ -23,5 +23,7 @@ data class User(
 
     val fotoPerfilPath: String = "",
 
-    val biografia: String = ""
+    val biografia: String = "",
+
+    val bannerPerfilPath: String = ""
 )

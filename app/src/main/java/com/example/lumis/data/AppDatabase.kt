@@ -69,9 +69,18 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+/**
+ * Migration 6 -> 7: adiciona o banner do perfil sem apagar usuários ou agendamentos.
+ */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN bannerPerfilPath TEXT NOT NULL DEFAULT ''")
+    }
+}
+
 @Database(
     entities = [User::class, Agendamento::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -97,7 +106,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_2_3,
                     MIGRATION_3_4,
                     MIGRATION_4_5,
-                    MIGRATION_5_6
+                    MIGRATION_5_6,
+                    MIGRATION_6_7
                 ).build()
 
                 INSTANCE = instance

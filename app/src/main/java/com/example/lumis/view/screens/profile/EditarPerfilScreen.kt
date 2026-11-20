@@ -1,7 +1,9 @@
 package com.example.lumis.view.screens.profile
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,16 +28,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.Crop
+import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -51,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -89,7 +99,8 @@ fun EditarPerfilScreen(
     usuario: User,
     authController: AuthController,
     onVoltar: () -> Unit,
-    onSalvo: () -> Unit = {}
+    onSalvo: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -101,6 +112,14 @@ fun EditarPerfilScreen(
     var fotoPath by remember(usuario.id) { mutableStateOf(usuario.fotoPerfilPath) }
     var fotoPreview by remember { mutableStateOf<Uri?>(null) }
     var salvandoFoto by remember { mutableStateOf(false) }
+
+    // Banner fields
+    var bannerPath by remember(usuario.id) { mutableStateOf(usuario.bannerPerfilPath) }
+    var bannerPreview by remember { mutableStateOf<Uri?>(null) }
+    var salvandoBanner by remember { mutableStateOf(false) }
+    // Arquivo que está sendo enquadrado no editor de banner (null = editor fechado)
+    var arquivoParaRecortar by remember { mutableStateOf<File?>(null) }
+
     var mensagemErro by remember { mutableStateOf("") }
     var salvando by remember { mutableStateOf(false) }
     var buscandoGps by remember { mutableStateOf(false) }
@@ -128,9 +147,31 @@ fun EditarPerfilScreen(
         }
     }
 
+    // Galeria para banner
+    val galeriaBannerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        mensagemErro = ""
+        scope.launch {
+            try {
+                arquivoParaRecortar = FotoPerfilHelper.copiarOriginalBanner(context, uri, usuario.id)
+            } catch (e: Exception) {
+                mensagemErro = e.message ?: "Não consegui abrir a imagem."
+            }
+        }
+    }
+
     fun abrirGaleria() {
         mensagemErro = ""
         galeriaLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
+
+    fun abrirGaleriaBanner() {
+        mensagemErro = ""
+        galeriaBannerLauncher.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
         )
     }
@@ -141,8 +182,221 @@ fun EditarPerfilScreen(
         fotoPreview = null
     }
 
+    fun removerBanner() {
+        FotoPerfilHelper.removerFoto(context, usuario.id, "banner")
+        bannerPath = ""
+        bannerPreview = null
+    }
+
+    // Camera launcher para tirar foto de perfil
+    var fotoCameraUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success && fotoCameraUri != null) {
+            fotoPreview = fotoCameraUri
+            salvandoFoto = true
+            mensagemErro = ""
+            scope.launch {
+                try {
+                    fotoPath = FotoPerfilHelper.salvarFotoInterna(context, fotoCameraUri!!, usuario.id)
+                    fotoPreview = null
+                    fotoCameraUri = null
+                } catch (e: Exception) {
+                    fotoPreview = null
+                    fotoCameraUri = null
+                    mensagemErro = e.message ?: "Não consegui salvar a foto."
+                } finally {
+                    salvandoFoto = false
+                }
+            }
+        }
+    }
+
+    // Camera launcher para banner
+    var bannerCameraUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraBannerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success && bannerCameraUri != null) {
+            mensagemErro = ""
+            scope.launch {
+                try {
+                    arquivoParaRecortar = FotoPerfilHelper.promoverBannerTempParaOriginal(context, usuario.id)
+                } catch (e: Exception) {
+                    mensagemErro = e.message ?: "Não consegui salvar a foto da câmera."
+                } finally {
+                    bannerCameraUri = null
+                }
+            }
+        }
+    }
+
+    fun abrirCamera() {
+        mensagemErro = ""
+        val arquivoFoto = FotoPerfilHelper.arquivoFoto(context, usuario.id)
+        fotoCameraUri = androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            arquivoFoto
+        )
+        cameraLauncher.launch(fotoCameraUri)
+    }
+
+    fun abrirCameraBanner() {
+        mensagemErro = ""
+        val arquivoBanner = FotoPerfilHelper.arquivoBannerTemp(context, usuario.id)
+        bannerCameraUri = androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            arquivoBanner
+        )
+        cameraBannerLauncher.launch(bannerCameraUri)
+    }
+
+    // Permissão de câmera
+    val permissaoCameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            // Se a permissão foi concedida, abre a câmera
+            abrirCamera()
+        } else {
+            mensagemErro = "Permissão de câmera negada. Não é possível tirar foto."
+        }
+    }
+
+    // Permissão de câmera para banner
+    val permissaoCameraLauncherWrapper = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            abrirCameraBanner()
+        } else {
+            mensagemErro = "Permissão de câmera negada. Não é possível tirar foto do banner."
+        }
+    }
+
+    // State para controlar o dialog de opções de foto
+    var mostrarDialogoFoto by remember { mutableStateOf(false) }
+
+    @Composable
+    fun DialogOpcoesFoto() {
+        if (mostrarDialogoFoto) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { mostrarDialogoFoto = false },
+                title = { Text(text = "Alterar foto", fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                abrirGaleria()
+                                mostrarDialogoFoto = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.PhotoLibrary, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Escolher da galeria", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                        Divider(color = ProfileColors.Divider)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                // Verifica permissão de câmera
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                        abrirCamera()
+                                    } else {
+                                        permissaoCameraLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+                                } else {
+                                    abrirCamera()
+                                }
+                                mostrarDialogoFoto = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.Camera, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Tirar foto", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { mostrarDialogoFoto = false }) { Text(text = "Cancelar", color = ProfileColors.Primary) }
+                }
+            )
+        }
+    }
+
+    // State para controlar o dialog de opções de banner
+    var mostrarDialogoBanner by remember { mutableStateOf(false) }
+
+    @Composable
+    fun DialogOpcoesBanner() {
+        if (mostrarDialogoBanner) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { mostrarDialogoBanner = false },
+                title = { Text(text = "Alterar banner", fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (FotoPerfilHelper.fotoExiste(bannerPath)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    arquivoParaRecortar = FotoPerfilHelper.arquivoParaAjuste(context, usuario.id, bannerPath)
+                                    mostrarDialogoBanner = false
+                                }.padding(vertical = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(imageVector = Icons.Outlined.Crop, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(text = "Ajustar enquadramento", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                            }
+                            androidx.compose.material3.Divider(color = ProfileColors.Divider)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                abrirGaleriaBanner()
+                                mostrarDialogoBanner = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.PhotoLibrary, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Escolher da galeria", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                        androidx.compose.material3.Divider(color = ProfileColors.Divider)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                // Verifica permissão de câmera
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                        abrirCameraBanner()
+                                    } else {
+                                        permissaoCameraLauncherWrapper.launch(Manifest.permission.CAMERA)
+                                    }
+                                } else {
+                                    abrirCameraBanner()
+                                }
+                                mostrarDialogoBanner = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.Camera, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Tirar foto", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { mostrarDialogoBanner = false }) { Text(text = "Cancelar", color = ProfileColors.Primary) }
+                }
+            )
+        }
+    }
+
     // Pede COARSE + FINE juntas: o Android mostra sozinho a opção
-    // "Usar localização exata" (FINE) vs aproximada (só COARSE).
+// "Usar localização exata" (FINE) vs aproximada (só COARSE).
     val permissaoLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { granted ->
@@ -209,6 +463,7 @@ fun EditarPerfilScreen(
                 localizacao = localizacao,
                 telefone = telefone.text,
                 fotoPerfilPath = fotoPath,
+                bannerPerfilPath = bannerPath,
                 biografia = biografia
             )
             salvando = false
@@ -228,8 +483,29 @@ fun EditarPerfilScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            LumisTopBar(onBack = onVoltar)
-
+            LumisTopBar(onBack = onVoltar, onNotificationsClick = onNotificationsClick)
+            DialogOpcoesFoto()
+            DialogOpcoesBanner()
+            arquivoParaRecortar?.let { arquivo ->
+                BannerCropDialog(
+                    arquivo = arquivo,
+                    onCancelar = { arquivoParaRecortar = null },
+                    onConfirmar = { recorte ->
+                        arquivoParaRecortar = null
+                        salvandoBanner = true
+                        mensagemErro = ""
+                        scope.launch {
+                            try {
+                                bannerPath = FotoPerfilHelper.salvarBannerRecortado(context, recorte, usuario.id)
+                            } catch (e: Exception) {
+                                mensagemErro = e.message ?: "Não consegui salvar o banner."
+                            } finally {
+                                salvandoBanner = false
+                            }
+                        }
+                    }
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -324,7 +600,7 @@ fun EditarPerfilScreen(
                                                 color = ProfileColors.CardBackground,
                                                 shape = CircleShape
                                             )
-                                            .clickable { abrirGaleria() },
+                                            .clickable { mostrarDialogoFoto = true },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
@@ -372,7 +648,103 @@ fun EditarPerfilScreen(
                     }
                 }
 
-                // Campo nome
+                // Banner de capa
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Banner de capa",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = ProfileColors.TextPrimary
+                        )
+                        if (bannerPreview != null || FotoPerfilHelper.fotoExiste(bannerPath)) {
+                            TextButton(
+                                onClick = ::removerBanner,
+                                enabled = !salvandoBanner
+                            ) {
+                                Text(
+                                    text = "Remover banner",
+                                    fontSize = 12.sp,
+                                    color = ProfileColors.BadgeRedText
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(BANNER_ASPECTO)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable { mostrarDialogoBanner = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val modeloBanner: Any? = bannerPreview
+                            ?: bannerPath.takeIf { FotoPerfilHelper.fotoExiste(it) }?.let { File(it) }
+                        if (salvandoBanner) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = ProfileColors.Primary
+                            )
+                        } else if (modeloBanner != null) {
+                            AsyncImage(
+                                model = modeloBanner,
+                                contentDescription = "Banner de capa",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                ProfileColors.PrimaryLight.copy(alpha = 0.3f),
+                                                ProfileColors.Primary.copy(alpha = 0.1f)
+                                            )
+                                        )
+                                    )
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = "Adicionar banner",
+                                    tint = ProfileColors.Primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Toque para adicionar banner",
+                                    fontSize = 12.sp,
+                                    color = ProfileColors.TextSecondary
+                                )
+                            }
+                        }
+                    }
+                    if (bannerPreview != null || FotoPerfilHelper.fotoExiste(bannerPath)) {
+                        TextButton(
+                            onClick = ::removerBanner,
+                            enabled = !salvandoBanner
+                        ) {
+                            Text(
+                                text = "Remover banner",
+                                fontSize = 12.sp,
+                                color = ProfileColors.BadgeRedText
+                            )
+                        }
+                    }
+                }
+
+            // Campo nome
                 Column {
                     Text(
                         text = "Nome de usuário",
@@ -472,6 +844,7 @@ fun EditarPerfilScreen(
                         minLines = 3,
                         maxLines = 5,
                         shape = FieldShape,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = ProfileColors.Background,
                             unfocusedContainerColor = ProfileColors.Background,
@@ -521,6 +894,7 @@ fun EditarPerfilScreen(
                         singleLine = true,
                         maxLines = 1,
                         shape = FieldShape,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = ProfileColors.Background,
                             unfocusedContainerColor = ProfileColors.Background,

@@ -37,6 +37,7 @@ import com.example.lumis.view.screens.client_profile.UsuarioProfile
 import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
+import com.example.lumis.view.screens.notifications.NotificationsScreen
 import com.example.lumis.view.screens.profile.EditarPerfilScreen
 import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.services.AgendamentoScreen
@@ -59,6 +60,7 @@ sealed class LumisTela {
     data object Resumo : LumisTela()
     data object Conta : LumisTela()
     data object EditarPerfil : LumisTela()
+    data object Notificacoes : LumisTela()
 }
 
 @Composable
@@ -166,6 +168,7 @@ fun MainScaffold(
                         NavItem.HOME -> HomeScreen(
                             localizacao = usuario.localizacao,
                             onLocationClick = { irPara(LumisTela.EditarPerfil) },
+                            onNotificationClick = { irPara(LumisTela.Notificacoes) },
                             onSeeAllCategories = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllRecommended = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
@@ -174,15 +177,19 @@ fun MainScaffold(
                             onServiceClick = { abrirServicoPorLegenda(it) },
                             onHireClick = { abrirServicoPorLegenda(it) }
                         )
-                        NavItem.CIDADE -> CidadeConscienteScreen()
-                        NavItem.AGENDA -> AgendaTab(registros = registrosAgenda)
+                        NavItem.CIDADE -> CidadeConscienteScreen(onNotificationsClick = { irPara(LumisTela.Notificacoes) })
+                        NavItem.AGENDA -> AgendaTab(
+                            registros = registrosAgenda,
+                            onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                        )
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
                             UsuarioProfileScreen(
                                 profile = UsuarioProfile(
                                     nome = usuario.nomeUsuario,
                                     localizacao = usuario.localizacao.ifBlank { "Adicionar localização" },
                                     fotoUrl = usuario.fotoPerfilPath.ifBlank { null },
-                                    biografia = usuario.biografia
+                                    biografia = usuario.biografia,
+                                    bannerUrl = usuario.bannerPerfilPath.ifBlank { null }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) }
@@ -206,11 +213,13 @@ fun MainScaffold(
                                 servicoEscolhido = servico
                                 irPara(LumisTela.Agendamento(servico))
                             },
-                            servicoInicial = servicoInicial
+                            servicoInicial = servicoInicial,
+                            onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                         )
                     }
                     is LumisTela.Planos -> PlanosScreen(
-                        onVoltarServicos = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) }
+                        onVoltarServicos = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Agendamento -> AgendamentoScreen(
                         servicoSelecionado = tela.servico.nome,
@@ -222,7 +231,8 @@ fun MainScaffold(
                             dataEscolhida = "$dia/${mesAtual.toString().padStart(2, '0')}/$anoAtual"
                             horarioEscolhido = hora
                             irPara(LumisTela.Imovel)
-                        }
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
 is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         servico = servicoEscolhido?.nome,
@@ -241,7 +251,8 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                             tamanhoImovel = tamanho
                             enderecoImovel = endereco
                             irPara(LumisTela.Adicionais)
-                        }
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Adicionais -> ServicosAdicionaisScreen(
                         servico = servicoEscolhido?.nome,
@@ -251,7 +262,8 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                             extrasEscolhidos = adicionais
                             totalPedido = subtotal
                             irPara(LumisTela.Resumo)
-                        }
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Resumo -> ResumoPedidoScreen(
                         servico = servicoEscolhido?.nome ?: "",
@@ -310,7 +322,8 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                     }
                                 }
                             }
-                        }
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Conta -> ContaScreen(
                         usuario = usuario,
@@ -318,13 +331,18 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         onEditarPerfil = { irPara(LumisTela.EditarPerfil) },
                         onSair = onLogout,
                         modoTema = modoTema,
-                        onModoTemaChange = onModoTemaChange
+                        onModoTemaChange = onModoTemaChange,
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.EditarPerfil -> EditarPerfilScreen(
                         usuario = usuario,
                         authController = authController,
                         onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
-                        onSalvo = { irPara(LumisTela.Principal(NavItem.PERFIL)) }
+                        onSalvo = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                    )
+                    is LumisTela.Notificacoes -> NotificationsScreen(
+                        onBack = { irPara(LumisTela.Principal(NavItem.PERFIL)) }
                     )
                 }
                 }

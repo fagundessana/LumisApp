@@ -109,7 +109,7 @@ class AuthController(context: Context) {
         return null
     }
 
-    // Atualiza nome, localização, telefone, foto e biografia do usuário logado.
+    // Atualiza nome, localização, telefone, foto, banner e biografia do usuário logado.
     // Telefone e biografia são opcionais; telefone preenchido exige 10 ou 11 dígitos,
     // biografia tem no máximo 300 caracteres.
     // Retorna null em caso de sucesso, ou mensagem de erro.
@@ -118,6 +118,7 @@ class AuthController(context: Context) {
         localizacao: String,
         telefone: String = "",
         fotoPerfilPath: String = "",
+        bannerPerfilPath: String = "",
         biografia: String = ""
     ): String? {
         val atual = usuarioLogado ?: return "Nenhum usuário logado"
@@ -125,6 +126,7 @@ class AuthController(context: Context) {
         val locLimpa = localizacao.trim()
         val telLimpo = telefone.trim()
         val fotoLimpa = fotoPerfilPath.trim()
+        val bannerLimpo = bannerPerfilPath.trim()
         val bioLimpa = biografia.trim()
 
         if (nomeLimpo.isBlank()) return "Digite seu nome de usuário"
@@ -141,6 +143,7 @@ class AuthController(context: Context) {
             localizacao = locLimpa,
             telefone = telLimpo,
             fotoPerfilPath = fotoLimpa,
+            bannerPerfilPath = bannerLimpo,
             biografia = bioLimpa
         )
         database.userDao().atualizar(atualizado)
@@ -156,6 +159,7 @@ class AuthController(context: Context) {
             localizacao = localizacao,
             telefone = atual.telefone,
             fotoPerfilPath = atual.fotoPerfilPath,
+            bannerPerfilPath = atual.bannerPerfilPath,
             biografia = atual.biografia
         )
     }

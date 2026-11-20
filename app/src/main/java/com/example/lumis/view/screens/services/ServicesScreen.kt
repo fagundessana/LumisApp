@@ -67,7 +67,8 @@ import com.example.lumis.view.theme.LumisTextSecondary
 fun ServicesScreen(
     onAbrirPlanos: () -> Unit = {},
     onAbrirAgendamento: (Servico) -> Unit = {},
-    servicoInicial: String? = null
+    servicoInicial: String? = null,
+    onNotificationsClick: () -> Unit = {}
 ) {
     val controller = remember { ServicesController() }
     var busca by rememberSaveable { mutableStateOf("") }
@@ -95,8 +96,12 @@ fun ServicesScreen(
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = LumisBackground) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LumisTopBar()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(LumisBackground)
+        ) {
+            LumisTopBar(onNotificationsClick = onNotificationsClick)
             LumisTabSelector(
                 selected = LumisTab.SERVICOS,
                 onSelected = { if (it == LumisTab.PLANOS) onAbrirPlanos() },
