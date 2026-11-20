@@ -33,6 +33,7 @@ fun HomeScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     localizacao: String = "",
     onLocationClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {},
     // Esses onClick com {} vazio são de propósito: o grupo liga eles depois.
     onSeeAllCategories: () -> Unit = {},
     onSeeAllServices: () -> Unit = {},
@@ -64,7 +65,8 @@ fun HomeScreen(
                     } else {
                         "Sua localização atual"
                     },
-                    onLocationClick = onLocationClick
+                    onLocationClick = onLocationClick,
+                    onNotificationClick = onNotificationClick
                 )
             }
             // 2. Banner verde da promoção "30% OFF"

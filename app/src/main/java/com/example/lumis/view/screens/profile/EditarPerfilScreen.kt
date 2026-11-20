@@ -337,6 +337,58 @@ fun EditarPerfilScreen(
         }
     }
 
+    // State para controlar o dialog de opções de banner
+    var mostrarDialogoBanner by remember { mutableStateOf(false) }
+
+    @Composable
+    fun DialogOpcoesBanner() {
+        if (mostrarDialogoBanner) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { mostrarDialogoBanner = false },
+                title = { Text(text = "Alterar banner", fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                abrirGaleriaBanner()
+                                mostrarDialogoBanner = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.PhotoLibrary, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Escolher da galeria", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                        androidx.compose.material3.Divider(color = ProfileColors.Divider)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                // Verifica permissão de câmera
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    if (context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                        abrirCameraBanner()
+                                    } else {
+                                        permissaoCameraLauncherWrapper.launch(Manifest.permission.CAMERA)
+                                    }
+                                } else {
+                                    abrirCameraBanner()
+                                }
+                                mostrarDialogoBanner = false
+                            }.padding(vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Outlined.Camera, contentDescription = null, tint = ProfileColors.Primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = "Tirar foto", fontSize = 16.sp, color = ProfileColors.TextPrimary)
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { mostrarDialogoBanner = false }) { Text(text = "Cancelar", color = ProfileColors.Primary) }
+                }
+            )
+        }
+    }
+
     // Pede COARSE + FINE juntas: o Android mostra sozinho a opção
 // "Usar localização exata" (FINE) vs aproximada (só COARSE).
     val permissaoLauncher = rememberLauncherForActivityResult(
@@ -427,6 +479,7 @@ fun EditarPerfilScreen(
         ) {
             LumisTopBar(onBack = onVoltar, onNotificationsClick = onNotificationsClick)
             DialogOpcoesFoto()
+            DialogOpcoesBanner()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -568,21 +621,89 @@ fun EditarPerfilScreen(
                         }
                     }
                 }
-            }
 
-            // Banner de capa
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Banner de capa",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = ProfileColors.TextPrimary
-                    )
+                // Banner de capa
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Banner de capa",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = ProfileColors.TextPrimary
+                        )
+                        if (bannerPreview != null || FotoPerfilHelper.fotoExiste(bannerPath)) {
+                            TextButton(
+                                onClick = ::removerBanner,
+                                enabled = !salvandoBanner
+                            ) {
+                                Text(
+                                    text = "Remover banner",
+                                    fontSize = 12.sp,
+                                    color = ProfileColors.BadgeRedText
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable { mostrarDialogoBanner = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val modeloBanner: Any? = bannerPreview
+                            ?: bannerPath.takeIf { FotoPerfilHelper.fotoExiste(it) }?.let { File(it) }
+                        if (salvandoBanner) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = ProfileColors.Primary
+                            )
+                        } else if (modeloBanner != null) {
+                            AsyncImage(
+                                model = modeloBanner,
+                                contentDescription = "Banner de capa",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                ProfileColors.PrimaryLight.copy(alpha = 0.3f),
+                                                ProfileColors.Primary.copy(alpha = 0.1f)
+                                            )
+                                        )
+                                    )
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = "Adicionar banner",
+                                    tint = ProfileColors.Primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Toque para adicionar banner",
+                                    fontSize = 12.sp,
+                                    color = ProfileColors.TextSecondary
+                                )
+                            }
+                        }
+                    }
                     if (bannerPreview != null || FotoPerfilHelper.fotoExiste(bannerPath)) {
                         TextButton(
                             onClick = ::removerBanner,
@@ -596,75 +717,6 @@ fun EditarPerfilScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .clickable { abrirGaleriaBanner() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    val modeloBanner: Any? = bannerPreview
-                        ?: bannerPath.takeIf { FotoPerfilHelper.fotoExiste(it) }?.let { File(it) }
-                    if (salvandoBanner) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp,
-                            color = ProfileColors.Primary
-                        )
-                    } else if (modeloBanner != null) {
-                        AsyncImage(
-                            model = modeloBanner,
-                            contentDescription = "Banner de capa",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            ProfileColors.PrimaryLight.copy(alpha = 0.3f),
-                                            ProfileColors.Primary.copy(alpha = 0.1f)
-                                        )
-                                    )
-                                )
-                                .clip(RoundedCornerShape(16.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Add,
-                                contentDescription = "Adicionar banner",
-                                tint = ProfileColors.Primary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Toque para adicionar banner",
-                                fontSize = 12.sp,
-                                color = ProfileColors.TextSecondary
-                            )
-                        }
-                    }
-                }
-                if (bannerPreview != null || FotoPerfilHelper.fotoExiste(bannerPath)) {
-                    TextButton(
-                        onClick = ::removerBanner,
-                        enabled = !salvandoBanner
-                    ) {
-                        Text(
-                            text = "Remover banner",
-                            fontSize = 12.sp,
-                            color = ProfileColors.BadgeRedText
-                        )
-                    }
-                }
-            }
 
             // Campo nome
                 Column {
@@ -766,6 +818,7 @@ fun EditarPerfilScreen(
                         minLines = 3,
                         maxLines = 5,
                         shape = FieldShape,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = ProfileColors.Background,
                             unfocusedContainerColor = ProfileColors.Background,
@@ -815,6 +868,7 @@ fun EditarPerfilScreen(
                         singleLine = true,
                         maxLines = 1,
                         shape = FieldShape,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = ProfileColors.Background,
                             unfocusedContainerColor = ProfileColors.Background,
@@ -923,6 +977,7 @@ fun EditarPerfilScreen(
             }
         }
     }
+}
 
 // ---------------------------------------------------------------------------------------------
 // PREVIEWS (mesmo padrão das telas de perfil)

@@ -119,6 +119,7 @@ fun MainScaffold(
                         NavItem.HOME -> HomeScreen(
                             localizacao = usuario.localizacao,
                             onLocationClick = { irPara(LumisTela.EditarPerfil) },
+                            onNotificationClick = { irPara(LumisTela.Notificacoes) },
                             onSeeAllCategories = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onSeeAllRecommended = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },

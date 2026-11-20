@@ -269,22 +269,7 @@ fun UsuarioHeaderSection(
                         )
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
-                            .clickable { emBreve() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.PhotoCamera,
-                            contentDescription = "Alterar capa",
-                            tint = ProfileColors.TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
                     }
-                }
             }
         }
 

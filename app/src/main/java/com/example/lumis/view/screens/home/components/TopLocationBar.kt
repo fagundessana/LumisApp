@@ -96,22 +96,12 @@ fun TopLocationBar(
                     color = LumisColors.Primary
                 )
             }
-            // Botão do sino (com a bolinha verde de "tem notificação").
+            // Botão do sino
             CircleIconButton(
                 onClick = onNotificationClick,
                 contentDescription = "Notificações",
                 icon = Icons.Filled.NotificationsNone
-            ) {
-                // Bolinha verde de "tem notificação".
-                Box(
-                    modifier = Modifier
-                        .padding(start = 12.dp, bottom = 12.dp)
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(LumisColors.Primary)
-                        .border(1.5.dp, LumisColors.Surface, CircleShape)
-                )
-            }
+            )
         }
     }
 }
