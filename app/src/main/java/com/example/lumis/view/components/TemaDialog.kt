@@ -101,7 +101,7 @@ fun TemaCard(
     }
 }
 
-// Modal com as três opções. Selecionar aplica o tema e fecha o modal.
+// Modal com as três opções. Selecionar aplica o tema; fecha só pelo botão "Fechar" ou toque fora.
 @Composable
 fun TemaDialog(
     modoAtual: ModoTema,
@@ -126,19 +126,13 @@ fun TemaDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .clickable {
-                                onSelecionar(modo)
-                                onDismiss()
-                            }
+                            .clickable { onSelecionar(modo) }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
                             selected = modo == modoAtual,
-                            onClick = {
-                                onSelecionar(modo)
-                                onDismiss()
-                            },
+                            onClick = { onSelecionar(modo) },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = ProfileColors.Primary,
                                 unselectedColor = ProfileColors.TextSecondary
