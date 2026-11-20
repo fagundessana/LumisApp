@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.lumis.R
-import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.TemaApp.corTema
@@ -87,8 +86,8 @@ data class Atalho(
 // Dados mockados equivalentes ao print de referência
 val atalhosPadrao = listOf(
     Atalho("Meus dados", Icons.Outlined.Description),
-    Atalho("Favoritos", Icons.Outlined.FavoriteBorder),
-    Atalho("Pagamentos", Icons.Outlined.CreditCard),
+    Atalho("Serviços", Icons.Outlined.HomeRepairService),
+    Atalho("Planos", Icons.Outlined.WorkspacePremium),
     Atalho("Notificações", Icons.Outlined.NotificationsNone)
 )
 
@@ -121,9 +120,6 @@ fun UsuarioProfileScreen(
     onMembroLumisClick: () -> Unit = {},
     onConfigClick: () -> Unit = {}
 ) {
-    // Ações ainda não implementadas mostram o aviso "Em breve"
-    val emBreve = lembreteEmBreve()
-
     Scaffold(
         containerColor = ProfileColors.CardBackground
     ) { innerPadding ->
@@ -163,21 +159,21 @@ fun UsuarioProfileScreen(
                             BiografiaSection(biografia = profile.biografia)
                         }
 
-                        MembroLumisCard(onClick = { emBreve() })
+                        MembroLumisCard(onClick = onMembroLumisClick)
 
                         AtalhosRapidosSection(
                             atalhos = atalhos,
-                            onAtalhoClick = { emBreve() }
+                            onAtalhoClick = onAtalhoClick
                         )
 
                         AtividadesRecentesSection(
                             atividades = atividadesRecentes,
-                            onAtividadeClick = { emBreve() }
+                            onAtividadeClick = onAtividadeClick
                         )
 
                         TarefasPendentesSection(
                             tarefas = tarefasPendentes,
-                            onConcluirTarefa = { emBreve() }
+                            onConcluirTarefa = onConcluirTarefa
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -199,8 +195,6 @@ fun UsuarioHeaderSection(
     onEditarClick: () -> Unit,
     onConfigClick: () -> Unit
 ) {
-    val emBreve = lembreteEmBreve()
-
     Box(modifier = Modifier.fillMaxWidth()) {
         // Banner de capa (imagem ou gradiente padrão)
         Box(

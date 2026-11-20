@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.widget.Toast
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import coil.compose.AsyncImage
@@ -170,10 +168,11 @@ fun calcularDesempenho(profile: FuncionarioProfile): NivelDesempenho {
 fun FuncionarioProfileScreen(
     profile: FuncionarioProfile = FuncionarioProfile(),
     onEditarClick: () -> Unit = {},
-    onConfigClick: () -> Unit = {}
+    onConfigClick: () -> Unit = {},
+    onCalendarioClick: () -> Unit = {}
 ) {
     var periodoSelecionado by remember { mutableStateOf(PeriodoServico.ANO) }
-    val context = LocalContext.current
+    var mostrarAvaliacoes by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = ProfileColors.Background
@@ -256,12 +255,8 @@ fun FuncionarioProfileScreen(
                         }
 
                         ActionButtons(
-                            onCalendarioClick = {
-                                Toast.makeText(context, "Em breve", Toast.LENGTH_SHORT).show()
-                            },
-                            onAvaliacoesClick = {
-                                Toast.makeText(context, "Em breve", Toast.LENGTH_SHORT).show()
-                            }
+                            onCalendarioClick = onCalendarioClick,
+                            onAvaliacoesClick = { mostrarAvaliacoes = true }
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -269,6 +264,28 @@ fun FuncionarioProfileScreen(
                 }
             }
         }
+    }
+
+    if (mostrarAvaliacoes) {
+        AlertDialog(
+            onDismissRequest = { mostrarAvaliacoes = false },
+            icon = { Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = ProfileColors.Primary) },
+            title = { Text("Resumo das avaliações") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Média geral: ${profile.avaliacao}")
+                    Text("Taxa de conclusão: ${profile.taxaConclusao}")
+                    Text("Pontualidade: ${profile.pontualidade}")
+                    Text(
+                        "Seu desempenho atual é ${calcularDesempenho(profile).label.lowercase()}.",
+                        color = ProfileColors.TextSecondary
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { mostrarAvaliacoes = false }) { Text("Fechar") }
+            }
+        )
     }
 }
 

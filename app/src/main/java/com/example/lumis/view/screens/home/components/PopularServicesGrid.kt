@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.screens.home.model.HomePreviewData
 import com.example.lumis.view.screens.home.model.PopularService
 import com.example.lumis.view.theme.LumisColors
@@ -38,7 +37,6 @@ fun PopularServicesGrid(
     onSeeAllClick: () -> Unit = {},
     onServiceClick: (String) -> Unit = {}
 ) {
-    val emBreve = lembreteEmBreve()
     Column(modifier = modifier) {
         SectionHeader(title = "Serviços populares", onActionClick = onSeeAllClick)
         val rows = HomePreviewData.popularServices.chunked(4)
@@ -50,9 +48,7 @@ fun PopularServicesGrid(
                 row.forEach { service ->
                     ServiceCard(
                         service = service,
-                        onClick = {
-                            if (service.isHighlight) emBreve() else onServiceClick(service.id)
-                        },
+                        onClick = { onServiceClick(service.id) },
                         modifier = Modifier.weight(1f)
                     )
                 }

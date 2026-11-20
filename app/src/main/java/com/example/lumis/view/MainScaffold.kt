@@ -192,7 +192,19 @@ fun MainScaffold(
                                     bannerUrl = usuario.bannerPerfilPath.ifBlank { null }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
-                                onConfigClick = { irPara(LumisTela.Conta) }
+                                onConfigClick = { irPara(LumisTela.Conta) },
+                                onMembroLumisClick = { irPara(LumisTela.Planos) },
+                                onAtalhoClick = { atalho ->
+                                    when (atalho.label) {
+                                        "Meus dados" -> irPara(LumisTela.EditarPerfil)
+                                        "Notificações" -> irPara(LumisTela.Notificacoes)
+                                        "Serviços" -> irPara(LumisTela.Principal(NavItem.EXPLORAR))
+                                        "Planos" -> irPara(LumisTela.Planos)
+                                        else -> irPara(LumisTela.Principal(NavItem.HOME))
+                                    }
+                                },
+                                onAtividadeClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
+                                onConcluirTarefa = { irPara(LumisTela.Principal(NavItem.CIDADE)) }
                             )
                         } else {
                             FuncionarioProfileScreen(
@@ -204,7 +216,8 @@ fun MainScaffold(
                                     biografia = usuario.biografia
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
-                                onConfigClick = { irPara(LumisTela.Conta) }
+                                onConfigClick = { irPara(LumisTela.Conta) },
+                                onCalendarioClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) }
                             )
                         }
                         NavItem.EXPLORAR -> ServicesScreen(

@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.screens.city.components.CircularFillIndicator
 import com.example.lumis.view.screens.city.model.BinFillItem
@@ -48,10 +47,10 @@ fun BinFillCard(
     modifier: Modifier = Modifier,
     fraction: Float = com.example.lumis.view.screens.city.model.CidadeUiModel.binFillFraction,
     label: String = com.example.lumis.view.screens.city.model.CidadeUiModel.binFillLabel,
-    items: List<BinFillItem> = com.example.lumis.view.screens.city.model.CidadeUiModel.binFillItems
+    items: List<BinFillItem> = com.example.lumis.view.screens.city.model.CidadeUiModel.binFillItems,
+    onVerMais: () -> Unit = {},
+    onFiltrar: () -> Unit = {}
 ) {
-    val onEmBreve = lembreteEmBreve()
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -73,7 +72,7 @@ fun BinFillCard(
             ) {
                 FilterChip(
                     selected = false,
-                    onClick = onEmBreve,
+                    onClick = onVerMais,
                     shape = RoundedCornerShape(20.dp),
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = CidadeColors.ChipVerMaisBackground,
@@ -131,7 +130,7 @@ fun BinFillCard(
                                         .size(36.dp)
                                         .clip(CircleShape)
                                         .background(CidadeColors.FilterButtonBackground)
-                                        .clickable { onEmBreve() },
+                                        .clickable(onClick = onFiltrar),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(

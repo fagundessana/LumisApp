@@ -119,7 +119,9 @@ fun PlanosScreen(
             // Conteúdo scrollável (lista de planos + faq)
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                // Reserva espaço para que o último card e a FAQ possam subir totalmente
+                // acima do CTA fixo, inclusive em telas menores.
+                contentPadding = PaddingValues(bottom = 112.dp)
             ) {
                 // Cabeçalho
                 item {
@@ -404,21 +406,23 @@ private fun FAQItem(pergunta: String, resposta: String) {
 private fun CtaComprar(planoSelecionado: Plano) {
     val context = LocalContext.current
 
-    Column(
+    Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(LumisSurface)
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .fillMaxWidth(),
+        color = LumisSurface,
+        shadowElevation = 12.dp
     ) {
-        BotaoContinuar(
-            onClick = {
-                Toast.makeText(
-                    context,
-                    "✅ ${planoSelecionado.nome} assinado!",
-                    Toast.LENGTH_LONG
-                ).show()
-            },
-            texto = "Assinar o ${planoSelecionado.nome} — ${planoSelecionado.preco}${planoSelecionado.precoPeriodo}"
-        )
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+            BotaoContinuar(
+                onClick = {
+                    Toast.makeText(
+                        context,
+                        "✅ ${planoSelecionado.nome} assinado!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                },
+                texto = "Assinar o ${planoSelecionado.nome} — ${planoSelecionado.preco}${planoSelecionado.precoPeriodo}"
+            )
+        }
     }
 }

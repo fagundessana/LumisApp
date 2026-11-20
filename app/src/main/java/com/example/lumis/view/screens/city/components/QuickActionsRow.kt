@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
@@ -43,10 +42,11 @@ import com.example.lumis.view.theme.Questrial
 fun QuickActionsRow(
     modifier: Modifier = Modifier,
     buttonHeight: androidx.compose.ui.unit.Dp = 80.dp,
-    cornerRadius: androidx.compose.ui.unit.Dp = 12.dp
+    cornerRadius: androidx.compose.ui.unit.Dp = 12.dp,
+    onEcopontosClick: () -> Unit = {},
+    onColetaClick: () -> Unit = {},
+    onDadosClick: () -> Unit = {}
 ) {
-    val onEmBreve = lembreteEmBreve()
-
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -60,7 +60,7 @@ fun QuickActionsRow(
             backgroundColor = CidadeColors.ActionEcopotonsBackground,
             iconColor = CidadeColors.ActionIconWhite,
             textColor = CidadeColors.ActionIconWhite,
-            onClick = onEmBreve,
+            onClick = onEcopontosClick,
             modifier = Modifier.weight(1f).height(buttonHeight),
             cornerRadius = cornerRadius
         )
@@ -72,7 +72,7 @@ fun QuickActionsRow(
             backgroundColor = CidadeColors.ActionColetaBackground,
             iconColor = CidadeColors.ActionIconWhite,
             textColor = CidadeColors.ActionIconWhite,
-            onClick = onEmBreve,
+            onClick = onColetaClick,
             modifier = Modifier.weight(1f).height(buttonHeight),
             cornerRadius = cornerRadius
         )
@@ -84,7 +84,7 @@ fun QuickActionsRow(
             backgroundColor = CidadeColors.ActionDadosBackground,
             iconColor = CidadeColors.ActionDadosText,
             textColor = CidadeColors.ActionDadosText,
-            onClick = onEmBreve,
+            onClick = onDadosClick,
             modifier = Modifier.weight(1f).height(buttonHeight),
             cornerRadius = cornerRadius
         )
