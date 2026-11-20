@@ -54,7 +54,8 @@ import com.example.lumis.view.theme.*
 fun ServicesScreen(
     onAbrirPlanos: () -> Unit = {},
     onAbrirAgendamento: (Servico) -> Unit = {},
-    servicoInicial: String? = null
+    servicoInicial: String? = null,
+    onNotificationsClick: () -> Unit = {}
 ) {
     val controller = remember { ServicesController() }
 
@@ -75,7 +76,7 @@ fun ServicesScreen(
                 .fillMaxSize()
                 .background(LumisBackground)
         ) {
-            LumisTopBar()
+            LumisTopBar(onNotificationsClick = onNotificationsClick)
 
             Abas(onAbrirPlanos = onAbrirPlanos)
 

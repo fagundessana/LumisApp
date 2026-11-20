@@ -53,7 +53,8 @@ fun ServicosAdicionaisScreen(
     servico: String? = null,
     datahora: String? = null,
     onBack: () -> Unit = {},
-    onConfirm: (subtotal: Double, adicionaisEscolhidos: List<String>) -> Unit = { _, _ -> }
+    onConfirm: (subtotal: Double, adicionaisEscolhidos: List<String>) -> Unit = { _, _ -> },
+    onNotificationsClick: () -> Unit = {}
 ) {
     var geladeira by remember { mutableStateOf(true) }
     var forno by remember { mutableStateOf(true) }
@@ -78,7 +79,7 @@ fun ServicosAdicionaisScreen(
             .fillMaxSize()
             .background(LumisBackground)
     ) {
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 3)
 

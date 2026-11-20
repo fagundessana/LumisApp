@@ -63,7 +63,8 @@ fun ConfiguracaoImovelScreen(
     data: String? = null,
     horario: String? = null,
     onBack: () -> Unit = {},
-    onConfirm: (quartos: Int, banheiros: Int, tamanho: String) -> Unit = { _, _, _ -> }
+    onConfirm: (quartos: Int, banheiros: Int, tamanho: String) -> Unit = { _, _, _ -> },
+    onNotificationsClick: () -> Unit = {}
 ) {
     var quartos by remember { mutableIntStateOf(2) }
     var banheiros by remember { mutableIntStateOf(1) }
@@ -78,7 +79,7 @@ fun ConfiguracaoImovelScreen(
         // =================================================
         // TOPO
         // =================================================
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 2)
 

@@ -1,6 +1,7 @@
 package com.example.lumis.view.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,8 @@ import com.example.lumis.view.theme.TemaApp.corTema
 
 @Composable
 fun LumisTopBar(
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    onNotificationsClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -74,7 +76,8 @@ fun LumisTopBar(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(corTema(claro = Color(0xFFEAF0F4), escuro = Color(0xFF262F36))),
+                .background(corTema(claro = Color(0xFFEAF0F4), escuro = Color(0xFF262F36)))
+                .clickable { onNotificationsClick?.invoke() },
             contentAlignment = Alignment.Center
         ) {
             Icon(

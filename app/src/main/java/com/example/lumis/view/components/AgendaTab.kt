@@ -52,13 +52,13 @@ object AgendaStore {
 }
 
 @Composable
-fun AgendaTab() {
+fun AgendaTab(onNotificationsClick: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LumisBackground)
     ) {
-        LumisTopBar()
+        LumisTopBar(onNotificationsClick = onNotificationsClick)
 
         Column(
             modifier = Modifier

@@ -58,7 +58,8 @@ data class UsuarioProfile(
     val nome: String = "Maria de Oliveira",
     val localizacao: String = "São Paulo, Brasil",
     val fotoUrl: String? = null,
-    val biografia: String = ""
+    val biografia: String = "",
+    val bannerUrl: String? = null
 )
 
 enum class StatusAtividade(val label: String) {
@@ -188,7 +189,7 @@ fun UsuarioProfileScreen(
 }
 
 // ---------------------------------------------------------------------------------------------
-// 1. HEADER (fundo verde + avatar sobreposto + nome/localização)
+// 1. HEADER (banner de capa + avatar sobreposto + nome/localização)
 // ---------------------------------------------------------------------------------------------
 
 @Composable
@@ -201,17 +202,31 @@ fun UsuarioHeaderSection(
     val emBreve = lembreteEmBreve()
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        // Fundo verde gradiente
+        // Banner de capa (imagem ou gradiente padrão)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
                 .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(HeaderGreenTop, HeaderGreenBottom)
-                    )
+                    brush = if (profile.bannerUrl != null && profile.bannerUrl!!.isNotBlank())
+                        Brush.horizontalGradient(colors = listOf(Color.Transparent, Color.Transparent))
+                    else
+                        Brush.verticalGradient(
+                            colors = listOf(HeaderGreenTop, HeaderGreenBottom)
+                        )
                 )
         ) {
+            // Imagem do banner (se existir)
+            if (profile.bannerUrl != null && profile.bannerUrl!!.isNotBlank()) {
+                coil.compose.AsyncImage(
+                    model = profile.bannerUrl!!,
+                    contentDescription = "Banner do perfil",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(0.dp))
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -63,7 +63,8 @@ fun ResumoPedidoScreen(
     extras: List<String>,
     total: Double,
     onConfirm: () -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -75,7 +76,7 @@ fun ResumoPedidoScreen(
         // =============================
         // TOPO
         // =============================
-        LumisTopBar(onBack = onBack)
+        LumisTopBar(onBack = onBack, onNotificationsClick = onNotificationsClick)
 
         LinhaProgresso(etapaAtual = 4)
 
