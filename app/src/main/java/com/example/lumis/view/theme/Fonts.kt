@@ -13,3 +13,7 @@ val Montserrat = FontFamily(
 val Questrial = FontFamily(
     Font(R.font.questrial_regular, FontWeight.Normal)
 )
+
+val MerriweatherSans = FontFamily(
+    Font(R.font.merriweather_sans_bold, FontWeight.Bold)
+)

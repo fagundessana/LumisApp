@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 private val LumisLightColorScheme = lightColorScheme(
-    primary = LumisGreen,
-    onPrimary = LumisSurface,
+    primary = LumisGreenVivid,
+    onPrimary = Color(0xFF102018),
     secondary = LumisTeal,
     background = LumisBackground,
     surface = LumisSurface,
@@ -42,8 +42,8 @@ private val LumisDarkColorScheme = darkColorScheme(
     primary = LumisGreenVivid,
     onPrimary = Color(0xFF1E1E1E),
     secondary = LumisTeal,
-    background = Color(0xFF1E1E1E),
-    surface = Color(0xFF262626),
+    background = Color(0xFF1A1A1A),
+    surface = Color(0xFF242424),
     onBackground = Color(0xFFF7F8FA),
     onSurface = Color(0xFFF7F8FA),
     outline = Color(0xFF4A4A4A),
@@ -51,14 +51,16 @@ private val LumisDarkColorScheme = darkColorScheme(
 )
 
 private val LumisTypography = Typography(
-    headlineSmall = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 26.sp),
-    titleLarge = TextStyle(fontWeight = FontWeight.Bold, fontSize = 17.sp, lineHeight = 22.sp),
-    titleMedium = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
-    bodyLarge = TextStyle(fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 20.sp),
-    bodyMedium = TextStyle(fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp),
-    bodySmall = TextStyle(fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp),
-    labelSmall = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 11.sp, letterSpacing = 0.6.sp),
-    labelLarge = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+    displaySmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.ExtraBold, fontSize = 32.sp, lineHeight = 38.sp),
+    headlineMedium = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 26.sp, lineHeight = 32.sp),
+    headlineSmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 28.sp),
+    titleLarge = TextStyle(fontFamily = MerriweatherSans, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp),
+    titleMedium = TextStyle(fontFamily = MerriweatherSans, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 21.sp),
+    bodyLarge = TextStyle(fontFamily = Questrial, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 23.sp),
+    bodyMedium = TextStyle(fontFamily = Questrial, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
+    bodySmall = TextStyle(fontFamily = Questrial, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 17.sp),
+    labelSmall = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 0.7.sp),
+    labelLarge = TextStyle(fontFamily = Montserrat, fontWeight = FontWeight.Bold, fontSize = 14.sp)
 )
 
 private val LumisShapes = Shapes(

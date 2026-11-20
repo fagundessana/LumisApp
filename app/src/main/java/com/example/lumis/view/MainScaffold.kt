@@ -1,6 +1,12 @@
 package com.example.lumis.view
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -147,7 +153,15 @@ fun MainScaffold(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                when (val tela = telaAtual) {
+                AnimatedContent(
+                    targetState = telaAtual,
+                    transitionSpec = {
+                        (fadeIn(tween(220)) + scaleIn(tween(220), initialScale = 0.985f))
+                            .togetherWith(fadeOut(tween(140)))
+                    },
+                    label = "screenTransition"
+                ) { telaDestino ->
+                when (val tela = telaDestino) {
                     is LumisTela.Principal -> when (tela.aba) {
                         NavItem.HOME -> HomeScreen(
                             localizacao = usuario.localizacao,
@@ -312,6 +326,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
                         onSalvo = { irPara(LumisTela.Principal(NavItem.PERFIL)) }
                     )
+                }
                 }
             }
 

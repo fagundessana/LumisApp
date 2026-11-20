@@ -3,23 +3,23 @@ package com.example.lumis.view.theme
 import androidx.compose.ui.graphics.Color
 import com.example.lumis.view.theme.TemaApp.corTema
 
-// Marca
-val LumisGreen = Color(0xFF3AA66E)
-val LumisGreenDark = Color(0xFF2E8F5C)
+// Marca. Estes tokens espelham o design system do site da Lumis.
+val LumisGreen = Color(0xFF50BF87)
+val LumisGreenDark = Color(0xFF317252)
 val LumisGreenLight: Color get() = corTema(claro = Color(0xFFE7F5EC), escuro = Color(0xFF1F3A2E))
 val LumisTeal = Color(0xFF3DBEA9)
 val LumisTealLight: Color get() = corTema(claro = Color(0xFFE6F7F4), escuro = Color(0xFF1C3A35))
-val LumisBlueAccent = Color(0xFF4A6CF7)
-val LumisGreenVivid = Color(0xFF50BF87)
+val LumisBlueAccent = Color(0xFF508ABF)
+val LumisGreenVivid = LumisGreen
 val LumisBlue = Color(0xFF508ABF)
 val LumisGreySecondary: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFF9A9A9A))
 
 // Neutros
-val LumisBackground: Color get() = corTema(claro = Color(0xFFF7F8FA), escuro = Color(0xFF1E1E1E))
-val LumisSurface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF262626))
+val LumisBackground: Color get() = corTema(claro = Color(0xFFF9F9FB), escuro = Color(0xFF1A1A1A))
+val LumisSurface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF242424))
 val LumisBorder: Color get() = corTema(claro = Color(0xFFE7E9EC), escuro = Color(0xFF3A3A3C))
-val LumisTextPrimary: Color get() = corTema(claro = Color(0xFF1A1D1F), escuro = Color(0xFFF9F9FB))
-val LumisTextSecondary: Color get() = corTema(claro = Color(0xFF7C8388), escuro = Color(0xFFA0A6AB))
+val LumisTextPrimary: Color get() = corTema(claro = Color(0xFF1A1A1A), escuro = Color(0xFFE0E0E0))
+val LumisTextSecondary: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFFA0A0A0))
 val LumisTextTertiary: Color get() = corTema(claro = Color(0xFFAEB4B8), escuro = Color(0xFF6E7479))
 
 // Estados

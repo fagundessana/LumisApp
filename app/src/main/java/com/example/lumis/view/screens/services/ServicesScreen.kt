@@ -1,8 +1,10 @@
 package com.example.lumis.view.screens.services
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,40 +17,51 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.lumis.controller.ServicesController
 import com.example.lumis.model.Servico
 import com.example.lumis.model.ServicoRepository
-import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LumisCard
+import com.example.lumis.view.components.LumisPageTitle
+import com.example.lumis.view.components.LumisPrimaryButton
+import com.example.lumis.view.components.LumisTab
+import com.example.lumis.view.components.LumisTabSelector
+import com.example.lumis.view.components.LumisTextField
 import com.example.lumis.view.components.LumisTopBar
-import com.example.lumis.view.theme.LumisBorder
-import com.example.lumis.view.theme.LumisGreySecondary
-import com.example.lumis.view.theme.LumisSurface
-import com.example.lumis.view.theme.LumisTeal
+import com.example.lumis.view.theme.LumisBackground
+import com.example.lumis.view.theme.LumisBlue
+import com.example.lumis.view.theme.LumisGreen
+import com.example.lumis.view.theme.LumisGreenDark
+import com.example.lumis.view.theme.LumisGreenLight
 import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
-import com.example.lumis.view.theme.*
-
-// ---------------------------------------------------------
-// TELA PRINCIPAL (SERVIÇOS)
-// ---------------------------------------------------------
 
 @Composable
 fun ServicesScreen(
@@ -57,143 +70,130 @@ fun ServicesScreen(
     servicoInicial: String? = null
 ) {
     val controller = remember { ServicesController() }
+    var busca by rememberSaveable { mutableStateOf("") }
+    var categoria by rememberSaveable { mutableStateOf("Todos") }
+    val categorias = listOf("Todos", "Rotina", "Pesada", "Mudança", "Temporada")
 
     LaunchedEffect(servicoInicial) {
         servicoInicial?.let { nome ->
-            ServicoRepository.todos
-                .firstOrNull { it.nome == nome }
-                ?.let { controller.selecionarServico(it) }
+            ServicoRepository.todos.firstOrNull { it.nome == nome }?.let(controller::selecionarServico)
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = LumisBackground
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LumisBackground)
-        ) {
+    val servicosFiltrados = controller.servicos.filter { servico ->
+        val correspondeBusca = busca.isBlank() ||
+            servico.nome.contains(busca, ignoreCase = true) ||
+            servico.descricao.contains(busca, ignoreCase = true)
+        val correspondeCategoria = when (categoria) {
+            "Rotina" -> servico.nome.contains("Padrão", true)
+            "Pesada" -> servico.nome.contains("Pesada", true)
+            "Mudança" -> servico.nome.contains("Mudança", true)
+            "Temporada" -> servico.nome.contains("Airbnb", true)
+            else -> true
+        }
+        correspondeBusca && correspondeCategoria
+    }
+
+    Surface(modifier = Modifier.fillMaxSize(), color = LumisBackground) {
+        Column(modifier = Modifier.fillMaxSize()) {
             LumisTopBar()
+            LumisTabSelector(
+                selected = LumisTab.SERVICOS,
+                onSelected = { if (it == LumisTab.PLANOS) onAbrirPlanos() },
+                modifier = Modifier.padding(top = 8.dp)
+            )
 
-            Abas(onAbrirPlanos = onAbrirPlanos)
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 20.dp,
+                    bottom = 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(LumisBorder)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(52.dp)
-                            .fillMaxSize()
-                            .background(LumisTeal)
+                item {
+                    LumisPageTitle(
+                        eyebrow = "SERVIÇOS LUMIS",
+                        title = "Encontre a limpeza ideal",
+                        subtitle = "Compare opções, escolha o melhor serviço e agende em poucos passos."
                     )
                 }
+                item {
+                    LumisTextField(
+                        value = busca,
+                        onValueChange = { busca = it },
+                        label = "Buscar serviço",
+                        placeholder = "Tipo de limpeza ou necessidade",
+                        leadingIcon = Icons.Outlined.Search,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                item {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(categorias) { item ->
+                            FilterChip(
+                                selected = categoria == item,
+                                onClick = { categoria = item },
+                                label = { Text(item) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = LumisGreenLight,
+                                    selectedLabelColor = LumisGreenDark
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    enabled = true,
+                                    selected = categoria == item,
+                                    borderColor = MaterialTheme.colorScheme.outline,
+                                    selectedBorderColor = LumisGreen
+                                )
+                            )
+                        }
+                    }
+                }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "CATEGORIA",
-                    color = LumisBlue,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                Text(
-                    text = "Qual tipo de limpeza você\nprecisa?",
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = LumisTextPrimary
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(controller.servicos) { servico ->
+                if (servicosFiltrados.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 42.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Nenhum serviço encontrado", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Tente outro termo ou remova os filtros.",
+                                color = LumisTextSecondary,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                } else {
+                    items(servicosFiltrados, key = { it.nome }) { servico ->
                         CardServico(
                             servico = servico,
                             selecionado = controller.servicoSelecionado == servico.nome,
-                            onClick = {
-                                controller.selecionarServico(servico)
-                            }
+                            onClick = { controller.selecionarServico(servico) }
                         )
                     }
                 }
             }
 
-            BotaoContinuar(
-                onClick = {
-                    controller.servicos
-                        .find { it.nome == controller.servicoSelecionado }
-                        ?.let(onAbrirAgendamento)
-                },
-                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
-            )
+            val selecionado = controller.servicos.firstOrNull { it.nome == controller.servicoSelecionado }
+            Surface(shadowElevation = 10.dp, color = MaterialTheme.colorScheme.surface) {
+                LumisPrimaryButton(
+                    text = "Continuar com ${selecionado?.nome ?: "o serviço"}",
+                    onClick = { selecionado?.let(onAbrirAgendamento) },
+                    enabled = selecionado != null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                )
+            }
         }
     }
 }
-
-// ---------------------------------------------------------
-// ABAS
-// ---------------------------------------------------------
-
-@Composable
-private fun Abas(onAbrirPlanos: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
-            .height(29.dp)
-            .clip(RoundedCornerShape(7.dp))
-            .background(LumisBorder)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .clip(RoundedCornerShape(7.dp))
-                .background(LumisGreenVivid),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Serviços",
-                color = Color.White,
-                fontSize = 11.sp
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .clickable { onAbrirPlanos() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Planos",
-                color = LumisGreySecondary,
-                fontSize = 11.sp
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------
-// CARD DE SERVIÇO
-// ---------------------------------------------------------
 
 @Composable
 private fun CardServico(
@@ -201,68 +201,104 @@ private fun CardServico(
     selecionado: Boolean,
     onClick: () -> Unit
 ) {
-    val corBorda = if (selecionado) LumisGreenVivid else LumisBorder
+    val scale by animateFloatAsState(
+        targetValue = if (selecionado) 1f else 0.985f,
+        animationSpec = spring(dampingRatio = 0.75f, stiffness = 500f),
+        label = "serviceCardScale"
+    )
+    val markerColor by animateColorAsState(
+        targetValue = if (selecionado) LumisGreen else MaterialTheme.colorScheme.outline,
+        label = "serviceMarkerColor"
+    )
 
-    Column(
+    LumisCard(
+        isSelected = selecionado,
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(LumisSurface)
-            .border(width = 1.dp, color = corBorda, shape = RoundedCornerShape(10.dp))
-            .clickable { onClick() }
-            .padding(10.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            Text(
-                text = servico.nome,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = LumisTextPrimary
-            )
-
             Box(
                 modifier = Modifier
-                    .size(17.dp)
-                    .clip(CircleShape)
-                    .border(
-                        width = 1.5.dp,
-                        color = if (selecionado) LumisGreenVivid else LumisTextSecondary,
-                        shape = CircleShape
-                    )
-                    .background(if (selecionado) LumisGreenVivid else LumisSurface),
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(LumisGreenLight),
                 contentAlignment = Alignment.Center
             ) {
-                if (selecionado) {
+                Text(
+                    text = servico.nome.take(1),
+                    color = LumisGreenDark,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = servico.nome,
+                        color = LumisTextPrimary,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clip(CircleShape)
+                            .background(if (selecionado) LumisGreen else Color.Transparent)
+                            .then(
+                                if (!selecionado) Modifier.background(Color.Transparent) else Modifier
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Check,
+                            contentDescription = if (selecionado) "Selecionado" else null,
+                            tint = if (selecionado) Color(0xFF102018) else markerColor,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = servico.descricao.replace("\n", " "),
+                    color = LumisTextSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Selecionado",
-                        tint = Color.White,
-                        modifier = Modifier.size(12.dp)
+                        Icons.Outlined.AccessTime,
+                        contentDescription = null,
+                        tint = LumisTextSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text("4 horas", color = LumisTextSecondary, style = MaterialTheme.typography.bodySmall)
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "A partir de ${servico.preco}",
+                        color = LumisBlue,
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = servico.descricao,
-            fontSize = 9.sp,
-            lineHeight = 12.sp,
-            color = LumisGreySecondary
-        )
-
-        Spacer(modifier = Modifier.height(3.dp))
-
-        Text(
-            text = servico.preco,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = LumisBlue
-        )
+        AnimatedVisibility(visible = selecionado) {
+            Spacer(Modifier.height(2.dp))
+        }
     }
 }
