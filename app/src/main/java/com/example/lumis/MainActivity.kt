@@ -22,6 +22,7 @@ import com.example.lumis.controller.AuthController
 import com.example.lumis.controller.TemaController
 import com.example.lumis.view.screens.auth.CadastroScreen
 import com.example.lumis.view.screens.auth.LoginScreen
+import com.example.lumis.view.screens.auth.ProfileChoiceScreen
 import kotlinx.coroutines.delay
 import com.example.lumis.view.screens.splashscreen.SplashScreen
 import com.example.lumis.view.MainScaffold
@@ -79,6 +80,7 @@ fun AuthRoot(
                 modoTema = modoTema,
                 onModoTemaChange = onModoTemaChange
             )
+            authController.mostrarEscolhaPerfil -> ProfileChoiceScreen(authController)
             authController.mostrarCadastro -> CadastroScreen(authController)
             else -> LoginScreen(authController)
         }

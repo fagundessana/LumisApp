@@ -1,654 +1,228 @@
 package com.example.lumis.view.screens.auth
 
 import android.util.Patterns
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Engineering
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PersonOutline
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.lumis.R
 import com.example.lumis.controller.AuthController
+import com.example.lumis.view.components.LumisPageTitle
+import com.example.lumis.view.components.LumisPrimaryButton
+import com.example.lumis.view.components.LumisTag
+import com.example.lumis.view.components.LumisTextField
 import com.example.lumis.view.theme.LumisBackground
-import com.example.lumis.view.theme.LumisSurface
-import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.LumisGreen
+import com.example.lumis.view.theme.LumisGreenLight
 import com.example.lumis.view.theme.LumisTextSecondary
-import com.example.lumis.view.screens.employee_profile.ProfileColors
 import kotlinx.coroutines.launch
 
-private val VerdeCliente = Color(0xFF50C58A)
-private val VerdeProfissional = Color(0xFF3DB8B1)
-private val VerdeTexto = Color(0xFF43BD80)
-private val AzulLink = Color(0xFF4389C9)
-
 @Composable
-fun CadastroScreen(
-    authController: AuthController
-) {
-
-    var email by remember { mutableStateOf("") }
-    var nomeUsuario by remember { mutableStateOf("") }
-    var localizacao by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
-    var confirmacaoSenha by remember { mutableStateOf("") }
-
-    var tipoUsuario by remember { mutableStateOf("Cliente") }
-
-    var senhaVisivel by remember { mutableStateOf(false) }
-    var confirmacaoVisivel by remember { mutableStateOf(false) }
-
-    var mensagemErro by remember { mutableStateOf("") }
-
+fun CadastroScreen(authController: AuthController) {
+    var email by rememberSaveable { mutableStateOf("") }
+    var nomeUsuario by rememberSaveable { mutableStateOf("") }
+    var localizacao by rememberSaveable { mutableStateOf("") }
+    var senha by rememberSaveable { mutableStateOf("") }
+    var confirmacaoSenha by rememberSaveable { mutableStateOf("") }
+    var senhaVisivel by rememberSaveable { mutableStateOf(false) }
+    var confirmacaoVisivel by rememberSaveable { mutableStateOf(false) }
+    var mensagemErro by rememberSaveable { mutableStateOf<String?>(null) }
+    var carregando by rememberSaveable { mutableStateOf(false) }
+    val tipoUsuario = authController.tipoCadastroInicial
     val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(LumisBackground)
+            .background(
+                Brush.verticalGradient(
+                    listOf(LumisGreenLight.copy(alpha = 0.68f), LumisBackground, LumisBackground)
+                )
+            )
             .verticalScroll(rememberScrollState())
-            .padding(
-                start = 25.dp,
-                end = 25.dp,
-                top = 15.dp,
-                bottom = 100.dp
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
+        IconButton(onClick = authController::abrirCadastro) {
+            Icon(Icons.Outlined.ArrowBack, contentDescription = "Voltar")
+        }
 
-        // =========================================================
-        // ILUSTRAÇÃO
-        // =========================================================
-
-        Spacer(
-            modifier = Modifier.height(18.dp)
+        LumisTag(text = "PERFIL ${tipoUsuario.uppercase()}")
+        LumisPageTitle(
+            title = if (tipoUsuario == "Cliente") "Crie sua conta" else "Crie seu perfil profissional",
+            subtitle = if (tipoUsuario == "Cliente") {
+                "Encontre profissionais verificados e acompanhe seus serviços em um só lugar."
+            } else {
+                "Apresente seu trabalho, organize sua agenda e encontre novas oportunidades."
+            }
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .clip(RoundedCornerShape(24.dp)),
-            contentAlignment = Alignment.Center
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            LumisTextField(
+                value = nomeUsuario,
+                onValueChange = {
+                    nomeUsuario = it
+                    mensagemErro = null
+                },
+                label = if (tipoUsuario == "Cliente") "Nome" else "Nome profissional",
+                leadingIcon = Icons.Outlined.PersonOutline,
+                modifier = Modifier.fillMaxWidth()
+            )
+            LumisTextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    mensagemErro = null
+                },
+                label = "E-mail",
+                placeholder = "voce@exemplo.com",
+                leadingIcon = Icons.Outlined.Email,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth()
+            )
+            LumisTextField(
+                value = localizacao,
+                onValueChange = { localizacao = it },
+                label = if (tipoUsuario == "Cliente") "Cidade ou região (opcional)" else "Região de atuação (opcional)",
+                leadingIcon = Icons.Outlined.LocationOn,
+                modifier = Modifier.fillMaxWidth()
+            )
+            LumisTextField(
+                value = senha,
+                onValueChange = {
+                    senha = it
+                    mensagemErro = null
+                },
+                label = "Senha",
+                leadingIcon = Icons.Outlined.Lock,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
+                        Icon(
+                            if (senhaVisivel) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                            contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha"
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            LumisTextField(
+                value = confirmacaoSenha,
+                onValueChange = {
+                    confirmacaoSenha = it
+                    mensagemErro = null
+                },
+                label = "Confirmar senha",
+                leadingIcon = Icons.Outlined.Lock,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (confirmacaoVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { confirmacaoVisivel = !confirmacaoVisivel }) {
+                        Icon(
+                            if (confirmacaoVisivel) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                            contentDescription = if (confirmacaoVisivel) "Ocultar senha" else "Mostrar senha"
+                        )
+                    }
+                },
+                isError = mensagemErro != null,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        AnimatedVisibility(mensagemErro != null) {
+            Text(
+                text = mensagemErro.orEmpty(),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        Text(
+            text = "Ao continuar, você concorda com os Termos de Uso e a Política de Privacidade da Lumis.",
+            color = LumisTextSecondary,
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        LumisPrimaryButton(
+            text = "Criar conta",
+            loading = carregando,
+            enabled = email.isNotBlank() && nomeUsuario.isNotBlank() && senha.isNotBlank() && confirmacaoSenha.isNotBlank(),
+            onClick = {
+                mensagemErro = when {
+                    !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches() -> "Digite um e-mail válido"
+                    senha.length < 6 -> "A senha deve ter pelo menos 6 caracteres"
+                    senha != confirmacaoSenha -> "As senhas não coincidem"
+                    else -> null
+                }
+                if (mensagemErro == null) {
+                    scope.launch {
+                        carregando = true
+                        mensagemErro = authController.cadastrar(
+                            email = email,
+                            nomeUsuario = nomeUsuario,
+                            senha = senha,
+                            confirmacaoSenha = confirmacaoSenha,
+                            tipoUsuario = tipoUsuario,
+                            localizacao = localizacao
+                        )
+                        carregando = false
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.homem_limpando),
-                contentDescription = "Homem limpando",
-                contentScale = ContentScale.Fit,
+            Text("Já tem uma conta? ", color = LumisTextSecondary, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "Entrar",
+                color = LumisGreen,
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
+                    .clickable(onClick = authController::abrirLogin)
+                    .padding(4.dp)
             )
         }
-
-        Spacer(
-            modifier = Modifier.height(18.dp)
-        )
-
-        // =========================================================
-        // TÍTULO
-        // =========================================================
-
-        Text(
-            text = buildAnnotatedString {
-                append("Faça parte de nossa ")
-
-                withStyle(
-                    SpanStyle(
-                        color = VerdeProfissional
-                    )
-                ) {
-                    append("comunidade")
-                }
-            },
-            fontSize = 14.sp,
-            color = LumisTextPrimary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(
-            modifier = Modifier.height(14.dp)
-        )
-
-        Text(
-            text = "Selecione o seu tipo de usuário",
-            fontSize = 14.sp,
-            color = LumisTextSecondary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(
-            modifier = Modifier.height(22.dp)
-        )
-
-        // =========================================================
-        // BOTÃO CLIENTE
-        // =========================================================
-
-        Button(
-            onClick = {
-                tipoUsuario = "Cliente"
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(72.dp),
-            shape = RoundedCornerShape(9.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (tipoUsuario == "Cliente")
-                    VerdeCliente
-                else
-                    LumisSurface,
-
-                contentColor = if (tipoUsuario == "Cliente")
-                    Color.White
-                else
-                    VerdeCliente
-            ),
-            border = BorderStroke(
-                2.dp,
-                VerdeCliente
-            )
-        ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.PersonOutline,
-                    contentDescription = "Cliente",
-                    modifier = Modifier.size(34.dp)
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = "Cliente",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-        }
-
-        // =========================================================
-        // BOTÃO PROFISSIONAL
-        // =========================================================
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        Button(
-            onClick = {
-                tipoUsuario = "Profissional"
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(72.dp),
-            shape = RoundedCornerShape(9.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (tipoUsuario == "Profissional")
-                    VerdeProfissional
-                else
-                    LumisSurface,
-
-                contentColor = if (tipoUsuario == "Profissional")
-                    Color.White
-                else
-                    VerdeProfissional
-            ),
-            border = BorderStroke(
-                2.dp,
-                VerdeProfissional
-            )
-        ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = Icons.Default.Engineering,
-                    contentDescription = "Profissional",
-                    modifier = Modifier.size(34.dp)
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = "Profissional",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-        }
-
-        // =========================================================
-        // EMAIL
-        // =========================================================
-
-        Spacer(
-            modifier = Modifier.height(28.dp)
-        )
-
-        CampoCadastro(
-            valor = email,
-            aoMudar = {
-                email = it
-            },
-            placeholder = "Digite seu email"
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        // =========================================================
-        // NOME DE USUÁRIO
-        // =========================================================
-
-        CampoCadastro(
-            valor = nomeUsuario,
-            aoMudar = {
-                nomeUsuario = it
-            },
-            placeholder = "Nome de usuário"
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        // =========================================================
-        // LOCALIZAÇÃO (OPCIONAL)
-        // =========================================================
-
-        CampoCadastro(
-            valor = localizacao,
-            aoMudar = {
-                localizacao = it
-            },
-            placeholder = "Onde você mora? (opcional)"
-        )
-
-        Text(
-            text = "Ex: São Paulo, SP — você pode alterar depois no perfil.",
-            fontSize = 11.sp,
-            color = LumisTextSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 6.dp)
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        // =========================================================
-        // SENHA
-        // =========================================================
-
-        CampoSenha(
-            valor = senha,
-            aoMudar = {
-                senha = it
-            },
-            placeholder = "Senha",
-            visivel = senhaVisivel,
-            aoAlternarVisibilidade = {
-                senhaVisivel = !senhaVisivel
-            }
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        // =========================================================
-        // CONFIRMAÇÃO
-        // =========================================================
-
-        CampoSenha(
-            valor = confirmacaoSenha,
-            aoMudar = {
-                confirmacaoSenha = it
-            },
-            placeholder = "Confirmação de senha",
-            visivel = confirmacaoVisivel,
-            aoAlternarVisibilidade = {
-                confirmacaoVisivel = !confirmacaoVisivel
-            }
-        )
-
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
-
-        // =========================================================
-        // ERRO
-        // =========================================================
-
-        if (mensagemErro.isNotEmpty()) {
-
-            Text(
-                text = mensagemErro,
-                color = Color.Red,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
-        }
-
-        // =========================================================
-        // TERMOS
-        // =========================================================
-
-        Text(
-            text = buildAnnotatedString {
-
-                append("Ao se registrar, você concorda com nossos\n")
-
-                withStyle(
-                    SpanStyle(
-                        color = AzulLink
-                    )
-                ) {
-                    append("Termos de uso")
-                }
-
-                append(" e a nossa ")
-
-                withStyle(
-                    SpanStyle(
-                        color = AzulLink
-                    )
-                ) {
-                    append("Política de Privacidade")
-                }
-            },
-            fontSize = 11.sp,
-            color = LumisTextSecondary,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(
-            modifier = Modifier.height(23.dp)
-        )
-
-        // =========================================================
-        // BOTÃO CADASTRAR
-        // =========================================================
-
-        Button(
-            onClick = {
-
-                mensagemErro = ""
-
-                when {
-
-                    email.isBlank() -> {
-                        mensagemErro = "Digite seu email"
-                    }
-
-                    !Patterns.EMAIL_ADDRESS
-                        .matcher(email)
-                        .matches() -> {
-
-                        mensagemErro = "Digite um email válido"
-                    }
-
-                    nomeUsuario.isBlank() -> {
-                        mensagemErro = "Digite seu nome de usuário"
-                    }
-
-                    senha.isBlank() -> {
-                        mensagemErro = "Digite uma senha"
-                    }
-
-                    confirmacaoSenha.isBlank() -> {
-                        mensagemErro = "Confirme sua senha"
-                    }
-
-                    else -> {
-
-                        scope.launch {
-
-                            val erro = authController.cadastrar(
-                                email = email,
-                                nomeUsuario = nomeUsuario,
-                                senha = senha,
-                                confirmacaoSenha = confirmacaoSenha,
-                                tipoUsuario = tipoUsuario,
-                                localizacao = localizacao
-                            )
-
-                            if (erro != null) {
-                                mensagemErro = erro
-                            } else {
-                                email = ""
-                                nomeUsuario = ""
-                                localizacao = ""
-                                senha = ""
-                                confirmacaoSenha = ""
-                            }
-                        }
-                    }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = LumisBackground,
-                contentColor = VerdeTexto
-            ),
-            border = BorderStroke(
-                width = 1.5.dp,
-                color = VerdeTexto
-            )
-        ) {
-
-            Text(
-                text = "Cadastre-se",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(25.dp)
-        )
-
-        // =========================================================
-        // LOGIN
-        // =========================================================
-
-        Text(
-            text = buildAnnotatedString {
-
-                append("Já possui uma conta? ")
-
-                withStyle(
-                    SpanStyle(
-                        color = AzulLink
-                    )
-                ) {
-                    append("Entre")
-                }
-
-                append(" agora!")
-            },
-            fontSize = 12.sp,
-            color = LumisTextPrimary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.clickable {
-                authController.abrirLogin()
-            }
-        )
+        Spacer(Modifier.size(12.dp))
     }
-}
-
-// =============================================================
-// CAMPO DE TEXTO NORMAL
-// =============================================================
-
-@Composable
-private fun CampoCadastro(
-    valor: String,
-    aoMudar: (String) -> Unit,
-    placeholder: String
-) {
-
-    OutlinedTextField(
-        value = valor,
-        onValueChange = aoMudar,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        placeholder = {
-            Text(
-                text = placeholder,
-                fontSize = 14.sp,
-                color = ProfileColors.TextSecondary
-            )
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(14.dp),
-        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = ProfileColors.Background,
-            unfocusedContainerColor = ProfileColors.Background,
-            focusedBorderColor = ProfileColors.Primary,
-            unfocusedBorderColor = ProfileColors.Divider,
-            cursorColor = ProfileColors.Primary
-        )
-    )
-}
-
-// =============================================================
-// CAMPO DE SENHA
-// =============================================================
-
-@Composable
-private fun CampoSenha(
-    valor: String,
-    aoMudar: (String) -> Unit,
-    placeholder: String,
-    visivel: Boolean,
-    aoAlternarVisibilidade: () -> Unit
-) {
-
-    OutlinedTextField(
-        value = valor,
-        onValueChange = aoMudar,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        placeholder = {
-            Text(
-                text = placeholder,
-                fontSize = 14.sp,
-                color = ProfileColors.TextSecondary
-            )
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(14.dp),
-        visualTransformation =
-            if (visivel)
-                VisualTransformation.None
-            else
-                PasswordVisualTransformation(),
-        trailingIcon = {
-
-            IconButton(
-                onClick = aoAlternarVisibilidade
-            ) {
-
-                Icon(
-                    imageVector =
-                        if (visivel)
-                            Icons.Default.VisibilityOff
-                        else
-                            Icons.Default.Visibility,
-                    contentDescription = "Mostrar senha",
-                    tint = LumisTextSecondary
-                )
-            }
-        },
-        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = ProfileColors.Background,
-            unfocusedContainerColor = ProfileColors.Background,
-            focusedBorderColor = ProfileColors.Primary,
-            unfocusedBorderColor = ProfileColors.Divider,
-            cursorColor = ProfileColors.Primary
-        )
-    )
 }

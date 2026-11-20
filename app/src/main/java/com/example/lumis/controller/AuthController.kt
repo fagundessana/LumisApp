@@ -10,6 +10,8 @@ import com.example.lumis.data.User
 // Número máximo de caracteres da biografia do perfil.
 const val LIMITE_BIOGRAFIA = 300
 
+enum class AuthRoute { LOGIN, ESCOLHA_PERFIL, CADASTRO }
+
 // ---------------------------------------------------------
 // CONTROLLER DE AUTENTICAÇÃO (cadastro / login / logout)
 // ---------------------------------------------------------
@@ -25,20 +27,30 @@ class AuthController(context: Context) {
     var usuarioLogado by mutableStateOf<User?>(null)
         private set
 
-    // Alterna entre a tela de login e a de cadastro.
-    var mostrarCadastro by mutableStateOf(false)
+    var rotaAuth by mutableStateOf(AuthRoute.LOGIN)
         private set
+
+    var tipoCadastroInicial by mutableStateOf("Cliente")
+        private set
+
+    val mostrarCadastro: Boolean get() = rotaAuth == AuthRoute.CADASTRO
+    val mostrarEscolhaPerfil: Boolean get() = rotaAuth == AuthRoute.ESCOLHA_PERFIL
 
     // Mensagem de sucesso exibida na tela de login (ex.: após cadastro).
     var mensagemLogin by mutableStateOf<String?>(null)
         private set
 
     fun abrirLogin() {
-        mostrarCadastro = false
+        rotaAuth = AuthRoute.LOGIN
     }
 
     fun abrirCadastro() {
-        mostrarCadastro = true
+        rotaAuth = AuthRoute.ESCOLHA_PERFIL
+    }
+
+    fun cadastrarComo(tipoUsuario: String) {
+        tipoCadastroInicial = tipoUsuario
+        rotaAuth = AuthRoute.CADASTRO
     }
 
     // Restaura a sessão do último usuário logado (nas próximas aberturas do app).
@@ -92,7 +104,7 @@ class AuthController(context: Context) {
             )
         )
 
-        mostrarCadastro = false
+        rotaAuth = AuthRoute.LOGIN
         mensagemLogin = "Cadastro realizado com sucesso! Faça login."
         return null
     }
@@ -151,7 +163,7 @@ class AuthController(context: Context) {
     fun logout() {
         usuarioLogado = null
         mensagemLogin = null
-        mostrarCadastro = false
+        rotaAuth = AuthRoute.LOGIN
         prefs.edit().remove("ultimo_email").apply()
     }
 }
