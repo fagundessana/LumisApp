@@ -1,4 +1,4 @@
-package com.example.lumis.ui.screens
+package com.example.lumis.view.screens.services
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -7,17 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,17 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import com.example.lumis.ui.theme.LumisBackground
-import com.example.lumis.ui.theme.LumisGreen
-import com.example.lumis.ui.theme.LumisGreenDark
-import com.example.lumis.ui.theme.LumisGreenLight
-import com.example.lumis.ui.theme.LumisSurface
-import com.example.lumis.ui.theme.LumisTextPrimary
-import com.example.lumis.ui.theme.LumisTextSecondary
+import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.*
 
 // ============================================================
 // TELA DE PLANOS
@@ -55,7 +47,9 @@ data class Plano(
 )
 
 @Composable
-fun PlanosScreen() {
+fun PlanosScreen(
+    onVoltarServicos: () -> Unit = {}
+) {
     var sel by remember { mutableStateOf("regular") }
     val lista = listOf(
         Plano(
@@ -116,7 +110,10 @@ fun PlanosScreen() {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // App Bar / Topo
-            TopBarPlanos()
+            LumisTopBar()
+
+            // Abas Serviços | Planos
+            AbasPlanos(onVoltarServicos = onVoltarServicos)
 
             // Conteúdo scrollável (lista de planos + faq)
             LazyColumn(
@@ -190,50 +187,58 @@ fun PlanosScreen() {
                     }
                 }
             }
-        }
 
-        // Botão CTA Principal
-        CtaComprar(
-            texto = "Assinar o Plano Regular — R$ 179,90/mês",
-            selecionadoNome = "${(lista.find { it.id == sel })?.nome ?: "Regular"}",
-            preco = (lista.find { it.id == sel })?.preco ?: "R$ 179,90"
-        )
+            // Botão CTA Principal
+            CtaComprar(
+                planoSelecionado = lista.find { it.id == sel } ?: lista[1]
+            )
+        }
     }
 }
 
 // ============================================================
-// TOPO (com logo + ícones)
+// ABAS (Serviços | Planos)
 // ============================================================
 
 @Composable
-private fun TopBarPlanos() {
+private fun AbasPlanos(onVoltarServicos: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(50))
             .background(LumisSurface)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .border(1.dp, LumisBorder, RoundedCornerShape(50))
+            .padding(4.dp)
     ) {
-        // Logo + Texto
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(LumisGreen),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("L", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-            Spacer(Modifier.width(10.dp))
-            Text("Lumis", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(50))
+                .clickable { onVoltarServicos() }
+                .padding(vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Serviços",
+                color = LumisTextSecondary,
+                fontSize = 13.sp
+            )
         }
-
-        // Notificação + Perfil
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(Icons.Default.Add, contentDescription = "Notificações", tint = LumisTextSecondary)
-            Icon(Icons.Default.Home, contentDescription = "Perfil", tint = LumisGreen)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(50))
+                .background(LumisGreen)
+                .padding(vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Planos",
+                color = Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -256,7 +261,7 @@ private fun PlanCard(
             .background(if (plano.popular) LumisGreen else LumisSurface)
             .border(
                 width = if (plano.popular) 0.dp else 1.dp,
-                color = if (plano.popular) Color.Transparent else Color(0xFFE7E9EC),
+                color = if (plano.popular) Color.Transparent else LumisBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
@@ -395,7 +400,7 @@ private fun FAQItem(pergunta: String, resposta: String) {
 // ============================================================
 
 @Composable
-private fun CtaComprar(texto: String, selecionadoNome: String, preco: String) {
+private fun CtaComprar(planoSelecionado: Plano) {
     val context = LocalContext.current
 
     Column(
@@ -404,28 +409,15 @@ private fun CtaComprar(texto: String, selecionadoNome: String, preco: String) {
             .background(LumisSurface)
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Button(
+        BotaoContinuar(
             onClick = {
                 Toast.makeText(
                     context,
-                    "✅ $selecionadoNome assinado!",
+                    "✅ ${planoSelecionado.nome} assinado!",
                     Toast.LENGTH_LONG
                 ).show()
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = LumisGreen
-            )
-        ) {
-            Text(
-                text = texto,
-                color = Color.White,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+            texto = "Assinar o ${planoSelecionado.nome} — ${planoSelecionado.preco}${planoSelecionado.precoPeriodo}"
+        )
     }
 }

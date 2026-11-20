@@ -1,6 +1,5 @@
-package com.example.lumis.ui.screens
+package com.example.lumis.view.screens.services
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,28 +9,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.foundation.Image
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.painterResource
-import com.example.lumis.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,12 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.ui.theme.LumisGreen
-import com.example.lumis.ui.theme.LumisBackground
-import com.example.lumis.ui.theme.LumisSurface
-import com.example.lumis.ui.theme.LumisTextPrimary
-import com.example.lumis.ui.theme.LumisTextSecondary
-import java.time.YearMonth
+import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LinhaProgresso
+import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.*
+import java.util.Calendar
 
 // ============================================================
 // PALETA (usa as mesmas da Claud e da servicesScreen)
@@ -65,17 +51,22 @@ fun AgendamentoScreen(
     onConfirm: (dia: Int, horario: String) -> Unit = { _, _ -> }
 ) {
 
-    // Data atual / padrão
-    val hoje = YearMonth.now()
-    var ano by remember { mutableStateOf(hoje.year) }
-    var mes by remember { mutableStateOf(hoje.month) }
-    var diaSelecionado by remember { mutableStateOf(15) }
+    // Data atual / padrão (usando Calendar para compatibilidade com API 24)
+    val cal = Calendar.getInstance()
+    val hojeAno = cal.get(Calendar.YEAR)
+    val hojeMes = cal.get(Calendar.MONTH) + 1 // Calendar.MONTH é 0-based
+    val hojeDia = cal.get(Calendar.DAY_OF_MONTH)
+    val diasNoMes = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    var ano by remember { mutableStateOf(hojeAno) }
+    var mes by remember { mutableStateOf(hojeMes) }
+    var diaSelecionado by remember { mutableStateOf(hojeDia) }
 
     // Horário selecionado
     var horarioSelecionado by remember { mutableStateOf("10:00") }
 
-    // Dias do mês atual (simples, sem validar os dias da semana)
-    val dias = (1..mes.length(hoje.isLeapYear)).toList()
+    // Dias do mês atual
+    val dias = (1..diasNoMes).toList()
 
     // Horários disponíveis
     val horarios = listOf("08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00")
@@ -88,10 +79,10 @@ fun AgendamentoScreen(
         // -------------------------------------------------
         // TOPO
         // -------------------------------------------------
-        TopoAgendamento(
-            servico = servicoSelecionado,
-            onBack = onBack
-        )
+        LumisTopBar(onBack = onBack)
+
+        LinhaProgresso(etapaAtual = 1)
+        Spacer(modifier = Modifier.height(12.dp))
 
         // -------------------------------------------------
         // CONTEÚDO
@@ -179,84 +170,10 @@ fun AgendamentoScreen(
         // -------------------------------------------------
         // BOTÃO CONTINUAR
         // -------------------------------------------------
-        Button(
+        BotaoContinuar(
             onClick = { onConfirm(diaSelecionado, horarioSelecionado) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .height(54.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = VerdeLumis
-            )
-        ) {
-            Text(
-                text = "Continuar",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-    }
-}
-
-// ============================================================
-// TOPO (com serviço selecionado e voltar)
-// ============================================================
-
-@Composable
-fun TopoAgendamento(
-    servico: String?,
-    onBack: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(LumisSurface)
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Botão voltar + logo + texto
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIos,
-                    contentDescription = "Voltar",
-                    tint = LumisTextPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(Modifier.width(6.dp))
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Logo Lumis",
-                modifier = Modifier.size(24.dp)
-            )
-            Column {
-                Text(text = "Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = VerdeLumis)
-                if (servico != null) {
-                    Text(text = servico, fontSize = 11.sp, color = CinzaTexto)
-                }
-            }
-        }
-
-        // Ícones direita
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(
-                imageVector = Icons.Filled.Notifications,
-                contentDescription = "Notificações",
-                tint = CinzaTexto,
-                modifier = Modifier.size(22.dp)
-            )
-            Icon(
-                imageVector = Icons.Filled.AccountCircle,
-                contentDescription = "Perfil",
-                tint = VerdeLumis,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+        )
     }
 }
 
@@ -275,7 +192,7 @@ fun CalendarioBox(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(16.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         // Dias da semana
@@ -318,7 +235,7 @@ fun DiaCelula(
             .aspectRatio(1f)
             .clip(CircleShape)
             .background(if (selecionado) VerdeLumis else Color.Transparent)
-            .border(if (selecionado) 0.dp else 1.dp, Color(0xFFE7E9EC), CircleShape)
+            .border(if (selecionado) 0.dp else 1.dp, LumisBorder, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -345,7 +262,7 @@ fun HorarioPill(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
             .background(if (selecionado) AzulLumis else LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(24.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -363,8 +280,8 @@ fun HorarioPill(
 // UTIL — nome do mês
 // ============================================================
 
-private fun formatarMes(mes: java.time.Month, ano: Int): String {
-    val nome = when (mes.value) {
+private fun formatarMes(mes: Int, ano: Int): String {
+    val nome = when (mes) {
         1 -> "Janeiro"
         2 -> "Fevereiro"
         3 -> "Março"

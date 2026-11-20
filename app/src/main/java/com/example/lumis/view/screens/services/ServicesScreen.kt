@@ -1,42 +1,49 @@
-package com.example.lumis.view.screens
+package com.example.lumis.view.screens.services
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.R
 import com.example.lumis.controller.ServicesController
 import com.example.lumis.model.Servico
+import com.example.lumis.model.ServicoRepository
+import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisGreySecondary
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTeal
+import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.theme.*
 
 // ---------------------------------------------------------
@@ -44,8 +51,20 @@ import com.example.lumis.view.theme.*
 // ---------------------------------------------------------
 
 @Composable
-fun ServicesScreen() {
+fun ServicesScreen(
+    onAbrirPlanos: () -> Unit = {},
+    onAbrirAgendamento: (Servico) -> Unit = {},
+    servicoInicial: String? = null
+) {
     val controller = remember { ServicesController() }
+
+    LaunchedEffect(servicoInicial) {
+        servicoInicial?.let { nome ->
+            ServicoRepository.todos
+                .firstOrNull { it.nome == nome }
+                ?.let { controller.selecionarServico(it) }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -56,9 +75,9 @@ fun ServicesScreen() {
                 .fillMaxSize()
                 .background(LumisBackground)
         ) {
-            Topo()
+            LumisTopBar()
 
-            Abas()
+            Abas(onAbrirPlanos = onAbrirPlanos)
 
             Column(
                 modifier = Modifier
@@ -70,7 +89,7 @@ fun ServicesScreen() {
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFE0E0E0))
+                        .background(LumisBorder)
                 ) {
                     Box(
                         modifier = Modifier
@@ -95,7 +114,7 @@ fun ServicesScreen() {
                     text = "Qual tipo de limpeza você\nprecisa?",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = LumisTextPrimary
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -115,90 +134,14 @@ fun ServicesScreen() {
                 }
             }
 
-            Button(
-                onClick = { controller.continuar() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
-                    .height(46.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = LumisGreenVivid
-                )
-            ) {
-                Text(
-                    text = "Continuar",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
-            }
-
-            MenuInferior()
-        }
-    }
-}
-
-// ---------------------------------------------------------
-// TOPO DA TELA
-// ---------------------------------------------------------
-
-@Composable
-private fun Topo() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .background(LumisSurface)
-            .statusBarsPadding()
-            .padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(8.dp))
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.lumis),
-                contentDescription = "Logo Lumis",
-                modifier = Modifier.size(32.dp)
+            BotaoContinuar(
+                onClick = {
+                    controller.servicos
+                        .find { it.nome == controller.servicoSelecionado }
+                        ?.let(onAbrirAgendamento)
+                },
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
             )
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFEAF0F4)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.NotificationsNone,
-                    contentDescription = "Notificações",
-                    tint = LumisBlue,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFEAF5EF)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Perfil",
-                    tint = LumisGreenVivid,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
     }
 }
@@ -208,14 +151,14 @@ private fun Topo() {
 // ---------------------------------------------------------
 
 @Composable
-private fun Abas() {
+private fun Abas(onAbrirPlanos: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
             .height(29.dp)
             .clip(RoundedCornerShape(7.dp))
-            .background(Color(0xFFE7E7E7))
+            .background(LumisBorder)
     ) {
         Box(
             modifier = Modifier
@@ -235,7 +178,8 @@ private fun Abas() {
         Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable { onAbrirPlanos() },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -257,7 +201,7 @@ private fun CardServico(
     selecionado: Boolean,
     onClick: () -> Unit
 ) {
-    val corBorda = if (selecionado) LumisGreenVivid else Color(0xFFD5D5D5)
+    val corBorda = if (selecionado) LumisGreenVivid else LumisBorder
 
     Column(
         modifier = Modifier
@@ -277,7 +221,7 @@ private fun CardServico(
                 text = servico.nome,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF333333)
+                color = LumisTextPrimary
             )
 
             Box(
@@ -286,10 +230,10 @@ private fun CardServico(
                     .clip(CircleShape)
                     .border(
                         width = 1.5.dp,
-                        color = if (selecionado) LumisGreenVivid else Color(0xFF999999),
+                        color = if (selecionado) LumisGreenVivid else LumisTextSecondary,
                         shape = CircleShape
                     )
-                    .background(if (selecionado) LumisGreenVivid else Color.White),
+                    .background(if (selecionado) LumisGreenVivid else LumisSurface),
                 contentAlignment = Alignment.Center
             ) {
                 if (selecionado) {
@@ -319,57 +263,6 @@ private fun CardServico(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = LumisBlue
-        )
-    }
-}
-
-// ---------------------------------------------------------
-// MENU INFERIOR
-// ---------------------------------------------------------
-
-@Composable
-private fun MenuInferior() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(LumisSurface)
-            .navigationBarsPadding()
-            .height(57.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ItemMenu(icone = Icons.Default.Home, texto = "Home", selecionado = false)
-        ItemMenu(icone = Icons.Default.Business, texto = "Cidade", selecionado = false)
-        ItemMenu(icone = Icons.Default.Explore, texto = "Explorar", selecionado = true)
-        ItemMenu(icone = Icons.Default.CalendarMonth, texto = "Agenda", selecionado = false)
-        ItemMenu(icone = Icons.Default.Person, texto = "Perfil", selecionado = false)
-    }
-}
-
-// ---------------------------------------------------------
-// ITEM DO MENU
-// ---------------------------------------------------------
-
-@Composable
-private fun ItemMenu(
-    icone: ImageVector,
-    texto: String,
-    selecionado: Boolean
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = icone,
-            contentDescription = texto,
-            modifier = Modifier.size(20.dp),
-            tint = if (selecionado) Color(0xFF777777) else Color(0xFF888888)
-        )
-
-        Spacer(modifier = Modifier.height(2.dp))
-
-        Text(
-            text = texto,
-            fontSize = 8.sp,
-            color = if (selecionado) Color(0xFF555555) else Color(0xFF777777)
         )
     }
 }

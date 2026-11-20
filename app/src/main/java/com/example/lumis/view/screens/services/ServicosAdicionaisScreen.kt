@@ -1,7 +1,5 @@
-package com.example.lumis.ui.screens
+package com.example.lumis.view.screens.services
 
-import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,18 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,21 +30,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.R
-import com.example.lumis.ui.theme.LumisBackground
-import com.example.lumis.ui.theme.LumisBlue
-import com.example.lumis.ui.theme.LumisGreen
-import com.example.lumis.ui.theme.LumisSurface
-import com.example.lumis.ui.theme.LumisTextPrimary
-import com.example.lumis.ui.theme.LumisTextSecondary
+import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LinhaProgresso
+import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisDisabledToggle
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextSecondary
+import com.example.lumis.view.theme.*
 
 // =========================================================
 // TELA DE SERVIÇOS ADICIONAIS (4ª etapa)
@@ -91,51 +78,9 @@ fun ServicosAdicionaisScreen(
             .fillMaxSize()
             .background(LumisBackground)
     ) {
-        // TopBar com logo
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(LumisSurface)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBackIos,
-                        contentDescription = "Voltar",
-                        tint = LumisTextPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Logo Lumis",
-                    modifier = Modifier.size(24.dp)
-                )
-                Column {
-                    Text("Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
-                    servico?.let { Text(text = it, fontSize = 11.sp, color = LumisTextSecondary) }
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(
-                    imageVector = Icons.Default.NotificationsNone,
-                    contentDescription = null,
-                    tint = LumisTextSecondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = null,
-                    tint = LumisGreen,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
+        LumisTopBar(onBack = onBack)
+
+        LinhaProgresso(etapaAtual = 3)
 
         Column(
             modifier = Modifier
@@ -207,21 +152,9 @@ fun ServicosAdicionaisScreen(
                 .background(LumisSurface)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            Button(
-                onClick = { onConfirm(subtotal, listaEscolhidos) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
-            ) {
-                Text(
-                    text = "Continuar",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            BotaoContinuar(
+                onClick = { onConfirm(subtotal, listaEscolhidos) }
+            )
             Spacer(Modifier.height(8.dp))
             Text(
                 text = "Total: R$ %.2f".format(subtotal).replace(".", ","),
@@ -253,7 +186,7 @@ private fun AdicionalCard(
             .background(if (ativo) LumisGreen.copy(0.08f) else LumisSurface)
             .border(
                 width = if (ativo) 1.5.dp else 1.dp,
-                color = if (ativo) LumisGreen else Color(0xFFE7E9EC),
+                color = if (ativo) LumisGreen else LumisBorder,
                 shape = RoundedCornerShape(14.dp)
             )
             .clickable(onClick = onChange)
@@ -266,7 +199,7 @@ private fun AdicionalCard(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(if (ativo) LumisGreen.copy(0.15f) else Color(0xFFF2F2F2)),
+                    .background(if (ativo) LumisGreen.copy(0.15f) else LumisBorder),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -289,7 +222,7 @@ private fun AdicionalCard(
                 .width(48.dp)
                 .height(26.dp)
                 .clip(RoundedCornerShape(50))
-                .background(if (ativo) LumisGreen else Color(0xFFDDDDDD)),
+                .background(if (ativo) LumisGreen else LumisDisabledToggle),
             contentAlignment = if (ativo) Alignment.CenterEnd else Alignment.CenterStart
         ) {
             Box(

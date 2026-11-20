@@ -1,4 +1,4 @@
-package com.example.lumis.ui.screens
+package com.example.lumis.view.screens.services
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -27,9 +28,8 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,12 +48,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lumis.ui.theme.LumisBackground
-import com.example.lumis.ui.theme.LumisBlue
-import com.example.lumis.ui.theme.LumisGreen
-import com.example.lumis.ui.theme.LumisSurface
-import com.example.lumis.ui.theme.LumisTextPrimary
-import com.example.lumis.ui.theme.LumisTextSecondary
+import com.example.lumis.view.components.BotaoContinuar
+import com.example.lumis.view.components.LinhaProgresso
+import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
+import androidx.compose.ui.platform.LocalContext
+import com.example.lumis.view.theme.*
 
 // =========================================================
 // TELA DE CONFIGURAÇÃO DO IMÓVEL (3ª etapa)
@@ -64,12 +65,18 @@ fun ConfiguracaoImovelScreen(
     servico: String? = null,
     data: String? = null,
     horario: String? = null,
+    quartosInicial: Int = 2,
+    banheirosInicial: Int = 1,
+    tamanhoInicial: String = "60–100m²",
+    endereco: String = "",
     onBack: () -> Unit = {},
-    onConfirm: (quartos: Int, banheiros: Int, tamanho: String) -> Unit = { _, _, _ -> }
+    onConfirm: (quartos: Int, banheiros: Int, tamanho: String, endereco: String) -> Unit = { _, _, _, _ -> }
 ) {
-    var quartos by remember { mutableIntStateOf(2) }
-    var banheiros by remember { mutableIntStateOf(1) }
-    var tamanhoSelecionado by remember { mutableStateOf("60–100m²") }
+    val context = LocalContext.current
+    var quartos by remember { mutableIntStateOf(quartosInicial) }
+    var banheiros by remember { mutableIntStateOf(banheirosInicial) }
+    var tamanhoSelecionado by remember { mutableStateOf(tamanhoInicial) }
+    var enderecoSelecionado by remember { mutableStateOf(endereco) }
 
     Column(
         modifier = Modifier
@@ -80,15 +87,14 @@ fun ConfiguracaoImovelScreen(
         // =================================================
         // TOPO
         // =================================================
-        TopBarConfiguracao(
-            servico = servico,
-            onBack = onBack
-        )
+        LumisTopBar(onBack = onBack)
+
+        LinhaProgresso(etapaAtual = 2)
 
         // =================================================
         // CONTEÚDO
         // =================================================
-        Column(
+Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -166,6 +172,19 @@ fun ConfiguracaoImovelScreen(
                 texto = "Acima de 150m²",
                 selecionado = tamanhoSelecionado == "Acima de 150m²"
             ) { tamanhoSelecionado = "Acima de 150m²" }
+
+            Spacer(modifier = Modifier.height(18.dp))
+            Text("Endereço completo do atendimento", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
+            Spacer(modifier = Modifier.height(6.dp))
+            OutlinedTextField(
+                value = enderecoSelecionado,
+                onValueChange = { enderecoSelecionado = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Rua, número, bairro, cidade e CEP") },
+                singleLine = false,
+                minLines = 2,
+                maxLines = 3
+            )
         }
 
         // =================================================
@@ -177,21 +196,9 @@ fun ConfiguracaoImovelScreen(
                 .background(LumisSurface)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            Button(
-                onClick = { onConfirm(quartos, banheiros, tamanhoSelecionado) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
-            ) {
-                Text(
-                    text = "Continuar",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            BotaoContinuar(
+                onClick = { if (enderecoSelecionado.isNotBlank()) onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoSelecionado.trim()) else Toast.makeText(context, "Informe o endereço do atendimento", Toast.LENGTH_SHORT).show() }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -201,54 +208,6 @@ fun ConfiguracaoImovelScreen(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-        }
-    }
-}
-
-// =========================================================
-// TOPO DA TELA
-// =========================================================
-
-@Composable
-private fun TopBarConfiguracao(
-    servico: String?,
-    onBack: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(LumisSurface)
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBackIos,
-                    contentDescription = "Voltar",
-                    tint = LumisTextPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(Modifier.width(6.dp))
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Logo Lumis",
-                modifier = Modifier.size(24.dp)
-            )
-            Column {
-                Text(text = "Lumis", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = LumisGreen)
-                servico?.let {
-                    Text(text = it, fontSize = 11.sp, color = LumisTextSecondary)
-                }
-            }
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Default.NotificationsNone, contentDescription = "Notificações", tint = LumisTextSecondary, modifier = Modifier.size(22.dp))
-            Icon(Icons.Default.AccountCircle, contentDescription = "Perfil", tint = LumisGreen, modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -269,7 +228,7 @@ private fun ContadorLinha(
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(14.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(14.dp))
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -286,7 +245,7 @@ private fun ContadorLinha(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFE7E9EC))
+                    .background(LumisBorder)
                     .clickable(onClick = onDiminuir),
                 contentAlignment = Alignment.Center
             ) {
@@ -345,7 +304,7 @@ private fun TamanhoPilula(
             .background(if (selecionado) LumisGreen else LumisSurface)
             .border(
                 width = if (selecionado) 0.dp else 1.dp,
-                color = Color(0xFFE7E9EC),
+                color = LumisBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)
