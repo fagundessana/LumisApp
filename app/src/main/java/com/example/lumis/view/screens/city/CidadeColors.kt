@@ -2,6 +2,7 @@ package com.example.lumis.view.screens.city
 
 import androidx.compose.ui.graphics.Color
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.TemaApp.corTema
 
 // Cores de status específicas da tela Cidade Consciente
 // Não altera o Color.kt global; usa LumisColors.Primary como base verde
@@ -21,11 +22,11 @@ object CidadeColors {
     // Laranja do arco de progresso (sweep)
     val ProgressArcOrange = Color(0xFFF28C38)
 
-    // Verde claro para trilha do arco
-    val ProgressTrackGreen = Color(0xFFE7F5EC) // LumisGreenLight
+    // Verde claro para trilha do arco (neutra: trilha clara → escura)
+    val ProgressTrackGreen: Color get() = corTema(claro = Color(0xFFE7F5EC), escuro = Color(0xFF3A3A3C))
 
-    // Fundo do sub-card cinza muito claro
-    val SubCardBackground = Color(0xFFF5F5F5) // LumisColors.LightGray
+    // Fundo do sub-card cinza muito claro (neutra: fundo cinza-claro → escuro)
+    val SubCardBackground: Color get() = corTema(claro = Color(0xFFF5F5F5), escuro = Color(0xFF2C2C2C))
 
     // Chip "Ver mais" verde
     val ChipVerMaisBackground = LumisColors.Primary
@@ -38,8 +39,10 @@ object CidadeColors {
     // Botões QuickActions
     val ActionEcopotonsBackground = LumisColors.Primary
     val ActionColetaBackground = Color(0xFFFFC107) // amarelo
-    val ActionDadosBackground = Color(0xFFE7F5EC) // verde bem claro (LumisGreenLight)
+    // Fundo verde claro do botão Dados (neutra: fundo claro → escuro)
+    val ActionDadosBackground: Color get() = corTema(claro = Color(0xFFE7F5EC), escuro = Color(0xFF1F3A2E))
     val ActionDadosText = LumisColors.Primary // texto verde escuro para contraste
     val ActionIconWhite = Color.White
-    val ActionTextDark = Color(0xFF1A1A1A) // LumisColors.TextPrimary
+    // Texto escuro para ações (neutra: texto escuro → claro)
+    val ActionTextDark: Color get() = corTema(claro = Color(0xFF1A1A1A), escuro = Color(0xFFF9F9FB))
 }

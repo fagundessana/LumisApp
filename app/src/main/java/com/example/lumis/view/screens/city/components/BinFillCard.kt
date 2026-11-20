@@ -36,6 +36,8 @@ import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.screens.city.components.CircularFillIndicator
 import com.example.lumis.view.screens.city.model.BinFillItem
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Questrial
 
 // Card principal de preenchimento da lixeira
@@ -154,7 +156,7 @@ fun BinFillCard(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360)
 @Composable
 private fun BinFillCardPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         BinFillCard()
     }
 }

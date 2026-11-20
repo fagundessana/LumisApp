@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.*
 
 // ============================================================
@@ -206,7 +208,7 @@ private fun AbasPlanos(onVoltarServicos: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(50))
             .background(LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(50))
+            .border(1.dp, LumisBorder, RoundedCornerShape(50))
             .padding(4.dp)
     ) {
         Box(
@@ -259,7 +261,7 @@ private fun PlanCard(
             .background(if (plano.popular) LumisGreen else LumisSurface)
             .border(
                 width = if (plano.popular) 0.dp else 1.dp,
-                color = if (plano.popular) Color.Transparent else Color(0xFFE7E9EC),
+                color = if (plano.popular) Color.Transparent else LumisBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)

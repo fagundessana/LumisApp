@@ -38,6 +38,12 @@ import com.example.lumis.model.Servico
 import com.example.lumis.model.ServicoRepository
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisGreySecondary
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTeal
+import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.theme.*
 
 // ---------------------------------------------------------
@@ -83,7 +89,7 @@ fun ServicesScreen(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFE0E0E0))
+                        .background(LumisBorder)
                 ) {
                     Box(
                         modifier = Modifier
@@ -108,7 +114,7 @@ fun ServicesScreen(
                     text = "Qual tipo de limpeza você\nprecisa?",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = LumisTextPrimary
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -152,7 +158,7 @@ private fun Abas(onAbrirPlanos: () -> Unit) {
             .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 10.dp)
             .height(29.dp)
             .clip(RoundedCornerShape(7.dp))
-            .background(Color(0xFFE7E7E7))
+            .background(LumisBorder)
     ) {
         Box(
             modifier = Modifier
@@ -195,7 +201,7 @@ private fun CardServico(
     selecionado: Boolean,
     onClick: () -> Unit
 ) {
-    val corBorda = if (selecionado) LumisGreenVivid else Color(0xFFD5D5D5)
+    val corBorda = if (selecionado) LumisGreenVivid else LumisBorder
 
     Column(
         modifier = Modifier
@@ -215,7 +221,7 @@ private fun CardServico(
                 text = servico.nome,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF333333)
+                color = LumisTextPrimary
             )
 
             Box(
@@ -224,10 +230,10 @@ private fun CardServico(
                     .clip(CircleShape)
                     .border(
                         width = 1.5.dp,
-                        color = if (selecionado) LumisGreenVivid else Color(0xFF999999),
+                        color = if (selecionado) LumisGreenVivid else LumisTextSecondary,
                         shape = CircleShape
                     )
-                    .background(if (selecionado) LumisGreenVivid else Color.White),
+                    .background(if (selecionado) LumisGreenVivid else LumisSurface),
                 contentAlignment = Alignment.Center
             ) {
                 if (selecionado) {

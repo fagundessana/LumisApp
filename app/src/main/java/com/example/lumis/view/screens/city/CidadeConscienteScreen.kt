@@ -25,6 +25,8 @@ import com.example.lumis.view.screens.city.components.StatusSummaryCard
 import com.example.lumis.view.screens.city.model.CidadeUiModel
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisBackground
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 
 // Tela principal "Cidade Consciente"
 // LazyColumn com: LumisTopBar fixo, StatusSummaryCard, BinFillCard, BinMapCard, QuickActionsRow
@@ -82,7 +84,7 @@ fun CidadeConscienteScreen(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360, heightDp = 800)
 @Composable
 private fun CidadeConscienteScreenPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         CidadeConscienteScreen()
     }
 }

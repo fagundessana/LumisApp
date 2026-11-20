@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.lembreteEmBreve
 import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Questrial
 
 // Linha de 3 ações rápidas lado a lado (peso igual)
@@ -140,7 +142,7 @@ private fun QuickActionButton(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360)
 @Composable
 private fun QuickActionsRowPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         QuickActionsRow()
     }
 }

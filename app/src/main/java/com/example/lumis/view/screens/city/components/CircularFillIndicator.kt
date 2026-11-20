@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Montserrat
 import com.example.lumis.view.theme.Questrial
 
@@ -124,7 +126,7 @@ fun CircularFillIndicator(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 200, heightDp = 200)
 @Composable
 private fun CircularFillIndicatorPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         CircularFillIndicator(fraction = 0.5f, label = "50 % cheio")
     }
 }

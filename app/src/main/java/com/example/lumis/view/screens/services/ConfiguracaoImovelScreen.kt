@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.*
 
 // =========================================================
@@ -204,7 +206,7 @@ private fun ContadorLinha(
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(14.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(14.dp))
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -221,7 +223,7 @@ private fun ContadorLinha(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFE7E9EC))
+                    .background(LumisBorder)
                     .clickable(onClick = onDiminuir),
                 contentAlignment = Alignment.Center
             ) {
@@ -280,7 +282,7 @@ private fun TamanhoPilula(
             .background(if (selecionado) LumisGreen else LumisSurface)
             .border(
                 width = if (selecionado) 0.dp else 1.dp,
-                color = Color(0xFFE7E9EC),
+                color = LumisBorder,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(onClick = onClick)

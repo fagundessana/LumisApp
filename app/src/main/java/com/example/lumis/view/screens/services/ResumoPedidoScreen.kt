@@ -45,6 +45,7 @@ import com.example.lumis.R
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.TemaApp.corTema
 import com.example.lumis.view.theme.*
 
 // ============================================================
@@ -137,7 +138,7 @@ fun ResumoPedidoScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2F8)),
+                colors = CardDefaults.cardColors(containerColor = corTema(claro = Color(0xFFEAF2F8), escuro = Color(0xFF262F36))),
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {

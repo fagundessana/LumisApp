@@ -21,6 +21,7 @@ import com.example.lumis.view.screens.home.components.RecommendedSection
 import com.example.lumis.view.screens.home.components.TopLocationBar
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 
 // HomeScreen: junta todas as seções em uma lista que rola pra baixo.
 // Usamos LazyColumn (em vez de Column normal) porque ela só desenha o que
@@ -97,7 +98,7 @@ fun HomeScreen(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360, heightDp = 800)
 @Composable
 private fun HomeScreenPreview() {
-    LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         HomeScreen()
     }
 }

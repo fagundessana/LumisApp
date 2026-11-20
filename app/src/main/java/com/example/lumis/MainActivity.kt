@@ -17,7 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.controller.AuthController
+import com.example.lumis.controller.TemaController
 import com.example.lumis.view.screens.auth.CadastroScreen
 import com.example.lumis.view.screens.auth.LoginScreen
 import kotlinx.coroutines.delay
@@ -30,9 +32,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LumisTheme {
+            val temaController = remember { TemaController(applicationContext) }
+            LumisTheme(modo = temaController.modo) {
                 val authController = remember { AuthController(applicationContext) }
-                AuthRoot(authController)
+                AuthRoot(
+                    authController = authController,
+                    modoTema = temaController.modo,
+                    onModoTemaChange = { temaController.definir(it) }
+                )
             }
         }
     }
@@ -43,7 +50,11 @@ class MainActivity : ComponentActivity() {
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-fun AuthRoot(authController: AuthController) {
+fun AuthRoot(
+    authController: AuthController,
+    modoTema: ModoTema = ModoTema.SISTEMA,
+    onModoTemaChange: (ModoTema) -> Unit = {}
+) {
     var mostrarSplash by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
@@ -64,7 +75,9 @@ fun AuthRoot(authController: AuthController) {
             usuario != null -> MainScaffold(
                 usuario = usuario,
                 authController = authController,
-                onLogout = { authController.logout() }
+                onLogout = { authController.logout() },
+                modoTema = modoTema,
+                onModoTemaChange = onModoTemaChange
             )
             authController.mostrarCadastro -> CadastroScreen(authController)
             else -> LoginScreen(authController)

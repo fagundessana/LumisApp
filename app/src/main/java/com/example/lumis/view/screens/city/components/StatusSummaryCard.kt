@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.screens.city.model.StatusItem
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Montserrat
 import com.example.lumis.view.theme.Questrial
 
@@ -150,7 +152,7 @@ private fun StatusColumn(
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360)
 @Composable
 private fun StatusSummaryCardPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         StatusSummaryCard()
     }
 }

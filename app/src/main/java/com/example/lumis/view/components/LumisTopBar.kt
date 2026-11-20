@@ -27,6 +27,7 @@ import com.example.lumis.view.theme.LumisBlue
 import com.example.lumis.view.theme.LumisGreen
 import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.TemaApp.corTema
 
 @Composable
 fun LumisTopBar(
@@ -73,7 +74,7 @@ fun LumisTopBar(
             modifier = Modifier
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEAF0F4)),
+                .background(corTema(claro = Color(0xFFEAF0F4), escuro = Color(0xFF262F36))),
             contentAlignment = Alignment.Center
         ) {
             Icon(

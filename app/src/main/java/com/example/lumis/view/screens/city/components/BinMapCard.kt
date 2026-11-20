@@ -33,6 +33,8 @@ import com.example.lumis.view.screens.city.CidadeColors
 import com.example.lumis.view.screens.city.model.MapMarker
 import com.example.lumis.view.screens.city.model.MarkerType
 import com.example.lumis.view.theme.LumisColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.view.theme.Questrial
 
 // Card do mapa das lixeiras
@@ -137,7 +139,7 @@ private fun MapMarkerView(marker: MapMarker) {
 @Preview(showBackground = true, backgroundColor = 0xFFF9F9FB, widthDp = 360)
 @Composable
 private fun BinMapCardPreview() {
-    com.example.lumis.view.theme.LumisTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         BinMapCard()
     }
 }

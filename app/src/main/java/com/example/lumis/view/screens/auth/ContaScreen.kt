@@ -22,6 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,7 +38,10 @@ import coil.compose.AsyncImage
 import com.example.lumis.data.FotoPerfilHelper
 import com.example.lumis.data.User
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.components.TemaCard
+import com.example.lumis.view.components.TemaDialog
 import com.example.lumis.view.screens.employee_profile.ProfileColors
+import com.example.lumis.view.theme.ModoTema
 import java.io.File
 
 // ---------------------------------------------------------------------------------------------
@@ -46,9 +53,13 @@ fun ContaScreen(
     usuario: User,
     onVoltar: () -> Unit,
     onEditarPerfil: () -> Unit = {},
-    onSair: () -> Unit
+    onSair: () -> Unit,
+    modoTema: ModoTema = ModoTema.SISTEMA,
+    onModoTemaChange: (ModoTema) -> Unit = {}
 ) {
     val rotuloTipo = if (usuario.tipoUsuario == "Cliente") "Cliente" else "Funcionário"
+
+    var mostrarDialogoTema by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = ProfileColors.Background
@@ -235,6 +246,10 @@ fun ContaScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                TemaCard(modoAtual = modoTema, onClick = { mostrarDialogoTema = true })
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // Botão editar perfil (mesmo padrão pill verde dos perfis)
                 Button(
                     onClick = onEditarPerfil,
@@ -278,8 +293,8 @@ fun ContaScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFBDCDC),
-                        contentColor = Color(0xFFB5495F)
+                        containerColor = ProfileColors.ChipRedBg,
+                        contentColor = ProfileColors.BadgeRedText
                     )
                 ) {
                     Icon(
@@ -296,5 +311,13 @@ fun ContaScreen(
                 }
             }
         }
+    }
+
+    if (mostrarDialogoTema) {
+        TemaDialog(
+            modoAtual = modoTema,
+            onSelecionar = onModoTemaChange,
+            onDismiss = { mostrarDialogoTema = false }
+        )
     }
 }

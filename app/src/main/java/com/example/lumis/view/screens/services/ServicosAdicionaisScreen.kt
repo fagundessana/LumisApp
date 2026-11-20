@@ -38,6 +38,10 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisDisabledToggle
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.theme.*
 
 // =========================================================
@@ -182,7 +186,7 @@ private fun AdicionalCard(
             .background(if (ativo) LumisGreen.copy(0.08f) else LumisSurface)
             .border(
                 width = if (ativo) 1.5.dp else 1.dp,
-                color = if (ativo) LumisGreen else Color(0xFFE7E9EC),
+                color = if (ativo) LumisGreen else LumisBorder,
                 shape = RoundedCornerShape(14.dp)
             )
             .clickable(onClick = onChange)
@@ -195,7 +199,7 @@ private fun AdicionalCard(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(if (ativo) LumisGreen.copy(0.15f) else Color(0xFFF2F2F2)),
+                    .background(if (ativo) LumisGreen.copy(0.15f) else LumisBorder),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -218,7 +222,7 @@ private fun AdicionalCard(
                 .width(48.dp)
                 .height(26.dp)
                 .clip(RoundedCornerShape(50))
-                .background(if (ativo) LumisGreen else Color(0xFFDDDDDD)),
+                .background(if (ativo) LumisGreen else LumisDisabledToggle),
             contentAlignment = if (ativo) Alignment.CenterEnd else Alignment.CenterStart
         ) {
             Box(

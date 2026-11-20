@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.lumis.view.theme.LumisBorder
 import com.example.lumis.view.theme.LumisTeal
 
 private const val TotalEtapas = 5
@@ -28,7 +29,7 @@ fun LinhaProgresso(
             .padding(horizontal = 20.dp)
             .height(4.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFFE0E0E0))
+            .background(LumisBorder)
     ) {
         Box(
             modifier = Modifier

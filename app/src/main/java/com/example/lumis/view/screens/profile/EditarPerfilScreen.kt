@@ -69,6 +69,8 @@ import com.example.lumis.data.LocalizacaoHelper
 import com.example.lumis.data.User
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.screens.employee_profile.ProfileColors
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -636,7 +638,7 @@ fun EditarPerfilScreen(
 @Preview(name = "Celular - Pixel 4", showBackground = true, device = Devices.PIXEL_4)
 @Composable
 private fun EditarPerfilPreviewPhone() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         // Preview sem AuthController real: usa contexto falso apenas para layout.
         // Em execução real o AuthController vem do MainActivity.
         Box(

@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.LumisGreen
+import com.example.lumis.view.theme.LumisGreenLight
+import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
 
 @Composable
@@ -54,7 +56,7 @@ fun EmBreveScreen() {
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE7F5EC)),
+                        .background(LumisGreenLight),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -69,7 +71,7 @@ fun EmBreveScreen() {
                     text = "Em breve",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1D1F)
+                    color = LumisTextPrimary
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(

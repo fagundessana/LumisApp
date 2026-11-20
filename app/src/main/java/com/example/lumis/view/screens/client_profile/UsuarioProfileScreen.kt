@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.lumis.R
 import com.example.lumis.view.components.lembreteEmBreve
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import java.io.File
 // Reaproveita a paleta de cores já definida na tela do funcionário,
 // mantendo os dois perfis (funcionário / usuário) com a mesma identidade visual.
@@ -239,7 +241,7 @@ fun UsuarioHeaderSection(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.7f))
+                            .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
                             .clickable { onConfigClick() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -255,7 +257,7 @@ fun UsuarioHeaderSection(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.7f))
+                            .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
                             .clickable { emBreve() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -292,7 +294,7 @@ fun UsuarioHeaderSection(
                         .offset(y = (-46).dp)
                         .size(88.dp)
                         .clip(CircleShape)
-                        .background(Color.White)
+                        .background(ProfileColors.CardBackground)
                         .border(3.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -730,7 +732,7 @@ private fun SectionTitle(prefixo: String, destaque: String) {
 @Preview(name = "Celular - Pixel 4", showBackground = true, device = Devices.PIXEL_4)
 @Composable
 fun UsuarioProfileScreenPreviewPhone() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         UsuarioProfileScreen()
     }
 }
@@ -738,7 +740,7 @@ fun UsuarioProfileScreenPreviewPhone() {
 @Preview(name = "Celular pequeno", showBackground = true, widthDp = 320, heightDp = 780)
 @Composable
 fun UsuarioProfileScreenPreviewSmallPhone() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         UsuarioProfileScreen()
     }
 }
@@ -746,7 +748,7 @@ fun UsuarioProfileScreenPreviewSmallPhone() {
 @Preview(name = "Tablet", showBackground = true, device = Devices.PIXEL_TABLET)
 @Composable
 fun UsuarioProfileScreenPreviewTablet() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         UsuarioProfileScreen()
     }
 }

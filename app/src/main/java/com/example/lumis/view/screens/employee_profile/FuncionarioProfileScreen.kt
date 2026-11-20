@@ -40,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
+import com.example.lumis.view.theme.LumisTheme
+import com.example.lumis.view.theme.ModoTema
 import coil.compose.AsyncImage
 import com.example.lumis.R
 import java.io.File
@@ -50,32 +52,34 @@ import kotlin.math.min
 // CORES E TOKENS DE DESIGN (baseado no Figma "Lumis 2.0")
 // ---------------------------------------------------------------------------------------------
 
+import com.example.lumis.view.theme.TemaApp.corTema
+
 object ProfileColors {
-    val Background = Color(0xFFF5F6FA)
-    val CardBackground = Color(0xFFFFFFFF)
+    val Background: Color get() = corTema(claro = Color(0xFFF5F6FA), escuro = Color(0xFF1E1E1E))
+    val CardBackground: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF262626))
     val Primary = Color(0xFF3FBF8F)
     val PrimaryDark = Color(0xFF2FA57A)
-    val PrimaryLight = Color(0xFFDFF6EC)
+    val PrimaryLight: Color get() = corTema(claro = Color(0xFFDFF6EC), escuro = Color(0xFF1F3A2E))
 
-    val HeaderBlueTop = Color(0xFFBFE0F5)
-    val HeaderBlueBottom = Color(0xFFEAF5FB)
+    val HeaderBlueTop: Color get() = corTema(claro = Color(0xFFBFE0F5), escuro = Color(0xFF1F3A4D))
+    val HeaderBlueBottom: Color get() = corTema(claro = Color(0xFFEAF5FB), escuro = Color(0xFF262F36))
 
-    val TextPrimary = Color(0xFF1E1E1E)
-    val TextSecondary = Color(0xFF8A8A8E)
-    val Divider = Color(0xFFEDEDF2)
+    val TextPrimary: Color get() = corTema(claro = Color(0xFF1E1E1E), escuro = Color(0xFFF9F9FB))
+    val TextSecondary: Color get() = corTema(claro = Color(0xFF8A8A8E), escuro = Color(0xFFA0A0A5))
+    val Divider: Color get() = corTema(claro = Color(0xFFEDEDF2), escuro = Color(0xFF3A3A3C))
 
-    val ChipRedBg = Color(0xFFFBDCDC)
-    val ChipLavenderBg = Color(0xFFE6E1FA)
+    val ChipRedBg: Color get() = corTema(claro = Color(0xFFFBDCDC), escuro = Color(0xFF4A2A2A))
+    val ChipLavenderBg: Color get() = corTema(claro = Color(0xFFE6E1FA), escuro = Color(0xFF332E4D))
     val ChipLavenderIcon = Color(0xFFC65B7A)
-    val ChipGreenBg = Color(0xFFD9F3E4)
+    val ChipGreenBg: Color get() = corTema(claro = Color(0xFFD9F3E4), escuro = Color(0xFF1F3A2E))
     val ChipGreenIcon = Color(0xFF2E86C1)
 
-    val BadgeRedBg = Color(0xFFF9C8CE)
-    val BadgeRedText = Color(0xFFB5495F)
-    val BadgeYellowBg = Color(0xFFFCEFC3)
-    val BadgeYellowText = Color(0xFFB98A1E)
-    val BadgeGreenBg = Color(0xFFCDF3E2)
-    val BadgeGreenText = Color(0xFF1F9E6E)
+    val BadgeRedBg: Color get() = corTema(claro = Color(0xFFF9C8CE), escuro = Color(0xFF4D2A30))
+    val BadgeRedText: Color get() = corTema(claro = Color(0xFFB5495F), escuro = Color(0xFFE58A9C))
+    val BadgeYellowBg: Color get() = corTema(claro = Color(0xFFFCEFC3), escuro = Color(0xFF4A4020))
+    val BadgeYellowText: Color get() = corTema(claro = Color(0xFFB98A1E), escuro = Color(0xFFE0B84A))
+    val BadgeGreenBg: Color get() = corTema(claro = Color(0xFFCDF3E2), escuro = Color(0xFF1F4A38))
+    val BadgeGreenText: Color get() = corTema(claro = Color(0xFF1F9E6E), escuro = Color(0xFF5FD3A0))
 }
 
 private val CardShape = RoundedCornerShape(20.dp)
@@ -319,7 +323,7 @@ fun ProfileHeaderSection(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.7f))
+                        .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
                         .clickable { onConfigClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -356,7 +360,7 @@ fun ProfileHeaderSection(
                         .offset(y = (-34).dp)
                         .size(82.dp)
                         .clip(CircleShape)
-                        .background(Color.White)
+                        .background(ProfileColors.CardBackground)
                         .border(3.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -947,7 +951,7 @@ fun ActionButtons(
 @Preview(name = "Celular - Pixel 4", showBackground = true, device = Devices.PIXEL_4)
 @Composable
 fun FuncionarioProfileScreenPreviewPhone() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         FuncionarioProfileScreen()
     }
 }
@@ -955,7 +959,7 @@ fun FuncionarioProfileScreenPreviewPhone() {
 @Preview(name = "Celular pequeno", showBackground = true, widthDp = 320, heightDp = 780)
 @Composable
 fun FuncionarioProfileScreenPreviewSmallPhone() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         FuncionarioProfileScreen()
     }
 }
@@ -963,7 +967,7 @@ fun FuncionarioProfileScreenPreviewSmallPhone() {
 @Preview(name = "Tablet", showBackground = true, device = Devices.PIXEL_TABLET)
 @Composable
 fun FuncionarioProfileScreenPreviewTablet() {
-    MaterialTheme {
+    LumisTheme(modo = ModoTema.SISTEMA) {
         FuncionarioProfileScreen()
     }
 }

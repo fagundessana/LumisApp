@@ -33,6 +33,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lumis.view.theme.LumisGreenLight
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextSecondary
 
 enum class NavItem(val label: String, val icon: ImageVector) {
     HOME("Home", Icons.Outlined.Home),
@@ -48,7 +51,7 @@ fun BottomNavBar(
     onSelect: (NavItem) -> Unit
 ) {
     Surface(
-        color = Color(0xFFFFFFFF),
+        color = LumisSurface,
         tonalElevation = 4.dp,
         shadowElevation = 8.dp
     ) {
@@ -74,15 +77,15 @@ fun BottomNavBar(
                                 .offset(y = (-14).dp)
                                 .size(52.dp)
                                 .clip(CircleShape)
-                                .background(Color.White)
-                                .border(2.dp, Color(0xFFDFF6EC), CircleShape),
+                                .background(LumisSurface)
+                                .border(2.dp, LumisGreenLight, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFDFF6EC)),
+                                    .background(LumisGreenLight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -105,14 +108,14 @@ fun BottomNavBar(
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.label,
-                            tint = Color(0xFF8A8A8E),
+                            tint = LumisTextSecondary,
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = item.label,
                             fontSize = 11.sp,
-                            color = Color(0xFF8A8A8E)
+                            color = LumisTextSecondary
                         )
                     }
                 }

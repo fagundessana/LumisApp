@@ -34,6 +34,7 @@ import com.example.lumis.view.screens.services.ResumoPedidoScreen
 import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
 import com.example.lumis.view.screens.services.ServicesScreen
 import com.example.lumis.view.theme.LumisBackground
+import com.example.lumis.view.theme.ModoTema
 import java.util.Calendar
 
 sealed class LumisTela {
@@ -51,7 +52,9 @@ sealed class LumisTela {
 fun MainScaffold(
     usuario: User,
     authController: AuthController,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    modoTema: ModoTema = ModoTema.SISTEMA,
+    onModoTemaChange: (ModoTema) -> Unit = {}
 ) {
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
@@ -228,7 +231,9 @@ fun MainScaffold(
                         usuario = usuario,
                         onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
                         onEditarPerfil = { irPara(LumisTela.EditarPerfil) },
-                        onSair = onLogout
+                        onSair = onLogout,
+                        modoTema = modoTema,
+                        onModoTemaChange = onModoTemaChange
                     )
                     is LumisTela.EditarPerfil -> EditarPerfilScreen(
                         usuario = usuario,

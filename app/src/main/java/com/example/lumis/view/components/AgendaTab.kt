@@ -33,6 +33,9 @@ import androidx.compose.runtime.mutableStateListOf
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.LumisBlue
 import com.example.lumis.view.theme.LumisGreen
+import com.example.lumis.view.theme.LumisGreenLight
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
 
 data class AgendamentoRegistro(
@@ -66,7 +69,7 @@ fun AgendaTab() {
                 text = "Agenda",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E1E1E)
+                color = LumisTextPrimary
             )
             Text(
                 text = "Seus serviços agendados",
@@ -96,7 +99,7 @@ fun AgendaTab() {
                         text = "Nenhum agendamento ainda",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E1E1E)
+                        color = LumisTextPrimary
                     )
                     Text(
                         text = "Quando você confirmar um serviço,\nele aparece aqui.",
@@ -129,7 +132,7 @@ private fun CardAgendamento(item: AgendamentoRegistro) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = LumisSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -142,11 +145,11 @@ private fun CardAgendamento(item: AgendamentoRegistro) {
                     text = item.servico,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E1E1E)
+                    color = LumisTextPrimary
                 )
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFDFF6EC), RoundedCornerShape(50))
+                        .background(LumisGreenLight, RoundedCornerShape(50))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(

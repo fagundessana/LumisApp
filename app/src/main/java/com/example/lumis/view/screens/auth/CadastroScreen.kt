@@ -52,16 +52,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.R
 import com.example.lumis.controller.AuthController
+import com.example.lumis.view.theme.LumisBackground
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextPrimary
+import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.screens.employee_profile.ProfileColors
 import kotlinx.coroutines.launch
 
-private val Fundo = Color(0xFFF9F9FB)
 private val VerdeCliente = Color(0xFF50C58A)
 private val VerdeProfissional = Color(0xFF3DB8B1)
 private val VerdeTexto = Color(0xFF43BD80)
 private val AzulLink = Color(0xFF4389C9)
-private val TextoPrincipal = Color(0xFF222222)
-private val TextoSecundario = Color(0xFF777777)
 
 @Composable
 fun CadastroScreen(
@@ -86,7 +87,7 @@ fun CadastroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Fundo)
+            .background(LumisBackground)
             .verticalScroll(rememberScrollState())
             .padding(
                 start = 25.dp,
@@ -143,7 +144,7 @@ fun CadastroScreen(
                 }
             },
             fontSize = 14.sp,
-            color = TextoPrincipal,
+            color = LumisTextPrimary,
             textAlign = TextAlign.Center
         )
 
@@ -154,7 +155,7 @@ fun CadastroScreen(
         Text(
             text = "Selecione o seu tipo de usuário",
             fontSize = 14.sp,
-            color = TextoSecundario,
+            color = LumisTextSecondary,
             textAlign = TextAlign.Center
         )
 
@@ -178,7 +179,7 @@ fun CadastroScreen(
                 containerColor = if (tipoUsuario == "Cliente")
                     VerdeCliente
                 else
-                    Color.White,
+                    LumisSurface,
 
                 contentColor = if (tipoUsuario == "Cliente")
                     Color.White
@@ -242,7 +243,7 @@ fun CadastroScreen(
                 containerColor = if (tipoUsuario == "Profissional")
                     VerdeProfissional
                 else
-                    Color.White,
+                    LumisSurface,
 
                 contentColor = if (tipoUsuario == "Profissional")
                     Color.White
@@ -337,7 +338,7 @@ fun CadastroScreen(
         Text(
             text = "Ex: São Paulo, SP — você pode alterar depois no perfil.",
             fontSize = 11.sp,
-            color = TextoSecundario,
+            color = LumisTextSecondary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
@@ -434,7 +435,7 @@ fun CadastroScreen(
                 }
             },
             fontSize = 11.sp,
-            color = TextoSecundario,
+            color = LumisTextSecondary,
             textAlign = TextAlign.Center
         )
 
@@ -507,7 +508,7 @@ fun CadastroScreen(
                 .height(48.dp),
             shape = RoundedCornerShape(30.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Fundo,
+                containerColor = LumisBackground,
                 contentColor = VerdeTexto
             ),
             border = BorderStroke(
@@ -547,7 +548,7 @@ fun CadastroScreen(
                 append(" agora!")
             },
             fontSize = 12.sp,
-            color = TextoPrincipal,
+            color = LumisTextPrimary,
             textAlign = TextAlign.Center,
             modifier = Modifier.clickable {
                 authController.abrirLogin()
@@ -638,7 +639,7 @@ private fun CampoSenha(
                         else
                             Icons.Default.Visibility,
                     contentDescription = "Mostrar senha",
-                    tint = Color(0xFF666872)
+                    tint = LumisTextSecondary
                 )
             }
         },

@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
+import com.example.lumis.view.theme.LumisBorder
+import com.example.lumis.view.theme.LumisSurface
+import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.*
 import java.util.Calendar
 
@@ -189,7 +192,7 @@ fun CalendarioBox(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(16.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         // Dias da semana
@@ -232,7 +235,7 @@ fun DiaCelula(
             .aspectRatio(1f)
             .clip(CircleShape)
             .background(if (selecionado) VerdeLumis else Color.Transparent)
-            .border(if (selecionado) 0.dp else 1.dp, Color(0xFFE7E9EC), CircleShape)
+            .border(if (selecionado) 0.dp else 1.dp, LumisBorder, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -259,7 +262,7 @@ fun HorarioPill(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
             .background(if (selecionado) AzulLumis else LumisSurface)
-            .border(1.dp, Color(0xFFE7E9EC), RoundedCornerShape(24.dp))
+            .border(1.dp, LumisBorder, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
