@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.mutableStateListOf
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.LumisBlue
 import com.example.lumis.view.theme.LumisGreen
@@ -42,17 +41,14 @@ data class AgendamentoRegistro(
     val servico: String,
     val data: String,
     val horario: String,
+    val endereco: String = "",
     val extras: List<String> = emptyList(),
     val total: Double = 0.0,
     val status: String = "Agendado"
 )
 
-object AgendaStore {
-    val registros = mutableStateListOf<AgendamentoRegistro>()
-}
-
 @Composable
-fun AgendaTab() {
+fun AgendaTab(registros: List<AgendamentoRegistro> = emptyList()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,7 +74,7 @@ fun AgendaTab() {
             )
         }
 
-        if (AgendaStore.registros.isEmpty()) {
+        if (registros.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -119,7 +115,7 @@ fun AgendaTab() {
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(AgendaStore.registros.reversed()) { item ->
+                items(registros.reversed()) { item ->
                     CardAgendamento(item)
                 }
             }
@@ -209,6 +205,15 @@ private fun CardAgendamento(item: AgendamentoRegistro) {
                 fontWeight = FontWeight.Bold,
                 color = LumisBlue
             )
+
+            if (item.endereco.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Endereço: ${item.endereco}",
+                    fontSize = 12.sp,
+                    color = LumisTextSecondary
+                )
+            }
         }
     }
 }

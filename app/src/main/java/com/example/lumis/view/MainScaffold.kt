@@ -1,20 +1,26 @@
 package com.example.lumis.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.lumis.controller.AuthController
+import com.example.lumis.data.Agendamento
+import com.example.lumis.data.AgendamentoRepository
+import com.example.lumis.data.AppDatabase
 import com.example.lumis.data.User
 import com.example.lumis.model.Servico
-import com.example.lumis.view.components.AgendaStore
 import com.example.lumis.view.components.AgendaTab
 import com.example.lumis.view.components.AgendamentoRegistro
 import com.example.lumis.view.components.BottomNavBar
@@ -35,6 +41,7 @@ import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
 import com.example.lumis.view.screens.services.ServicesScreen
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.ModoTema
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 sealed class LumisTela {
@@ -56,6 +63,13 @@ fun MainScaffold(
     modoTema: ModoTema = ModoTema.SISTEMA,
     onModoTemaChange: (ModoTema) -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val database = remember(context) { AppDatabase.getDatabase(context) }
+    val agendamentoRepository = remember(database) {
+        AgendamentoRepository(database.agendamentoDao())
+    }
+    val scope = rememberCoroutineScope()
+
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
     var servicoEscolhido by remember { mutableStateOf<Servico?>(null) }
@@ -67,6 +81,27 @@ fun MainScaffold(
     var tamanhoImovel by remember { mutableStateOf("") }
     var extrasEscolhidos by remember { mutableStateOf<List<String>>(emptyList()) }
     var totalPedido by remember { mutableStateOf(0.0) }
+    var registrosAgenda by remember { mutableStateOf<List<AgendamentoRegistro>>(emptyList()) }
+    var formaPagamento by remember { mutableStateOf("A combinar no atendimento") }
+    var enderecoImovel by remember { mutableStateOf("") }
+
+    LaunchedEffect(usuario.id, agendamentoRepository) {
+        registrosAgenda = agendamentoRepository
+            .listarPorUsuario(usuario.id)
+            .map { salvo ->
+                AgendamentoRegistro(
+                    servico = salvo.servico,
+                    data = salvo.data,
+                    horario = salvo.horario,
+                    endereco = salvo.endereco,
+                    extras = salvo.extras
+                        .split('\n')
+                        .filter { it.isNotBlank() },
+                    total = salvo.totalCentavos / 100.0,
+                    status = salvo.status
+                )
+            }
+    }
 
     fun irPara(nova: LumisTela) {
         telaAtual = nova
@@ -126,7 +161,7 @@ fun MainScaffold(
                             onHireClick = { abrirServicoPorLegenda(it) }
                         )
                         NavItem.CIDADE -> CidadeConscienteScreen()
-                        NavItem.AGENDA -> AgendaTab()
+                        NavItem.AGENDA -> AgendaTab(registros = registrosAgenda)
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
                             UsuarioProfileScreen(
                                 profile = UsuarioProfile(
@@ -175,20 +210,22 @@ fun MainScaffold(
                             irPara(LumisTela.Imovel)
                         }
                     )
-                    is LumisTela.Imovel -> ConfiguracaoImovelScreen(
+is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         servico = servicoEscolhido?.nome,
                         data = dataEscolhida,
                         horario = horarioEscolhido,
+                        endereco = enderecoImovel,
                         onBack = {
                             irPara(
                                 servicoEscolhido?.let { LumisTela.Agendamento(it) }
                                     ?: LumisTela.Principal(NavItem.EXPLORAR)
                             )
                         },
-                        onConfirm = { q, b, tamanho ->
+                        onConfirm = { q, b, tamanho, endereco ->
                             quartosCount = q
                             banheirosCount = b
                             tamanhoImovel = tamanho
+                            enderecoImovel = endereco
                             irPara(LumisTela.Adicionais)
                         }
                     )
@@ -211,20 +248,54 @@ fun MainScaffold(
                         tamanho = tamanhoImovel,
                         extras = extrasEscolhidos,
                         total = totalPedido,
+                        endereco = enderecoImovel,
+                        formaPagamentoInicial = formaPagamento,
+                        onFormaPagamentoChange = { formaPagamento = it },
                         onBack = { irPara(LumisTela.Adicionais) },
-                        onConfirm = {
-                            servicoEscolhido?.let { servico ->
-                                AgendaStore.registros.add(
-                                    AgendamentoRegistro(
-                                        servico = servico.nome,
-                                        data = dataEscolhida,
-                                        horario = horarioEscolhido,
-                                        extras = extrasEscolhidos,
-                                        total = totalPedido
-                                    )
+                        onConfirm = { formaPagamento ->
+                            val servico = servicoEscolhido
+                            if (servico != null) {
+                                val novoAgendamento = Agendamento(
+                                    usuarioId = usuario.id,
+                                    servico = servico.nome,
+                                    data = dataEscolhida,
+                                    horario = horarioEscolhido,
+                                    quartos = quartosCount,
+                                    banheiros = banheirosCount,
+                                    tamanhoImovel = tamanhoImovel,
+                                    extras = extrasEscolhidos.joinToString("\n"),
+                                    endereco = enderecoImovel,
+                                    formaPagamento = formaPagamento,
+                                    totalCentavos = (totalPedido * 100.0).toLong()
                                 )
+                                scope.launch {
+                                    try {
+                                        agendamentoRepository.salvar(novoAgendamento)
+                                        registrosAgenda = agendamentoRepository
+                                            .listarPorUsuario(usuario.id)
+                                            .map { salvo ->
+                                                AgendamentoRegistro(
+                                                    servico = salvo.servico,
+                                                    data = salvo.data,
+                                                    horario = salvo.horario,
+                                                    endereco = salvo.endereco,
+                                                    extras = salvo.extras
+                                                        .split('\n')
+                                                        .filter { it.isNotBlank() },
+                                                    total = salvo.totalCentavos / 100.0,
+                                                    status = salvo.status
+                                                )
+                                            }
+                                        irPara(LumisTela.Principal(NavItem.AGENDA))
+                                    } catch (erro: Exception) {
+                                        Toast.makeText(
+                                            context,
+                                            "Não foi possível salvar o agendamento. Tente novamente.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
                             }
-                            irPara(LumisTela.Principal(NavItem.AGENDA))
                         }
                     )
                     is LumisTela.Conta -> ContaScreen(

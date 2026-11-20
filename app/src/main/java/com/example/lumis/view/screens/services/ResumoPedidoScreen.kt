@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,8 +30,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,10 +68,13 @@ fun ResumoPedidoScreen(
     tamanho: String,
     extras: List<String>,
     total: Double,
-    onConfirm: () -> Unit = {},
+    endereco: String = "",
+    formaPagamentoInicial: String = "A combinar no atendimento",
+    onFormaPagamentoChange: (String) -> Unit = {},
+    onConfirm: (formaPagamento: String) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-    val context = LocalContext.current
+    var formaPagamento by remember { mutableStateOf(formaPagamentoInicial) }
 
     Column(
         modifier = Modifier
@@ -128,6 +137,7 @@ fun ResumoPedidoScreen(
                     RowBetween("Horário", horario)
                     RowBetween("Quartos / Banheiros", "$quartos | $banheiros")
                     RowBetween("Tamanho", tamanho)
+                    RowBetween("Endereço", endereco)
                     RowBetween("Adicionais", extras.joinToString(", "))
                 }
             }
@@ -181,32 +191,60 @@ fun ResumoPedidoScreen(
                     }
                 }
             }
-        }
 
-        // =============================
-        // BOTÃO CONFIRMAR
-        // =============================
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(LumisSurface)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-        ) {
-            BotaoContinuar(
-                onClick = {
-                    Toast.makeText(context, "Pedido confirmado! ✅", Toast.LENGTH_LONG).show()
-                    onConfirm()
-                },
-                texto = "Confirmar Agendamento"
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Cancelamento gratuito até 24h antes",
-                fontSize = 11.sp,
-                color = LumisTextSecondary,
+            Spacer(Modifier.height(16.dp))
+
+            // ============ FORMAS DE PAGAMENTO ============
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = LumisSurface),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Text(
+                        text = "Forma de pagamento",
+                        color = LumisBlue,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    listOf("A combinar no atendimento", "Dinheiro", "Pix", "Cartão de débito", "Cartão de crédito").forEach { opcao ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = formaPagamento == opcao, onClick = {
+                                formaPagamento = opcao
+                                onFormaPagamentoChange(opcao)
+                            })
+                            Text(opcao, color = LumisTextPrimary, fontSize = 13.sp)
+                        }
+                    }
+                    Text("A seleção registra apenas a preferência. O aplicativo não processa pagamentos.", fontSize = 11.sp, color = LumisTextSecondary)
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // =============================
+            // BOTÃO CONFIRMAR
+            // =============================
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(LumisSurface)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                BotaoContinuar(
+                    onClick = { onConfirm(formaPagamento) },
+                    texto = "Confirmar Agendamento"
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "Cancelamentos e reagendamentos ficam registrados na sua agenda local.",
+                    fontSize = 11.sp,
+                    color = LumisTextSecondary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

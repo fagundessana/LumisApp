@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +53,7 @@ import com.example.lumis.view.components.LinhaProgresso
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.theme.LumisBorder
 import com.example.lumis.view.theme.LumisSurface
+import androidx.compose.ui.platform.LocalContext
 import com.example.lumis.view.theme.*
 
 // =========================================================
@@ -62,12 +65,18 @@ fun ConfiguracaoImovelScreen(
     servico: String? = null,
     data: String? = null,
     horario: String? = null,
+    quartosInicial: Int = 2,
+    banheirosInicial: Int = 1,
+    tamanhoInicial: String = "60–100m²",
+    endereco: String = "",
     onBack: () -> Unit = {},
-    onConfirm: (quartos: Int, banheiros: Int, tamanho: String) -> Unit = { _, _, _ -> }
+    onConfirm: (quartos: Int, banheiros: Int, tamanho: String, endereco: String) -> Unit = { _, _, _, _ -> }
 ) {
-    var quartos by remember { mutableIntStateOf(2) }
-    var banheiros by remember { mutableIntStateOf(1) }
-    var tamanhoSelecionado by remember { mutableStateOf("60–100m²") }
+    val context = LocalContext.current
+    var quartos by remember { mutableIntStateOf(quartosInicial) }
+    var banheiros by remember { mutableIntStateOf(banheirosInicial) }
+    var tamanhoSelecionado by remember { mutableStateOf(tamanhoInicial) }
+    var enderecoSelecionado by remember { mutableStateOf(endereco) }
 
     Column(
         modifier = Modifier
@@ -85,7 +94,7 @@ fun ConfiguracaoImovelScreen(
         // =================================================
         // CONTEÚDO
         // =================================================
-        Column(
+Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -163,6 +172,19 @@ fun ConfiguracaoImovelScreen(
                 texto = "Acima de 150m²",
                 selecionado = tamanhoSelecionado == "Acima de 150m²"
             ) { tamanhoSelecionado = "Acima de 150m²" }
+
+            Spacer(modifier = Modifier.height(18.dp))
+            Text("Endereço completo do atendimento", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
+            Spacer(modifier = Modifier.height(6.dp))
+            OutlinedTextField(
+                value = enderecoSelecionado,
+                onValueChange = { enderecoSelecionado = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Rua, número, bairro, cidade e CEP") },
+                singleLine = false,
+                minLines = 2,
+                maxLines = 3
+            )
         }
 
         // =================================================
@@ -175,7 +197,7 @@ fun ConfiguracaoImovelScreen(
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
             BotaoContinuar(
-                onClick = { onConfirm(quartos, banheiros, tamanhoSelecionado) }
+                onClick = { if (enderecoSelecionado.isNotBlank()) onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoSelecionado.trim()) else Toast.makeText(context, "Informe o endereço do atendimento", Toast.LENGTH_SHORT).show() }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
