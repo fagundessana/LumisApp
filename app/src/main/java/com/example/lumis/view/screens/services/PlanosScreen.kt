@@ -286,7 +286,7 @@ private fun PlanCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         plano.nome,
                         fontSize = 18.sp,
@@ -297,10 +297,11 @@ private fun PlanCard(
                     Text(
                         plano.descricao,
                         fontSize = 12.sp,
-                        color = LumisTextSecondary
+                        color = LumisTextSecondary,
+                        maxLines = 2
                     )
                 }
-                Spacer(Modifier.weight(1f))
+                Spacer(Modifier.width(12.dp))
                 if (plano.popular) {
                     Box(
                         modifier = Modifier
@@ -423,7 +424,7 @@ private fun CtaComprar(planoSelecionado: Plano, onAssinar: () -> Unit) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
             BotaoContinuar(
                 onClick = onAssinar,
-                texto = stringResource(R.string.subscribe_plan_cta, planoSelecionado.nome, planoSelecionado.preco, planoSelecionado.precoPeriodo)
+                texto = stringResource(R.string.subscribe_plan_cta, planoSelecionado.nome)
             )
         }
     }

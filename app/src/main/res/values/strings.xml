@@ -181,7 +181,7 @@
     <string name="faq_home_answer">Atendemos casas, apartamentos e coberturas. Para empresas, consulte a disponibilidade.</string>
     <string name="how_to_pay">Como deseja pagar?</string>
     <string name="most_popular">Mais popular</string>
-    <string name="subscribe_plan_cta">Assinar %1$s — %2$s%3$s</string>
+    <string name="subscribe_plan_cta">Assinar %1$s</string>
     <string name="pix">Pix</string>
     <string name="credit_card">Cartão de crédito</string>
     <string name="debit_card">Cartão de débito</string>

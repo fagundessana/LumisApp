@@ -182,7 +182,7 @@
     <string name="faq_home_answer">We serve houses, apartments, and penthouses. Check availability for businesses.</string>
     <string name="how_to_pay">How would you like to pay?</string>
     <string name="most_popular">Most popular</string>
-    <string name="subscribe_plan_cta">Subscribe to %1$s — %2$s%3$s</string>
+    <string name="subscribe_plan_cta">Subscribe to %1$s</string>
     <string name="pix">Pix</string>
     <string name="credit_card">Credit card</string>
     <string name="debit_card">Debit card</string>

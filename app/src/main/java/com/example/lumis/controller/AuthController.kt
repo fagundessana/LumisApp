@@ -47,10 +47,10 @@ class AuthController(context: Context) {
 
     suspend fun garantirDadosDemo() {
         val demonstrativos = listOf(
-            User(
-                email = "ana.demo@lumis.app",
-                nomeUsuario = "Ana Beatriz Santos",
-                senha = "Lumis@Ana1",
+            "ana.demo@lumis.app" to User(
+                email = "maite.siqueira.demo@lumis.app",
+                nomeUsuario = "Maitê Siqueira",
+                senha = "Lumis@Maite1",
                 tipoUsuario = "Profissional",
                 localizacao = "São Paulo, SP",
                 telefone = "(11) 99911-2401",
@@ -61,10 +61,10 @@ class AuthController(context: Context) {
                 valorMinimoCentavos = 12_000,
                 isDemo = true
             ),
-            User(
-                email = "carlos.demo@lumis.app",
-                nomeUsuario = "Carlos Henrique Lima",
-                senha = "Lumis@Carlos1",
+            "carlos.demo@lumis.app" to User(
+                email = "breno.alcantara.demo@lumis.app",
+                nomeUsuario = "Breno Alcântara",
+                senha = "Lumis@Breno1",
                 tipoUsuario = "Profissional",
                 localizacao = "São Paulo, SP",
                 telefone = "(11) 99922-3512",
@@ -75,10 +75,10 @@ class AuthController(context: Context) {
                 valorMinimoCentavos = 18_000,
                 isDemo = true
             ),
-            User(
-                email = "mariana.demo@lumis.app",
-                nomeUsuario = "Mariana Costa",
-                senha = "Lumis@Mariana1",
+            "mariana.demo@lumis.app" to User(
+                email = "ravena.duarte.demo@lumis.app",
+                nomeUsuario = "Ravena Duarte",
+                senha = "Lumis@Ravena1",
                 tipoUsuario = "Profissional",
                 localizacao = "Curitiba, PR",
                 telefone = "(41) 99880-4623",
@@ -89,7 +89,7 @@ class AuthController(context: Context) {
                 valorMinimoCentavos = 15_000,
                 isDemo = true
             ),
-            User(
+            "cliente.demo@lumis.app" to User(
                 email = "cliente.demo@lumis.app",
                 nomeUsuario = "Cliente Demonstração",
                 senha = "Lumis@Cliente1",
@@ -100,17 +100,26 @@ class AuthController(context: Context) {
             )
         )
 
-        demonstrativos.forEach { usuarioDemo ->
-            if (database.userDao().buscarPorEmail(usuarioDemo.email) == null) {
-                database.userDao().inserir(usuarioDemo)
+        demonstrativos.forEach { (emailLegado, usuarioDemo) ->
+            val atual = database.userDao().buscarPorEmail(usuarioDemo.email)
+            val legado = if (emailLegado != usuarioDemo.email) database.userDao().buscarPorEmail(emailLegado) else null
+            when {
+                atual != null -> Unit
+                legado != null && legado.isDemo -> {
+                    database.userDao().atualizar(usuarioDemo.copy(id = legado.id))
+                    if (prefs.getString("ultimo_email", null) == emailLegado) {
+                        prefs.edit().putString("ultimo_email", usuarioDemo.email).apply()
+                    }
+                }
+                else -> database.userDao().inserir(usuarioDemo)
             }
         }
 
         val clienteDemo = database.userDao().buscarPorEmail("cliente.demo@lumis.app") ?: return
         val avaliacoesDemo = mapOf(
-            "ana.demo@lumis.app" to listOf(5, 5),
-            "carlos.demo@lumis.app" to listOf(5, 4),
-            "mariana.demo@lumis.app" to listOf(5, 5)
+            "maite.siqueira.demo@lumis.app" to listOf(5, 5),
+            "breno.alcantara.demo@lumis.app" to listOf(5, 4),
+            "ravena.duarte.demo@lumis.app" to listOf(5, 5)
         )
 
         avaliacoesDemo.forEach { (email, avaliacoes) ->
