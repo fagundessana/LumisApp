@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +61,7 @@ import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
 import kotlinx.coroutines.delay
+import com.example.lumis.R
 
 @Composable
 fun ConfiguracaoImovelScreen(
@@ -115,15 +117,15 @@ fun ConfiguracaoImovelScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Column {
-                Text("CONFIGURAÇÃO", color = LumisBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                Text("Detalhes do imóvel", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = LumisTextPrimary)
-                Text("Conte sobre o espaço e confirme onde será o atendimento.", fontSize = 13.sp, color = LumisTextSecondary)
+                Text(stringResource(R.string.property_configuration).uppercase(), color = LumisBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.property_details), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = LumisTextPrimary)
+                Text(stringResource(R.string.property_details_hint), fontSize = 13.sp, color = LumisTextSecondary)
             }
 
-            ContadorLinha("Quartos", quartos, { if (quartos > 1) quartos-- }, { quartos++ })
-            ContadorLinha("Banheiros", banheiros, { if (banheiros > 1) banheiros-- }, { banheiros++ })
+            ContadorLinha(stringResource(R.string.bedrooms), quartos, { if (quartos > 1) quartos-- }, { quartos++ })
+            ContadorLinha(stringResource(R.string.bathrooms), banheiros, { if (banheiros > 1) banheiros-- }, { banheiros++ })
 
-            Text("Tamanho aproximado", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
+            Text(stringResource(R.string.approximate_size), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = LumisTextSecondary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TamanhoPilula("Até 60m²", tamanhoSelecionado == "Até 60m²") { tamanhoSelecionado = "Até 60m²" }
                 TamanhoPilula("60–100m²", tamanhoSelecionado == "60–100m²") { tamanhoSelecionado = "60–100m²" }
@@ -141,8 +143,8 @@ fun ConfiguracaoImovelScreen(
                         }
                         Spacer(Modifier.width(10.dp))
                         Column {
-                            Text("Endereço do atendimento", fontWeight = FontWeight.SemiBold, color = LumisTextPrimary)
-                            Text("Digite o CEP para preencher automaticamente", fontSize = 12.sp, color = LumisTextSecondary)
+                            Text(stringResource(R.string.service_address), fontWeight = FontWeight.SemiBold, color = LumisTextPrimary)
+                            Text(stringResource(R.string.cep_autofill_hint), fontSize = 12.sp, color = LumisTextSecondary)
                         }
                     }
 
@@ -150,7 +152,7 @@ fun ConfiguracaoImovelScreen(
                         value = cep,
                         onValueChange = { cep = formatarCep(it) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("CEP") },
+                        label = { Text(stringResource(R.string.cep)) },
                         placeholder = { Text("00000-000") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         trailingIcon = {
@@ -163,15 +165,15 @@ fun ConfiguracaoImovelScreen(
                         isError = erroCep != null,
                         singleLine = true
                     )
-                    OutlinedTextField(logradouro, { logradouro = it }, Modifier.fillMaxWidth(), label = { Text("Rua / avenida") }, singleLine = true)
+                    OutlinedTextField(logradouro, { logradouro = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.street)) }, singleLine = true)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedTextField(numero, { numero = it }, Modifier.weight(0.38f), label = { Text("Número") }, singleLine = true)
-                        OutlinedTextField(complemento, { complemento = it }, Modifier.weight(0.62f), label = { Text("Complemento") }, singleLine = true)
+                        OutlinedTextField(numero, { numero = it }, Modifier.weight(0.38f), label = { Text(stringResource(R.string.number)) }, singleLine = true)
+                        OutlinedTextField(complemento, { complemento = it }, Modifier.weight(0.62f), label = { Text(stringResource(R.string.complement)) }, singleLine = true)
                     }
-                    OutlinedTextField(bairro, { bairro = it }, Modifier.fillMaxWidth(), label = { Text("Bairro") }, singleLine = true)
+                    OutlinedTextField(bairro, { bairro = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.neighborhood)) }, singleLine = true)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedTextField(cidade, { cidade = it }, Modifier.weight(0.72f), label = { Text("Cidade") }, singleLine = true)
-                        OutlinedTextField(uf, { uf = it.take(2).uppercase() }, Modifier.weight(0.28f), label = { Text("UF") }, singleLine = true)
+                        OutlinedTextField(cidade, { cidade = it }, Modifier.weight(0.72f), label = { Text(stringResource(R.string.city)) }, singleLine = true)
+                        OutlinedTextField(uf, { uf = it.take(2).uppercase() }, Modifier.weight(0.28f), label = { Text(stringResource(R.string.state)) }, singleLine = true)
                     }
                 }
             }
@@ -181,16 +183,16 @@ fun ConfiguracaoImovelScreen(
             BotaoContinuar(onClick = {
                 val enderecoCompleto = montarEndereco(logradouro, numero, complemento, bairro, cidade, uf, cep)
                 when {
-                    cepNumerico.length != 8 -> Toast.makeText(context, "Informe um CEP válido", Toast.LENGTH_SHORT).show()
-                    buscandoCep -> Toast.makeText(context, "Aguarde a consulta do CEP", Toast.LENGTH_SHORT).show()
+                    cepNumerico.length != 8 -> Toast.makeText(context, context.getString(R.string.invalid_cep), Toast.LENGTH_SHORT).show()
+                    buscandoCep -> Toast.makeText(context, context.getString(R.string.wait_cep), Toast.LENGTH_SHORT).show()
                     erroCep != null -> Toast.makeText(context, erroCep, Toast.LENGTH_SHORT).show()
                     logradouro.isBlank() || numero.isBlank() || bairro.isBlank() || cidade.isBlank() || uf.isBlank() ->
-                        Toast.makeText(context, "Complete os dados do endereço", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.complete_address), Toast.LENGTH_SHORT).show()
                     else -> onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoCompleto)
                 }
             })
             Spacer(Modifier.height(8.dp))
-            Text("Quartos: $quartos  •  Banheiros: $banheiros  •  $tamanhoSelecionado", fontSize = 12.sp, color = LumisTextSecondary, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            Text(stringResource(R.string.property_summary, quartos, banheiros, tamanhoSelecionado), fontSize = 12.sp, color = LumisTextSecondary, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
     }
 }

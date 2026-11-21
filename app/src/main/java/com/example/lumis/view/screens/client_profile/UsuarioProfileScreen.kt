@@ -2,17 +2,38 @@ package com.example.lumis.view.screens.client_profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material.icons.outlined.CleaningServices
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,537 +41,143 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.lumis.R
-import com.example.lumis.view.theme.LumisTheme
-import com.example.lumis.view.theme.ModoTema
-import com.example.lumis.view.theme.TemaApp.corTema
-import java.io.File
-// Reaproveita a paleta de cores já definida na tela do funcionário,
-// mantendo os dois perfis (funcionário / usuário) com a mesma identidade visual.
 import com.example.lumis.view.screens.employee_profile.ProfileColors
-
-// ---------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------
-
-private val CardShape = RoundedCornerShape(20.dp)
-private val SmallCardShape = RoundedCornerShape(16.dp)
-private val PillShape = RoundedCornerShape(50)
-
-// Gradiente verde usado no header do perfil de usuário (equivalente ao azul do funcionário)
-private val HeaderGreenTop: Color get() = corTema(claro = Color(0xFFA9E2C4), escuro = Color(0xFF24463A))
-private val HeaderGreenBottom: Color get() = corTema(claro = Color(0xFFE9F8F0), escuro = Color(0xFF262626))
-
-// ---------------------------------------------------------------------------------------------
-// MODELOS DE DADOS (MOCK)
-// ---------------------------------------------------------------------------------------------
+import java.io.File
 
 data class UsuarioProfile(
-    val nome: String = "Maria de Oliveira",
-    val localizacao: String = "São Paulo, Brasil",
+    val nome: String,
+    val localizacao: String,
     val fotoUrl: String? = null,
     val biografia: String = "",
-    val bannerUrl: String? = null
+    val bannerUrl: String? = null,
+    val planoAtivo: String? = null
 )
-
-enum class StatusAtividade(val label: String) {
-    CONCLUIDO("Concluído"),
-    CANCELADO("Cancelado")
-}
-
-data class AtividadeRecente(
-    val titulo: String,
-    val data: String,
-    val status: StatusAtividade = StatusAtividade.CONCLUIDO
-)
-
-data class TarefaPendente(
-    val titulo: String,
-    val prazo: String,
-    val icone: ImageVector
-)
-
-data class Atalho(
-    val label: String,
-    val icone: ImageVector
-)
-
-// Dados mockados equivalentes ao print de referência
-val atalhosPadrao = listOf(
-    Atalho("Meus dados", Icons.Outlined.Description),
-    Atalho("Serviços", Icons.Outlined.HomeRepairService),
-    Atalho("Planos", Icons.Outlined.WorkspacePremium),
-    Atalho("Notificações", Icons.Outlined.NotificationsNone)
-)
-
-val atividadesRecentesPadrao = listOf(
-    AtividadeRecente("Limpeza Residencial", "26/08/2026"),
-    AtividadeRecente("Limpeza Residencial", "05/08/2026"),
-    AtividadeRecente("Limpeza de estofados", "17/07/2026"),
-    AtividadeRecente("Limpeza de carro", "08/06/2026")
-)
-
-val tarefasPendentesPadrao = listOf(
-    TarefaPendente("Coleta de recicláveis", "2 Dias para completar", Icons.Outlined.Autorenew),
-    TarefaPendente("Reporte de acúmulo de lixo", "2 Dias para completar", Icons.Outlined.DeleteOutline)
-)
-
-// ---------------------------------------------------------------------------------------------
-// TELA PRINCIPAL
-// ---------------------------------------------------------------------------------------------
 
 @Composable
 fun UsuarioProfileScreen(
-    profile: UsuarioProfile = UsuarioProfile(),
-    atalhos: List<Atalho> = atalhosPadrao,
-    atividadesRecentes: List<AtividadeRecente> = atividadesRecentesPadrao,
-    tarefasPendentes: List<TarefaPendente> = tarefasPendentesPadrao,
-    onAtalhoClick: (Atalho) -> Unit = {},
-    onAtividadeClick: (AtividadeRecente) -> Unit = {},
-    onConcluirTarefa: (TarefaPendente) -> Unit = {},
+    profile: UsuarioProfile,
     onEditarClick: () -> Unit = {},
+    onConfigClick: () -> Unit = {},
     onMembroLumisClick: () -> Unit = {},
-    onConfigClick: () -> Unit = {}
+    onNotificacoesClick: () -> Unit = {},
+    onServicosClick: () -> Unit = {},
+    onAgendaClick: () -> Unit = {}
 ) {
-    Scaffold(
-        containerColor = ProfileColors.CardBackground
-    ) { innerPadding ->
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            val isWideScreen = maxWidth > 600.dp
-            val contentMaxWidth = if (isWideScreen) 460.dp else maxWidth
-            val horizontalPadding = if (isWideScreen) (maxWidth - contentMaxWidth) / 2 else 0.dp
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                item {
-                    UsuarioHeaderSection(
-                        profile = profile,
-                        horizontalPadding = horizontalPadding,
-                        onEditarClick = onEditarClick,
-                        onConfigClick = onConfigClick
-                    )
-                }
-
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ProfileColors.CardBackground)
-                            .padding(horizontal = horizontalPadding + 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().background(ProfileColors.Background),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item { CabecalhoCliente(profile, onEditarClick, onConfigClick) }
+        item {
+            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                if (profile.biografia.isNotBlank()) {
+                    Surface(
+                        shape = RoundedCornerShape(18.dp),
+                        color = ProfileColors.CardBackground,
+                        border = BorderStroke(1.dp, ProfileColors.Divider)
                     ) {
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        if (profile.biografia.isNotBlank()) {
-                            BiografiaSection(biografia = profile.biografia)
+                        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                            Text(stringResource(R.string.about_me), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                            Spacer(Modifier.height(5.dp))
+                            Text(profile.biografia, color = ProfileColors.TextSecondary)
                         }
-
-                        MembroLumisCard(onClick = onMembroLumisClick)
-
-                        AtalhosRapidosSection(
-                            atalhos = atalhos,
-                            onAtalhoClick = onAtalhoClick
-                        )
-
-                        AtividadesRecentesSection(
-                            atividades = atividadesRecentes,
-                            onAtividadeClick = onAtividadeClick
-                        )
-
-                        TarefasPendentesSection(
-                            tarefas = tarefasPendentes,
-                            onConcluirTarefa = onConcluirTarefa
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
+
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = ProfileColors.PrimaryLight,
+                    border = BorderStroke(1.dp, ProfileColors.Primary.copy(alpha = 0.35f)),
+                    onClick = onMembroLumisClick
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.WorkspacePremium, null, tint = ProfileColors.PrimaryDark)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                profile.planoAtivo ?: stringResource(R.string.discover_lumis_plans),
+                                fontWeight = FontWeight.Bold,
+                                color = ProfileColors.TextPrimary
+                            )
+                            Text(
+                                if (profile.planoAtivo == null) stringResource(R.string.plan_benefits_hint)
+                                else stringResource(R.string.active_plan),
+                                color = ProfileColors.TextSecondary
+                            )
+                        }
+                        Icon(Icons.Outlined.ChevronRight, null, tint = ProfileColors.PrimaryDark)
+                    }
+                }
+
+                Text(stringResource(R.string.quick_access), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                AtalhoPerfil(Icons.Outlined.CleaningServices, stringResource(R.string.services), onServicosClick)
+                AtalhoPerfil(Icons.Outlined.CalendarMonth, stringResource(R.string.nav_schedule), onAgendaClick)
+                AtalhoPerfil(Icons.Outlined.Notifications, stringResource(R.string.notifications), onNotificacoesClick)
+
+                Button(
+                    onClick = onEditarClick,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ProfileColors.Primary)
+                ) {
+                    Icon(Icons.Outlined.Edit, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(20.dp))
             }
         }
     }
 }
 
-// ---------------------------------------------------------------------------------------------
-// 1. HEADER (banner de capa + avatar sobreposto + nome/localização)
-// ---------------------------------------------------------------------------------------------
-
 @Composable
-fun UsuarioHeaderSection(
+private fun CabecalhoCliente(
     profile: UsuarioProfile,
-    horizontalPadding: Dp,
     onEditarClick: () -> Unit,
     onConfigClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        // Banner de capa (imagem ou gradiente padrão)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .background(
-                    brush = if (profile.bannerUrl != null && profile.bannerUrl!!.isNotBlank())
-                        Brush.horizontalGradient(colors = listOf(Color.Transparent, Color.Transparent))
-                    else
-                        Brush.verticalGradient(
-                            colors = listOf(HeaderGreenTop, HeaderGreenBottom)
-                        )
-                )
-        ) {
-            // Imagem do banner (se existir)
-            if (profile.bannerUrl != null && profile.bannerUrl!!.isNotBlank()) {
-                coil.compose.AsyncImage(
-                    model = profile.bannerUrl!!,
-                    contentDescription = "Banner do perfil",
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(0.dp))
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding + 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Logo Lumis
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(ProfileColors.Primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.lumis),
-                        contentDescription = "Logo Lumis",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                // Botões: configurações + alterar foto de capa (lado a lado)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(ProfileColors.CardBackground.copy(alpha = 0.7f))
-                            .clickable { onConfigClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = "Configurações",
-                            tint = ProfileColors.TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    }
-            }
+    Box(Modifier.fillMaxWidth().height(270.dp)) {
+        if (!profile.bannerUrl.isNullOrBlank() && File(profile.bannerUrl).exists()) {
+            AsyncImage(File(profile.bannerUrl), null, Modifier.fillMaxWidth().aspectRatio(2f), contentScale = ContentScale.Crop)
+        } else {
+            Box(
+                Modifier.fillMaxWidth().height(150.dp)
+                    .background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary)))
+            )
         }
-
-        // Container branco com cantos superiores arredondados
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 110.dp)
-                .background(
-                    color = ProfileColors.CardBackground,
-                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-                )
+        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.End) {
+            IconButton(onClick = onEditarClick) { Icon(Icons.Outlined.Edit, stringResource(R.string.edit_profile), tint = Color.White) }
+            IconButton(onClick = onConfigClick) { Icon(Icons.Outlined.Settings, stringResource(R.string.settings), tint = Color.White) }
+        }
+        Surface(
+            modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp).fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            color = ProfileColors.CardBackground,
+            shadowElevation = 4.dp
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = horizontalPadding + 20.dp, end = horizontalPadding + 20.dp, top = 18.dp, bottom = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Avatar circular sobrepondo a transição verde/branca
+            Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier
-                        .offset(y = (-46).dp)
-                        .size(88.dp)
-                        .clip(CircleShape)
-                        .background(ProfileColors.CardBackground)
-                        .border(3.dp, Color.White, CircleShape),
+                    Modifier.size(76.dp).clip(CircleShape).background(ProfileColors.PrimaryLight),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(ProfileColors.Divider),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val fotoFile = profile.fotoUrl
-                            ?.takeIf { it.isNotBlank() }
-                            ?.let { File(it) }
-                            ?.takeIf { it.exists() }
-                        if (fotoFile != null) {
-                            AsyncImage(
-                                model = fotoFile,
-                                contentDescription = "Foto do usuário",
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Outlined.Person,
-                                contentDescription = "Foto do usuário",
-                                tint = ProfileColors.Primary,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
+                    if (!profile.fotoUrl.isNullOrBlank() && File(profile.fotoUrl).exists()) {
+                        AsyncImage(File(profile.fotoUrl), profile.nome, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                    } else {
+                        Icon(Icons.Outlined.Person, null, Modifier.size(36.dp), tint = ProfileColors.PrimaryDark)
                     }
                 }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Nome e localização (alinhados ao centro do avatar)
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .offset(y = (-30).dp)
-                ) {
-                    Text(
-                        text = profile.nome,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp,
-                        color = ProfileColors.TextPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(profile.nome, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Outlined.LocationOn,
-                            contentDescription = null,
-                            tint = ProfileColors.TextSecondary,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = profile.localizacao,
-                            fontSize = 12.sp,
-                            color = ProfileColors.TextSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                // Botão editar
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .offset(y = (-30).dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onEditarClick() }
-                        .padding(horizontal = 6.dp, vertical = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = "Editar perfil",
-                        tint = ProfileColors.Primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "Editar",
-                        fontSize = 10.sp,
-                        color = ProfileColors.Primary
-                    )
-                }
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 2. CARD "MEMBRO LUMIS"
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun MembroLumisCard(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = CardShape,
-        colors = CardDefaults.cardColors(containerColor = ProfileColors.PrimaryLight),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.WorkspacePremium,
-                contentDescription = null,
-                tint = ProfileColors.PrimaryDark,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Membro Lumis",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    color = ProfileColors.PrimaryDark
-                )
-                Text(
-                    text = "Clique aqui e descubra seus benefícios",
-                    fontSize = 12.sp,
-                    color = ProfileColors.TextSecondary
-                )
-            }
-            Icon(
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = null,
-                tint = ProfileColors.PrimaryDark,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 3. ATALHOS RÁPIDOS
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun AtalhosRapidosSection(
-    atalhos: List<Atalho>,
-    onAtalhoClick: (Atalho) -> Unit
-) {
-    Column {
-        SectionTitle(prefixo = "Atalhos", destaque = "rápidos")
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            atalhos.forEach { atalho ->
-                AtalhoItem(
-                    atalho = atalho,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onAtalhoClick(atalho) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AtalhoItem(
-    atalho: Atalho,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .clip(SmallCardShape)
-            .background(ProfileColors.CardBackground)
-            .border(BorderStroke(1.dp, ProfileColors.Divider), SmallCardShape)
-            .clickable { onClick() }
-            .padding(vertical = 14.dp, horizontal = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = atalho.icone,
-            contentDescription = atalho.label,
-            tint = ProfileColors.Primary,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = atalho.label,
-            fontSize = 11.sp,
-            color = ProfileColors.TextPrimary,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// BIOGRAFIA (seção opcional — só aparece quando preenchida no Editar Perfil)
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun BiografiaSection(biografia: String) {
-    Column {
-        SectionTitle(prefixo = "Sobre", destaque = "mim")
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            border = BorderStroke(1.dp, ProfileColors.Divider),
-            colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Text(
-                text = biografia,
-                fontSize = 13.sp,
-                color = ProfileColors.TextPrimary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 4. ATIVIDADES RECENTES
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun AtividadesRecentesSection(
-    atividades: List<AtividadeRecente>,
-    onAtividadeClick: (AtividadeRecente) -> Unit
-) {
-    Column {
-        SectionTitle(prefixo = "Atividades", destaque = "recentes")
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            border = BorderStroke(1.dp, ProfileColors.Divider),
-            colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column {
-                atividades.forEachIndexed { index, atividade ->
-                    AtividadeRow(
-                        atividade = atividade,
-                        onClick = { onAtividadeClick(atividade) }
-                    )
-                    if (index != atividades.lastIndex) {
-                        HorizontalDivider(color = ProfileColors.Divider, thickness = 1.dp)
+                        Icon(Icons.Outlined.LocationOn, null, Modifier.size(16.dp), tint = ProfileColors.Primary)
+                        Spacer(Modifier.width(3.dp))
+                        Text(profile.localizacao, color = ProfileColors.TextSecondary)
                     }
                 }
             }
@@ -559,191 +186,18 @@ fun AtividadesRecentesSection(
 }
 
 @Composable
-private fun AtividadeRow(
-    atividade: AtividadeRecente,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+private fun AtalhoPerfil(icon: ImageVector, titulo: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = ProfileColors.CardBackground,
+        border = BorderStroke(1.dp, ProfileColors.Divider)
     ) {
-        Icon(
-            imageVector = Icons.Outlined.CalendarMonth,
-            contentDescription = null,
-            tint = ProfileColors.ChipGreenIcon,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = atividade.titulo,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = ProfileColors.TextPrimary,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = atividade.data,
-                fontSize = 12.sp,
-                color = ProfileColors.TextSecondary
-            )
-            Text(
-                text = atividade.status.label,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (atividade.status == StatusAtividade.CONCLUIDO)
-                    ProfileColors.BadgeGreenText else ProfileColors.BadgeRedText
-            )
+        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, null, tint = ProfileColors.Primary)
+            Spacer(Modifier.width(12.dp))
+            Text(titulo, Modifier.weight(1f), color = ProfileColors.TextPrimary, fontWeight = FontWeight.Medium)
+            Icon(Icons.Outlined.ChevronRight, null, tint = ProfileColors.TextSecondary)
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = ProfileColors.TextSecondary,
-            modifier = Modifier.size(18.dp)
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// 5. TAREFAS PENDENTES
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-fun TarefasPendentesSection(
-    tarefas: List<TarefaPendente>,
-    onConcluirTarefa: (TarefaPendente) -> Unit
-) {
-    Column {
-        SectionTitle(prefixo = "Tarefas", destaque = "Pendentes")
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = CardShape,
-            border = BorderStroke(1.dp, ProfileColors.Divider),
-            colors = CardDefaults.cardColors(containerColor = ProfileColors.CardBackground),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column {
-                tarefas.forEachIndexed { index, tarefa ->
-                    TarefaRow(
-                        tarefa = tarefa,
-                        onConcluir = { onConcluirTarefa(tarefa) }
-                    )
-                    if (index != tarefas.lastIndex) {
-                        HorizontalDivider(color = ProfileColors.Divider, thickness = 1.dp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TarefaRow(
-    tarefa: TarefaPendente,
-    onConcluir: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = tarefa.icone,
-            contentDescription = null,
-            tint = ProfileColors.Primary,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = tarefa.titulo,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = ProfileColors.TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = tarefa.prazo,
-                fontSize = 11.sp,
-                color = ProfileColors.TextSecondary
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            onClick = onConcluir,
-            shape = PillShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ProfileColors.Primary,
-                contentColor = Color.White
-            ),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
-        ) {
-            Text(text = "Concluir", fontSize = 12.sp, fontWeight = FontWeight.Medium)
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                imageVector = Icons.Outlined.PhotoCamera,
-                contentDescription = "Anexar foto",
-                modifier = Modifier.size(14.dp)
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// COMPONENTE AUXILIAR: TÍTULO DE SEÇÃO (ex.: "Atalhos rápidos")
-// ---------------------------------------------------------------------------------------------
-
-@Composable
-private fun SectionTitle(prefixo: String, destaque: String) {
-    Row {
-        Text(
-            text = "$prefixo ",
-            fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
-            color = ProfileColors.TextPrimary
-        )
-        Text(
-            text = destaque,
-            fontWeight = FontWeight.Bold,
-            fontSize = 17.sp,
-            color = ProfileColors.Primary
-        )
-    }
-}
-
-// ---------------------------------------------------------------------------------------------
-// PREVIEWS
-// ---------------------------------------------------------------------------------------------
-
-@Preview(name = "Celular - Pixel 4", showBackground = true, device = Devices.PIXEL_4)
-@Composable
-fun UsuarioProfileScreenPreviewPhone() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        UsuarioProfileScreen()
-    }
-}
-
-@Preview(name = "Celular pequeno", showBackground = true, widthDp = 320, heightDp = 780)
-@Composable
-fun UsuarioProfileScreenPreviewSmallPhone() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        UsuarioProfileScreen()
-    }
-}
-
-@Preview(name = "Tablet", showBackground = true, device = Devices.PIXEL_TABLET)
-@Composable
-fun UsuarioProfileScreenPreviewTablet() {
-    LumisTheme(modo = ModoTema.SISTEMA) {
-        UsuarioProfileScreen()
     }
 }

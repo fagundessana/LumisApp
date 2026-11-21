@@ -25,6 +25,7 @@ import com.example.lumis.controller.AuthController
 import com.example.lumis.data.Agendamento
 import com.example.lumis.data.AgendamentoRepository
 import com.example.lumis.data.AppDatabase
+import com.example.lumis.data.AssinaturaPlano
 import com.example.lumis.data.User
 import com.example.lumis.model.Servico
 import com.example.lumis.view.components.AgendaTab
@@ -44,6 +45,7 @@ import com.example.lumis.view.screens.services.AgendamentoScreen
 import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
 import com.example.lumis.view.screens.services.PlanosScreen
 import com.example.lumis.view.screens.services.PagamentoScreen
+import com.example.lumis.view.screens.services.ContextoPagamento
 import com.example.lumis.view.screens.services.ResumoPedidoScreen
 import com.example.lumis.view.screens.services.ServicosAdicionaisScreen
 import com.example.lumis.view.screens.services.ServicesScreen
@@ -60,6 +62,7 @@ sealed class LumisTela {
     data object Adicionais : LumisTela()
     data object Resumo : LumisTela()
     data object Pagamento : LumisTela()
+    data class PagamentoPlano(val planoId: String, val nome: String, val valorCentavos: Long) : LumisTela()
     data object Conta : LumisTela()
     data object EditarPerfil : LumisTela()
     data object Notificacoes : LumisTela()
@@ -79,6 +82,7 @@ fun MainScaffold(
         AgendamentoRepository(database.agendamentoDao())
     }
     val scope = rememberCoroutineScope()
+    val assinaturaPlanoDao = remember(database) { database.assinaturaPlanoDao() }
 
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
@@ -94,8 +98,10 @@ fun MainScaffold(
     var registrosAgenda by remember { mutableStateOf<List<AgendamentoRegistro>>(emptyList()) }
     var formaPagamento by remember { mutableStateOf("A combinar no atendimento") }
     var enderecoImovel by remember { mutableStateOf("") }
+    var assinaturaAtiva by remember { mutableStateOf<AssinaturaPlano?>(null) }
 
     LaunchedEffect(usuario.id, agendamentoRepository) {
+        assinaturaAtiva = assinaturaPlanoDao.buscarPorUsuario(usuario.id)
         registrosAgenda = agendamentoRepository
             .listarPorUsuario(usuario.id)
             .map { salvo ->
@@ -223,22 +229,15 @@ fun MainScaffold(
                                     localizacao = usuario.localizacao.ifBlank { "Adicionar localização" },
                                     fotoUrl = usuario.fotoPerfilPath.ifBlank { null },
                                     biografia = usuario.biografia,
-                                    bannerUrl = usuario.bannerPerfilPath.ifBlank { null }
+                                    bannerUrl = usuario.bannerPerfilPath.ifBlank { null },
+                                    planoAtivo = assinaturaAtiva?.nomePlano
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
                                 onMembroLumisClick = { irPara(LumisTela.Planos) },
-                                onAtalhoClick = { atalho ->
-                                    when (atalho.label) {
-                                        "Meus dados" -> irPara(LumisTela.EditarPerfil)
-                                        "Notificações" -> irPara(LumisTela.Notificacoes)
-                                        "Serviços" -> irPara(LumisTela.Principal(NavItem.EXPLORAR))
-                                        "Planos" -> irPara(LumisTela.Planos)
-                                        else -> irPara(LumisTela.Principal(NavItem.HOME))
-                                    }
-                                },
-                                onAtividadeClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
-                                onConcluirTarefa = { irPara(LumisTela.Principal(NavItem.CIDADE)) }
+                                onNotificacoesClick = { irPara(LumisTela.Notificacoes) },
+                                onServicosClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                                onAgendaClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) }
                             )
                         } else {
                             FuncionarioProfileScreen(
@@ -273,6 +272,9 @@ fun MainScaffold(
                     }
                     is LumisTela.Planos -> PlanosScreen(
                         onVoltarServicos = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
+                        onAssinarPlano = { plano ->
+                            irPara(LumisTela.PagamentoPlano(plano.id, plano.nome, plano.valorCentavos))
+                        },
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Agendamento -> AgendamentoScreen(
@@ -387,6 +389,27 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                         ).show()
                                     }
                                 }
+                            }
+                        },
+                        onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                    )
+                    is LumisTela.PagamentoPlano -> PagamentoScreen(
+                        formaPagamento = "Cartão de crédito",
+                        total = tela.valorCentavos / 100.0,
+                        contexto = ContextoPagamento.PLANO,
+                        onBack = { irPara(LumisTela.Planos) },
+                        onConcluir = {
+                            scope.launch {
+                                val assinatura = AssinaturaPlano(
+                                    usuarioId = usuario.id,
+                                    planoId = tela.planoId,
+                                    nomePlano = tela.nome,
+                                    valorMensalCentavos = tela.valorCentavos
+                                )
+                                assinaturaPlanoDao.salvar(assinatura)
+                                assinaturaAtiva = assinatura
+                                Toast.makeText(context, "${tela.nome} ativado com sucesso.", Toast.LENGTH_LONG).show()
+                                irPara(LumisTela.Principal(NavItem.PERFIL))
                             }
                         },
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }

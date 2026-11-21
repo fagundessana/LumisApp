@@ -7,7 +7,7 @@ data class Servico(
 )
 
 // ---------------------------------------------------------
-// FONTE DE DADOS (MOCK)
+// Catálogo local dos serviços oferecidos pelo aplicativo.
 // ---------------------------------------------------------
 
 object ServicoRepository {

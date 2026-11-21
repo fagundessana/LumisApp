@@ -55,12 +55,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import com.example.lumis.R
 
+enum class ContextoPagamento { AGENDAMENTO, PLANO }
+
 @Composable
 fun PagamentoScreen(
     formaPagamento: String,
     total: Double,
     onBack: () -> Unit,
     onConcluir: () -> Unit,
+    contexto: ContextoPagamento = ContextoPagamento.AGENDAMENTO,
     onNotificationsClick: () -> Unit = {}
 ) {
     var titular by remember { mutableStateOf("") }
@@ -73,13 +76,17 @@ fun PagamentoScreen(
     val scope = rememberCoroutineScope()
     val usaCartao = formaPagamento.contains("Cartão", ignoreCase = true)
     val usaPix = formaPagamento.equals("Pix", ignoreCase = true)
+    val erroTitular = stringResource(R.string.cardholder_required)
+    val erroNumero = stringResource(R.string.card_number_invalid)
+    val erroValidade = stringResource(R.string.expiry_required)
+    val erroCvv = stringResource(R.string.cvv_required)
 
     fun simularPagamento() {
         erro = when {
-            usaCartao && titular.isBlank() -> "Informe o nome impresso no cartão"
-            usaCartao && numeroCartao.filter(Char::isDigit).length < 16 -> "Informe um número de cartão válido para a simulação"
-            usaCartao && validade.length < 5 -> "Informe a validade"
-            usaCartao && cvv.length < 3 -> "Informe o código de segurança"
+            usaCartao && titular.isBlank() -> erroTitular
+            usaCartao && numeroCartao.filter(Char::isDigit).length < 16 -> erroNumero
+            usaCartao && validade.length < 5 -> erroValidade
+            usaCartao && cvv.length < 3 -> erroCvv
             else -> null
         }
         if (erro != null) return
@@ -98,9 +105,9 @@ fun PagamentoScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(stringResource(R.string.payment).uppercase(), color = LumisGreenDark, fontWeight = FontWeight.Bold)
-            Text(if (aprovado) "Tudo certo!" else stringResource(R.string.payment_simulation), color = LumisTextPrimary, fontWeight = FontWeight.Bold)
+            Text(if (aprovado) stringResource(R.string.all_set) else stringResource(R.string.payment_simulation), color = LumisTextPrimary, fontWeight = FontWeight.Bold)
             Text(
-                if (aprovado) "A simulação foi aprovada. Agora você pode concluir o agendamento."
+                if (aprovado) stringResource(R.string.payment_approved)
                 else stringResource(R.string.payment_disclaimer),
                 color = LumisTextSecondary
             )
@@ -112,23 +119,23 @@ fun PagamentoScreen(
                         Spacer(Modifier.size(10.dp))
                         Column(Modifier.weight(1f)) {
                             Text(formaPagamento, color = LumisTextPrimary, fontWeight = FontWeight.SemiBold)
-                            Text("Total do pedido", color = LumisTextSecondary)
+                            Text(stringResource(R.string.order_total), color = LumisTextSecondary)
                         }
                         Text("R$ ${"%.2f".format(total).replace('.', ',')}", color = LumisGreenDark, fontWeight = FontWeight.Bold)
                     }
 
                     if (!aprovado && usaCartao) {
-                        OutlinedTextField(titular, { titular = it }, Modifier.fillMaxWidth(), label = { Text("Nome no cartão") }, singleLine = true)
+                        OutlinedTextField(titular, { titular = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.cardholder_name)) }, singleLine = true)
                         OutlinedTextField(
                             numeroCartao,
                             { numeroCartao = formatarCartao(it) },
                             Modifier.fillMaxWidth(),
-                            label = { Text("Número do cartão de teste") },
+                            label = { Text(stringResource(R.string.test_card_number)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            OutlinedTextField(validade, { validade = formatarValidade(it) }, Modifier.weight(1f), label = { Text("Validade") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+                            OutlinedTextField(validade, { validade = formatarValidade(it) }, Modifier.weight(1f), label = { Text(stringResource(R.string.expiry)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
                             OutlinedTextField(cvv, { cvv = it.filter(Char::isDigit).take(4) }, Modifier.weight(1f), label = { Text("CVV") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
                         }
                     }
@@ -138,19 +145,19 @@ fun PagamentoScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Outlined.Pix, null, Modifier.size(54.dp), tint = LumisGreenDark)
                                 Text("PIX-LUMIS-DEMONSTRACAO", color = LumisGreenDark, fontWeight = FontWeight.Bold)
-                                Text("Código ilustrativo", color = LumisTextSecondary)
+                                Text(stringResource(R.string.illustrative_code), color = LumisTextSecondary)
                             }
                         }
                     }
 
                     if (!aprovado && !usaCartao && !usaPix) {
-                        Text("A preferência “$formaPagamento” será registrada no agendamento. O pagamento deverá ser combinado no atendimento.", color = LumisTextSecondary)
+                        Text(stringResource(R.string.payment_preference_notice, formaPagamento), color = LumisTextSecondary)
                     }
 
                     if (aprovado) {
                         Column(Modifier.fillMaxWidth().background(LumisGreenLight, RoundedCornerShape(16.dp)).padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(Icons.Outlined.CheckCircle, null, Modifier.size(52.dp), tint = LumisGreenDark)
-                            Text("Pagamento simulado com sucesso", color = LumisGreenDark, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text(stringResource(R.string.simulated_payment_success), color = LumisGreenDark, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         }
                     }
                 }
@@ -173,7 +180,16 @@ fun PagamentoScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = LumisGreen)
             ) {
                 if (processando) CircularProgressIndicator(Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
-                else Text(stringResource(if (aprovado) R.string.finish_appointment else R.string.simulate_payment), fontWeight = FontWeight.Bold)
+                else Text(
+                    stringResource(
+                        when {
+                            !aprovado -> R.string.simulate_payment
+                            contexto == ContextoPagamento.PLANO -> R.string.finish_subscription
+                            else -> R.string.finish_appointment
+                        }
+                    ),
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

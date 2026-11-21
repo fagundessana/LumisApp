@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,15 +25,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.screens.employee_profile.ProfileColors
 import com.example.lumis.view.theme.LumisBackground
-import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 
@@ -62,7 +55,7 @@ data class Notification(
 
 // A tela começa vazia até existir uma fonte persistente de notificações reais.
 // Não exibimos eventos, pagamentos ou avaliações inventados.
-private val notificacoesMock = mutableStateListOf<Notification>()
+private val notificacoesLocais = mutableStateListOf<Notification>()
 
 // ---------------------------------------------------------------------------------------------
 // TELA DE NOTIFICAÇÕES
@@ -72,7 +65,7 @@ private val notificacoesMock = mutableStateListOf<Notification>()
 fun NotificationsScreen(
     onBack: () -> Unit = {}
 ) {
-    val notificacoes = remember { notificacoesMock }
+    val notificacoes = remember { notificacoesLocais }
 
     Box(
         modifier = Modifier.fillMaxSize(),

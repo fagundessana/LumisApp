@@ -184,7 +184,13 @@ private fun CardAgendamento(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = item.status,
+                        text = stringResource(
+                            when (item.status) {
+                                "Cancelado" -> R.string.status_cancelled
+                                "Concluído" -> R.string.status_completed
+                                else -> R.string.status_scheduled
+                            }
+                        ),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = when (item.status) {
@@ -230,7 +236,7 @@ private fun CardAgendamento(
             if (item.extras.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Extras: ${item.extras.joinToString(", ")}",
+                    text = stringResource(R.string.extras_label, item.extras.joinToString(", ")),
                     fontSize = 12.sp,
                     color = LumisTextSecondary
                 )
@@ -239,7 +245,7 @@ private fun CardAgendamento(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Total: R$ ${"%.2f".format(item.total).replace(".", ",")}",
+                text = stringResource(R.string.total_label, "%.2f".format(item.total).replace(".", ",")),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = LumisBlue
@@ -248,7 +254,7 @@ private fun CardAgendamento(
             if (item.endereco.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Endereço: ${item.endereco}",
+                    text = stringResource(R.string.address_label, item.endereco),
                     fontSize = 12.sp,
                     color = LumisTextSecondary
                 )
@@ -256,9 +262,9 @@ private fun CardAgendamento(
 
             if (item.status == "Agendado") {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = { onCancelar(item.id) }) { Text("Cancelar") }
-                    TextButton(onClick = { mostrarReagendamento = true }) { Text("Reagendar") }
-                    TextButton(onClick = { onConcluir(item.id) }) { Text("Concluir") }
+                    TextButton(onClick = { onCancelar(item.id) }) { Text(stringResource(R.string.cancel)) }
+                    TextButton(onClick = { mostrarReagendamento = true }) { Text(stringResource(R.string.reschedule)) }
+                    TextButton(onClick = { onConcluir(item.id) }) { Text(stringResource(R.string.complete)) }
                 }
             }
 
@@ -288,11 +294,11 @@ private fun CardAgendamento(
         var novoHorario by remember { mutableStateOf(item.horario) }
         AlertDialog(
             onDismissRequest = { mostrarReagendamento = false },
-            title = { Text("Reagendar serviço") },
+            title = { Text(stringResource(R.string.reschedule_service)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(novaData, { novaData = it }, label = { Text("Data") }, singleLine = true)
-                    OutlinedTextField(novoHorario, { novoHorario = it }, label = { Text("Horário") }, singleLine = true)
+                    OutlinedTextField(novaData, { novaData = it }, label = { Text(stringResource(R.string.date)) }, singleLine = true)
+                    OutlinedTextField(novoHorario, { novoHorario = it }, label = { Text(stringResource(R.string.time)) }, singleLine = true)
                 }
             },
             confirmButton = {
@@ -302,9 +308,9 @@ private fun CardAgendamento(
                         onReagendar(item.id, novaData.trim(), novoHorario.trim())
                         mostrarReagendamento = false
                     }
-                ) { Text("Salvar") }
+                ) { Text(stringResource(R.string.save)) }
             },
-            dismissButton = { TextButton(onClick = { mostrarReagendamento = false }) { Text("Voltar") } }
+            dismissButton = { TextButton(onClick = { mostrarReagendamento = false }) { Text(stringResource(R.string.back)) } }
         )
     }
 }

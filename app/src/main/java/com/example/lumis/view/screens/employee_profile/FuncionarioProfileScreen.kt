@@ -38,11 +38,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.lumis.view.theme.TemaApp.corTema
 import java.io.File
+import com.example.lumis.R
 
 object ProfileColors {
     val Background: Color get() = corTema(Color(0xFFF5F6FA), Color(0xFF171918))
@@ -94,23 +96,27 @@ fun FuncionarioProfileScreen(
                             Icon(Icons.Filled.Star, null, tint = Color(0xFFFFB800), modifier = Modifier.size(30.dp))
                             Spacer(Modifier.width(10.dp))
                             Column {
-                                Text("%.1f de 5".format(profile.mediaAvaliacoes), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
-                                Text("${profile.quantidadeAvaliacoes} avaliações registradas", color = ProfileColors.TextSecondary)
+                                Text(stringResource(R.string.rating_out_of_five, profile.mediaAvaliacoes), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                                Text(stringResource(R.string.ratings_registered, profile.quantidadeAvaliacoes), color = ProfileColors.TextSecondary)
                             }
                         }
                     }
                 } else {
                     Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
-                        Text("Ainda não há avaliações registradas.", Modifier.padding(16.dp), color = ProfileColors.TextSecondary)
+                        Text(stringResource(R.string.no_ratings_yet), Modifier.padding(16.dp), color = ProfileColors.TextSecondary)
                     }
                 }
 
-                InformacaoCard("Sobre mim", profile.biografia.ifBlank { "Adicione uma apresentação ao seu perfil." })
-                InformacaoCard("Especialidades", profile.especialidades.ifBlank { "Especialidades ainda não informadas." })
-                InformacaoCard("Região de atendimento", profile.regiaoAtuacao.ifBlank { profile.localizacao })
-                InformacaoCard("Experiência", profile.experiencia.ifBlank { "Experiência ainda não informada." })
+                val apresentacao = if (profile.biografia.isBlank()) stringResource(R.string.add_profile_intro) else profile.biografia
+                val especialidades = if (profile.especialidades.isBlank()) stringResource(R.string.specialties_not_set) else profile.especialidades
+                val regiao = profile.regiaoAtuacao.ifBlank { profile.localizacao }
+                val experiencia = if (profile.experiencia.isBlank()) stringResource(R.string.experience_not_set) else profile.experiencia
+                InformacaoCard(stringResource(R.string.about_me), apresentacao)
+                InformacaoCard(stringResource(R.string.specialties), especialidades)
+                InformacaoCard(stringResource(R.string.service_region), regiao)
+                InformacaoCard(stringResource(R.string.experience), experiencia)
                 if (profile.valorMinimoCentavos > 0) {
-                    InformacaoCard("Valor mínimo", "R$ ${"%.2f".format(profile.valorMinimoCentavos / 100.0).replace('.', ',')} por serviço")
+                    InformacaoCard(stringResource(R.string.minimum_price), stringResource(R.string.price_per_service, "%.2f".format(profile.valorMinimoCentavos / 100.0).replace('.', ',')))
                 }
 
                 Button(
@@ -121,7 +127,7 @@ fun FuncionarioProfileScreen(
                 ) {
                     Icon(Icons.Outlined.CalendarMonth, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Abrir agenda", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.open_schedule), fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(20.dp))
             }
@@ -138,8 +144,8 @@ private fun CabecalhoProfissional(profile: FuncionarioProfile, onEditarClick: ()
             Box(Modifier.fillMaxWidth().height(150.dp).background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary))))
         }
         Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.End) {
-            IconButton(onClick = onEditarClick) { Icon(Icons.Outlined.Edit, "Editar", tint = Color.White) }
-            IconButton(onClick = onConfigClick) { Icon(Icons.Outlined.Settings, "Configurações", tint = Color.White) }
+            IconButton(onClick = onEditarClick) { Icon(Icons.Outlined.Edit, stringResource(R.string.edit_profile), tint = Color.White) }
+            IconButton(onClick = onConfigClick) { Icon(Icons.Outlined.Settings, stringResource(R.string.settings), tint = Color.White) }
         }
         Surface(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp).fillMaxWidth(),

@@ -78,14 +78,33 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+/** Persiste a assinatura escolhida pelo usuário sem alterar os dados existentes. */
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `assinaturas_plano` (
+                `usuarioId` INTEGER NOT NULL,
+                `planoId` TEXT NOT NULL,
+                `nomePlano` TEXT NOT NULL,
+                `valorMensalCentavos` INTEGER NOT NULL,
+                `ativaDesdeMillis` INTEGER NOT NULL,
+                PRIMARY KEY(`usuarioId`)
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 @Database(
-    entities = [User::class, Agendamento::class],
-    version = 8,
+    entities = [User::class, Agendamento::class, AssinaturaPlano::class],
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun agendamentoDao(): AgendamentoDao
+    abstract fun assinaturaPlanoDao(): AssinaturaPlanoDao
 
     companion object {
         @Volatile
@@ -104,7 +123,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_4_5,
                     MIGRATION_5_6,
                     MIGRATION_6_7,
-                    MIGRATION_7_8
+                    MIGRATION_7_8,
+                    MIGRATION_8_9
                 ).build()
 
                 INSTANCE = instance

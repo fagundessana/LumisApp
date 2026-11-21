@@ -1,6 +1,5 @@
 package com.example.lumis.view.screens.services
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,8 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +39,7 @@ data class Plano(
     val nome: String,
     val descricao: String,
     val preco: String,
+    val valorCentavos: Long,
     val precoPeriodo: String,
     val caracteristicas: List<String>,
     val popular: Boolean = false
@@ -50,6 +48,7 @@ data class Plano(
 @Composable
 fun PlanosScreen(
     onVoltarServicos: () -> Unit = {},
+    onAssinarPlano: (Plano) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
 ) {
     var sel by remember { mutableStateOf("regular") }
@@ -59,6 +58,7 @@ fun PlanosScreen(
             nome = "Plano Básico",
             descricao = "Perfeito para quem busca praticidade com economia",
             preco = "R$ 99,90",
+            valorCentavos = 9_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
                 "2 limpezas/mês (até 4 cômodos)",
@@ -72,6 +72,7 @@ fun PlanosScreen(
             nome = "Plano Regular",
             descricao = "Equilíbrio perfeito e o mais escolhido",
             preco = "R$ 179,90",
+            valorCentavos = 17_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
                 "3 limpezas/mês (até 4 cômodos)",
@@ -86,6 +87,7 @@ fun PlanosScreen(
             nome = "Plano Premium",
             descricao = "Conforto total e suporte prioritário",
             preco = "R$ 399,90",
+            valorCentavos = 39_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
                 "Limpeza semanal dedicada",
@@ -177,7 +179,8 @@ fun PlanosScreen(
 
             // Botão CTA Principal
             CtaComprar(
-                planoSelecionado = lista.find { it.id == sel } ?: lista[1]
+                planoSelecionado = lista.find { it.id == sel } ?: lista[1],
+                onAssinar = onAssinarPlano
             )
         }
     }
@@ -340,9 +343,7 @@ private fun FAQItem(pergunta: String, resposta: String) {
 // ============================================================
 
 @Composable
-private fun CtaComprar(planoSelecionado: Plano) {
-    val context = LocalContext.current
-
+private fun CtaComprar(planoSelecionado: Plano, onAssinar: (Plano) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
@@ -351,13 +352,7 @@ private fun CtaComprar(planoSelecionado: Plano) {
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
             BotaoContinuar(
-                onClick = {
-                    Toast.makeText(
-                        context,
-                        "✅ ${planoSelecionado.nome} assinado!",
-                        Toast.LENGTH_LONG
-                    ).show()
-                },
+                onClick = { onAssinar(planoSelecionado) },
                 texto = "Assinar o ${planoSelecionado.nome} — ${planoSelecionado.preco}${planoSelecionado.precoPeriodo}"
             )
         }
