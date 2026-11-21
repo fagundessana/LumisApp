@@ -45,16 +45,18 @@ import coil.compose.AsyncImage
 import com.example.lumis.view.theme.TemaApp.corTema
 import java.io.File
 import com.example.lumis.R
+import com.example.lumis.controller.ModoIdioma
+import com.example.lumis.view.components.IdiomaSelector
 
 object ProfileColors {
-    val Background: Color get() = corTema(Color(0xFFF5F6FA), Color(0xFF171918))
-    val CardBackground: Color get() = corTema(Color.White, Color(0xFF242725))
+    val Background: Color get() = corTema(Color(0xFFF5F6FA), Color(0xFF101713))
+    val CardBackground: Color get() = corTema(Color.White, Color(0xFF1A241F))
     val Primary = Color(0xFF50BF87)
     val PrimaryDark = Color(0xFF317252)
     val PrimaryLight: Color get() = corTema(Color(0xFFE7F5EC), Color(0xFF1F3A2E))
     val TextPrimary: Color get() = corTema(Color(0xFF1A1A1A), Color(0xFFF2F4F3))
     val TextSecondary: Color get() = corTema(Color(0xFF666666), Color(0xFFADB5B0))
-    val Divider: Color get() = corTema(Color(0xFFE7E9EC), Color(0xFF3A403C))
+    val Divider: Color get() = corTema(Color(0xFFE7E9EC), Color(0xFF34443B))
     val ChipRedBg: Color get() = corTema(Color(0xFFFBDCDC), Color(0xFF4A2A2A))
     val ChipGreenIcon = Color(0xFF2E86C1)
     val BadgeRedText: Color get() = corTema(Color(0xFFB5495F), Color(0xFFFF9BAD))
@@ -81,7 +83,9 @@ fun FuncionarioProfileScreen(
     profile: FuncionarioProfile,
     onEditarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {},
-    onCalendarioClick: () -> Unit = {}
+    onCalendarioClick: () -> Unit = {},
+    modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
+    onModoIdiomaChange: (ModoIdioma) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(ProfileColors.Background),
@@ -118,6 +122,7 @@ fun FuncionarioProfileScreen(
                 if (profile.valorMinimoCentavos > 0) {
                     InformacaoCard(stringResource(R.string.minimum_price), stringResource(R.string.price_per_service, "%.2f".format(profile.valorMinimoCentavos / 100.0).replace('.', ',')))
                 }
+                IdiomaSelector(modoIdioma, onModoIdiomaChange)
 
                 Button(
                     onClick = onCalendarioClick,

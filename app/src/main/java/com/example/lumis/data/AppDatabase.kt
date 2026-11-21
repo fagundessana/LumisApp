@@ -96,15 +96,34 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     }
 }
 
+/** Liga agendamentos a profissionais e cria favoritos/contas demonstrativas sem apagar dados. */
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE users ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE agendamentos ADD COLUMN profissionalId INTEGER DEFAULT NULL")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_agendamentos_profissionalId ON agendamentos(profissionalId)")
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `profissionais_favoritos` (
+                `clienteId` INTEGER NOT NULL,
+                `profissionalId` INTEGER NOT NULL,
+                PRIMARY KEY(`clienteId`, `profissionalId`)
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 @Database(
-    entities = [User::class, Agendamento::class, AssinaturaPlano::class],
-    version = 9,
+    entities = [User::class, Agendamento::class, AssinaturaPlano::class, ProfissionalFavorito::class],
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun agendamentoDao(): AgendamentoDao
     abstract fun assinaturaPlanoDao(): AssinaturaPlanoDao
+    abstract fun profissionalFavoritoDao(): ProfissionalFavoritoDao
 
     companion object {
         @Volatile
@@ -124,7 +143,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_5_6,
                     MIGRATION_6_7,
                     MIGRATION_7_8,
-                    MIGRATION_8_9
+                    MIGRATION_8_9,
+                    MIGRATION_9_10
                 ).build()
 
                 INSTANCE = instance

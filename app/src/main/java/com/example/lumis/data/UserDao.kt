@@ -22,4 +22,7 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE nomeUsuario = :nome LIMIT 1")
     suspend fun buscarPorNome(nome: String): User?
+
+    @Query("SELECT * FROM users WHERE tipoUsuario != 'Cliente' ORDER BY isDemo DESC, nomeUsuario ASC")
+    suspend fun listarProfissionais(): List<User>
 }

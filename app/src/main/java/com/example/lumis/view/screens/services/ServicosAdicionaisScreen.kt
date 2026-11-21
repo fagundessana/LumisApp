@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,7 @@ import com.example.lumis.view.theme.LumisDisabledToggle
 import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.theme.*
+import com.example.lumis.R
 
 // =========================================================
 // TELA DE SERVIÇOS ADICIONAIS (4ª etapa)
@@ -91,14 +93,14 @@ fun ServicosAdicionaisScreen(
         ) {
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "ADICIONAIS",
+                text = stringResource(R.string.add_ons).uppercase(),
                 color = LumisBlue,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Serviços adicionais",
+                text = stringResource(R.string.additional_services),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = LumisTextPrimary
@@ -106,7 +108,7 @@ fun ServicosAdicionaisScreen(
             Spacer(Modifier.height(16.dp))
 
             AdicionalCard(
-                nome = "Limpeza de Geladeira",
+                nome = stringResource(R.string.fridge_cleaning),
                 preco = "+ R$ 40,00",
                 icon = Icons.Default.Home,
                 ativo = geladeira,
@@ -114,7 +116,7 @@ fun ServicosAdicionaisScreen(
             )
             Spacer(Modifier.height(10.dp))
             AdicionalCard(
-                nome = "Limpeza de Forno",
+                nome = stringResource(R.string.oven_cleaning),
                 preco = "+ R$ 35,00",
                 icon = Icons.Default.Star,
                 ativo = forno,
@@ -122,7 +124,7 @@ fun ServicosAdicionaisScreen(
             )
             Spacer(Modifier.height(10.dp))
             AdicionalCard(
-                nome = "Limpeza Interna de Armários",
+                nome = stringResource(R.string.cabinet_cleaning),
                 preco = "+ R$ 50,00",
                 icon = Icons.Default.Home,
                 ativo = armarios,
@@ -130,7 +132,7 @@ fun ServicosAdicionaisScreen(
             )
             Spacer(Modifier.height(10.dp))
             AdicionalCard(
-                nome = "Limpeza de Vidros",
+                nome = stringResource(R.string.window_cleaning),
                 preco = "+ R$ 45,00",
                 icon = Icons.Default.Home,
                 ativo = vidros,
@@ -138,7 +140,7 @@ fun ServicosAdicionaisScreen(
             )
             Spacer(Modifier.height(10.dp))
             AdicionalCard(
-                nome = "Passar Roupas",
+                nome = stringResource(R.string.ironing),
                 preco = "+ R$ 60,00",
                 icon = Icons.Default.Star,
                 ativo = roupas,
@@ -158,7 +160,7 @@ fun ServicosAdicionaisScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Total: R$ %.2f".format(subtotal).replace(".", ","),
+                text = stringResource(R.string.total_label, "%.2f".format(subtotal).replace(".", ",")),
                 fontSize = 13.sp,
                 color = LumisTextSecondary,
                 modifier = Modifier.fillMaxWidth(),

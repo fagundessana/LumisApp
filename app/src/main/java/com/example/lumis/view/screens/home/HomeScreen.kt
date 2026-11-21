@@ -18,6 +18,8 @@ import com.example.lumis.view.screens.home.components.CategorySection
 import com.example.lumis.view.screens.home.components.PopularServicesGrid
 import com.example.lumis.view.screens.home.components.PromoBanner
 import com.example.lumis.view.screens.home.components.TopLocationBar
+import com.example.lumis.view.screens.home.components.RecommendedSection
+import com.example.lumis.view.screens.home.model.ProfessionalUi
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
@@ -40,7 +42,10 @@ fun HomeScreen(
     onSeeAllServices: () -> Unit = {},
     onDiscountClick: () -> Unit = {},
     onCategoryClick: (String) -> Unit = {},
-    onServiceClick: (String) -> Unit = {}
+    onServiceClick: (String) -> Unit = {},
+    profissionais: List<ProfessionalUi> = emptyList(),
+    onFavoritoClick: (Int) -> Unit = {},
+    onProfissionalClick: (Int) -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -82,6 +87,13 @@ fun HomeScreen(
                 PopularServicesGrid(
                     onSeeAllClick = onSeeAllServices,
                     onServiceClick = onServiceClick
+                )
+            }
+            item {
+                RecommendedSection(
+                    profissionais = profissionais,
+                    onFavoritoClick = onFavoritoClick,
+                    onContratarClick = onProfissionalClick
                 )
             }
         }

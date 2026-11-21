@@ -1,8 +1,8 @@
 package com.example.lumis
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +20,8 @@ import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.controller.AuthController
 import com.example.lumis.controller.TemaController
+import com.example.lumis.controller.IdiomaController
+import com.example.lumis.controller.ModoIdioma
 import com.example.lumis.view.screens.auth.CadastroScreen
 import com.example.lumis.view.screens.auth.LoginScreen
 import com.example.lumis.view.screens.auth.ProfileChoiceScreen
@@ -29,9 +31,10 @@ import com.example.lumis.view.MainScaffold
 
 private const val SPLASH_DURATION_MS = 1800L
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val idiomaController = IdiomaController(applicationContext)
         setContent {
             val temaController = remember { TemaController(applicationContext) }
             LumisTheme(modo = temaController.modo) {
@@ -39,7 +42,9 @@ class MainActivity : ComponentActivity() {
                 AuthRoot(
                     authController = authController,
                     modoTema = temaController.modo,
-                    onModoTemaChange = { temaController.definir(it) }
+                    onModoTemaChange = { temaController.definir(it) },
+                    modoIdioma = idiomaController.modo,
+                    onModoIdiomaChange = { idiomaController.definir(it) }
                 )
             }
         }
@@ -54,7 +59,9 @@ class MainActivity : ComponentActivity() {
 fun AuthRoot(
     authController: AuthController,
     modoTema: ModoTema = ModoTema.SISTEMA,
-    onModoTemaChange: (ModoTema) -> Unit = {}
+    onModoTemaChange: (ModoTema) -> Unit = {},
+    modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
+    onModoIdiomaChange: (ModoIdioma) -> Unit = {}
 ) {
     var mostrarSplash by remember { mutableStateOf(true) }
 
@@ -63,8 +70,9 @@ fun AuthRoot(
         mostrarSplash = false
     }
 
-    // Restaura a sessão do último usuário logado
+    // Prepara as contas de demonstração e restaura a sessão.
     LaunchedEffect(Unit) {
+        authController.garantirDadosDemo()
         authController.restaurarSessao()
     }
 
@@ -78,7 +86,9 @@ fun AuthRoot(
                 authController = authController,
                 onLogout = { authController.logout() },
                 modoTema = modoTema,
-                onModoTemaChange = onModoTemaChange
+                onModoTemaChange = onModoTemaChange,
+                modoIdioma = modoIdioma,
+                onModoIdiomaChange = onModoIdiomaChange
             )
             authController.mostrarEscolhaPerfil -> ProfileChoiceScreen(authController)
             authController.mostrarCadastro -> CadastroScreen(authController)

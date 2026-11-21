@@ -22,6 +22,7 @@ import com.example.lumis.R
 fun SectionHeader(
     title: String,
     actionLabel: String? = null,
+    showAction: Boolean = true,
     onActionClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -39,13 +40,15 @@ fun SectionHeader(
             color = LumisColors.TextPrimary
         )
         // Botãozinho verde "Ver todas" à direita.
-        TextButton(onClick = onActionClick) {
-            Text(
-                text = actionLabel ?: stringResource(R.string.see_all),
-                fontFamily = Questrial,
-                fontSize = 12.sp,
-                color = LumisColors.Primary
-            )
+        if (showAction) {
+            TextButton(onClick = onActionClick) {
+                Text(
+                    text = actionLabel ?: stringResource(R.string.see_all),
+                    fontFamily = Questrial,
+                    fontSize = 12.sp,
+                    color = LumisColors.Primary
+                )
+            }
         }
     }
 }

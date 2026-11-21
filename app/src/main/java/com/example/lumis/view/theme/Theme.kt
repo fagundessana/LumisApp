@@ -42,11 +42,11 @@ private val LumisDarkColorScheme = darkColorScheme(
     primary = LumisGreenVivid,
     onPrimary = Color(0xFF1E1E1E),
     secondary = LumisTeal,
-    background = Color(0xFF1A1A1A),
-    surface = Color(0xFF242424),
+    background = Color(0xFF101713),
+    surface = Color(0xFF1A241F),
     onBackground = Color(0xFFF7F8FA),
     onSurface = Color(0xFFF7F8FA),
-    outline = Color(0xFF4A4A4A),
+    outline = Color(0xFF405248),
     error = Color(0xFFFF6B6B)
 )
 

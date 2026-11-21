@@ -27,7 +27,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +53,10 @@ import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
 import androidx.compose.ui.res.stringResource
 import com.example.lumis.R
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 data class AgendamentoRegistro(
     val id: Long,
@@ -144,6 +153,7 @@ fun AgendaTab(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CardAgendamento(
     item: AgendamentoRegistro,
@@ -153,6 +163,8 @@ private fun CardAgendamento(
     onReagendar: (Long, String, String) -> Unit
 ) {
     var mostrarReagendamento by remember { mutableStateOf(false) }
+    var mostrarHorarios by remember { mutableStateOf(false) }
+    var novaData by remember { mutableStateOf(item.data) }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -290,27 +302,73 @@ private fun CardAgendamento(
     }
 
     if (mostrarReagendamento) {
-        var novaData by remember { mutableStateOf(item.data) }
-        var novoHorario by remember { mutableStateOf(item.horario) }
-        AlertDialog(
+        val hojeUtc = remember {
+            LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        }
+        val inicial = remember(item.data) {
+            runCatching {
+                LocalDate.parse(item.data, DateTimeFormatter.ofPattern("d/MM/yyyy"))
+                    .atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+            }.getOrDefault(hojeUtc).coerceAtLeast(hojeUtc)
+        }
+        val calendario = rememberDatePickerState(
+            initialSelectedDateMillis = inicial,
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis >= hojeUtc
+            }
+        )
+        DatePickerDialog(
             onDismissRequest = { mostrarReagendamento = false },
-            title = { Text(stringResource(R.string.reschedule_service)) },
+            confirmButton = {
+                TextButton(
+                    enabled = calendario.selectedDateMillis != null,
+                    onClick = {
+                        calendario.selectedDateMillis?.let { millis ->
+                            novaData = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            mostrarReagendamento = false
+                            mostrarHorarios = true
+                        }
+                    }
+                ) { Text(stringResource(R.string.continue_label)) }
+            },
+            dismissButton = { TextButton(onClick = { mostrarReagendamento = false }) { Text(stringResource(R.string.cancel)) } }
+        ) {
+            DatePicker(state = calendario, title = { Text(stringResource(R.string.choose_new_date), Modifier.padding(24.dp)) })
+        }
+    }
+
+    if (mostrarHorarios) {
+        val horarios = listOf("08:00", "09:30", "11:00", "13:00", "14:30", "16:00", "17:30")
+        var novoHorario by remember { mutableStateOf(item.horario.takeIf { it in horarios } ?: horarios.first()) }
+        AlertDialog(
+            onDismissRequest = { mostrarHorarios = false },
+            title = { Text(stringResource(R.string.choose_new_time)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(novaData, { novaData = it }, label = { Text(stringResource(R.string.date)) }, singleLine = true)
-                    OutlinedTextField(novoHorario, { novoHorario = it }, label = { Text(stringResource(R.string.time)) }, singleLine = true)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(novaData, color = LumisTextSecondary)
+                    horarios.chunked(3).forEach { linha ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            linha.forEach { horario ->
+                                FilterChip(
+                                    selected = novoHorario == horario,
+                                    onClick = { novoHorario = horario },
+                                    label = { Text(horario) }
+                                )
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
-                    enabled = novaData.isNotBlank() && novoHorario.isNotBlank(),
                     onClick = {
-                        onReagendar(item.id, novaData.trim(), novoHorario.trim())
-                        mostrarReagendamento = false
+                        onReagendar(item.id, novaData, novoHorario)
+                        mostrarHorarios = false
                     }
                 ) { Text(stringResource(R.string.save)) }
             },
-            dismissButton = { TextButton(onClick = { mostrarReagendamento = false }) { Text(stringResource(R.string.back)) } }
+            dismissButton = { TextButton(onClick = { mostrarHorarios = false }) { Text(stringResource(R.string.back)) } }
         )
     }
 }

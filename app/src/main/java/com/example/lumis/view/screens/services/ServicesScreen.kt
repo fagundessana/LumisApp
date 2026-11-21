@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.lumis.controller.ServicesController
@@ -62,18 +63,42 @@ import com.example.lumis.view.theme.LumisGreenDark
 import com.example.lumis.view.theme.LumisGreenLight
 import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.LumisTextSecondary
+import com.example.lumis.view.screens.home.model.ProfessionalUi
+import com.example.lumis.R
 
 @Composable
 fun ServicesScreen(
     onAbrirPlanos: () -> Unit = {},
     onAbrirAgendamento: (Servico) -> Unit = {},
     servicoInicial: String? = null,
+    profissionais: List<ProfessionalUi> = emptyList(),
+    profissionalSelecionadoId: Int? = null,
+    onSelecionarProfissional: (Int) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
 ) {
     val controller = remember { ServicesController() }
     var busca by rememberSaveable { mutableStateOf("") }
     var categoria by rememberSaveable { mutableStateOf("Todos") }
     val categorias = listOf("Todos", "Rotina", "Pesada", "Mudança", "Temporada")
+    val rotulosCategorias = mapOf(
+        "Todos" to stringResource(R.string.category_all),
+        "Rotina" to stringResource(R.string.category_routine),
+        "Pesada" to stringResource(R.string.category_deep),
+        "Mudança" to stringResource(R.string.category_moving),
+        "Temporada" to stringResource(R.string.category_vacation)
+    )
+    val nomesServicos = mapOf(
+        "Limpeza Padrão" to stringResource(R.string.service_standard),
+        "Limpeza Pesada" to stringResource(R.string.service_deep),
+        "Limpeza Pós-Mudança" to stringResource(R.string.service_moving),
+        "Limpeza Airbnb / Temporada" to stringResource(R.string.service_airbnb)
+    )
+    val descricoesServicos = mapOf(
+        "Limpeza Padrão" to stringResource(R.string.service_standard_description),
+        "Limpeza Pesada" to stringResource(R.string.service_deep_description),
+        "Limpeza Pós-Mudança" to stringResource(R.string.service_moving_description),
+        "Limpeza Airbnb / Temporada" to stringResource(R.string.service_airbnb_description)
+    )
 
     LaunchedEffect(servicoInicial) {
         servicoInicial?.let { nome ->
@@ -86,9 +111,13 @@ fun ServicesScreen(
     }
 
     val servicosFiltrados = controller.servicos.filter { servico ->
+        val nomeLocalizado = nomesServicos[servico.nome] ?: servico.nome
+        val descricaoLocalizada = descricoesServicos[servico.nome] ?: servico.descricao
         val correspondeBusca = busca.isBlank() ||
             servico.nome.contains(busca, ignoreCase = true) ||
-            servico.descricao.contains(busca, ignoreCase = true)
+            servico.descricao.contains(busca, ignoreCase = true) ||
+            nomeLocalizado.contains(busca, ignoreCase = true) ||
+            descricaoLocalizada.contains(busca, ignoreCase = true)
         val correspondeCategoria = when (categoria) {
             "Rotina" -> servico.nome.contains("Padrão", true)
             "Pesada" -> servico.nome.contains("Pesada", true)
@@ -124,17 +153,40 @@ fun ServicesScreen(
             ) {
                 item {
                     LumisPageTitle(
-                        eyebrow = "SERVIÇOS LUMIS",
-                        title = "Encontre a limpeza ideal",
-                        subtitle = "Compare opções, escolha o melhor serviço e agende em poucos passos."
+                        eyebrow = stringResource(R.string.lumis_services).uppercase(),
+                        title = stringResource(R.string.find_ideal_cleaning),
+                        subtitle = stringResource(R.string.compare_services_hint)
                     )
+                }
+                if (profissionais.isNotEmpty()) {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(stringResource(R.string.choose_professional), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(profissionais, key = { it.id }) { profissional ->
+                                    FilterChip(
+                                        selected = profissional.id == profissionalSelecionadoId,
+                                        onClick = { onSelecionarProfissional(profissional.id) },
+                                        label = { Text(profissional.nome.substringBefore(' ')) },
+                                        leadingIcon = if (profissional.id == profissionalSelecionadoId) {
+                                            { Icon(Icons.Outlined.Check, null, Modifier.size(16.dp)) }
+                                        } else null,
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = LumisGreenLight,
+                                            selectedLabelColor = LumisGreenDark
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
                 item {
                     LumisTextField(
                         value = busca,
                         onValueChange = { busca = it },
-                        label = "Buscar serviço",
-                        placeholder = "Tipo de limpeza ou necessidade",
+                        label = stringResource(R.string.search_service),
+                        placeholder = stringResource(R.string.search_service_hint),
                         leadingIcon = Icons.Outlined.Search,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -145,7 +197,7 @@ fun ServicesScreen(
                             FilterChip(
                                 selected = categoria == item,
                                 onClick = { categoria = item },
-                                label = { Text(item) },
+                                label = { Text(rotulosCategorias[item] ?: item) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = LumisGreenLight,
                                     selectedLabelColor = LumisGreenDark
@@ -170,9 +222,9 @@ fun ServicesScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text("Nenhum serviço encontrado", style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.no_service_found), style = MaterialTheme.typography.titleMedium)
                             Text(
-                                "Tente outro termo ou remova os filtros.",
+                                stringResource(R.string.try_another_search),
                                 color = LumisTextSecondary,
                                 style = MaterialTheme.typography.bodyMedium
                             )
@@ -182,6 +234,8 @@ fun ServicesScreen(
                     items(servicosFiltrados, key = { it.nome }) { servico ->
                         CardServico(
                             servico = servico,
+                            nomeExibicao = nomesServicos[servico.nome] ?: servico.nome,
+                            descricaoExibicao = descricoesServicos[servico.nome] ?: servico.descricao,
                             selecionado = controller.servicoSelecionado == servico.nome,
                             onClick = { controller.selecionarServico(servico) }
                         )
@@ -192,7 +246,10 @@ fun ServicesScreen(
             val selecionado = controller.servicos.firstOrNull { it.nome == controller.servicoSelecionado }
             Surface(shadowElevation = 10.dp, color = MaterialTheme.colorScheme.surface) {
                 LumisPrimaryButton(
-                    text = "Continuar com ${selecionado?.nome ?: "o serviço"}",
+                    text = stringResource(
+                        R.string.continue_with_service,
+                        selecionado?.let { nomesServicos[it.nome] ?: it.nome } ?: stringResource(R.string.the_service)
+                    ),
                     onClick = { selecionado?.let(onAbrirAgendamento) },
                     enabled = selecionado != null,
                     modifier = Modifier
@@ -207,6 +264,8 @@ fun ServicesScreen(
 @Composable
 private fun CardServico(
     servico: Servico,
+    nomeExibicao: String,
+    descricaoExibicao: String,
     selecionado: Boolean,
     onClick: () -> Unit
 ) {
@@ -243,7 +302,7 @@ private fun CardServico(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = servico.nome.take(1),
+                    text = nomeExibicao.take(1),
                     color = LumisGreenDark,
                     style = MaterialTheme.typography.titleLarge
                 )
@@ -255,7 +314,7 @@ private fun CardServico(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = servico.nome,
+                        text = nomeExibicao,
                         color = LumisTextPrimary,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
@@ -275,14 +334,14 @@ private fun CardServico(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Check,
-                            contentDescription = if (selecionado) "Selecionado" else null,
+                            contentDescription = if (selecionado) stringResource(R.string.selected) else null,
                             tint = if (selecionado) Color(0xFF102018) else markerColor,
                             modifier = Modifier.size(15.dp)
                         )
                     }
                 }
                 Text(
-                    text = servico.descricao.replace("\n", " "),
+                    text = descricaoExibicao.replace("\n", " "),
                     color = LumisTextSecondary,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
@@ -296,10 +355,10 @@ private fun CardServico(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(5.dp))
-                    Text("4 horas", color = LumisTextSecondary, style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.four_hours), color = LumisTextSecondary, style = MaterialTheme.typography.bodySmall)
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = "A partir de ${servico.preco}",
+                        text = stringResource(R.string.from_value, servico.preco),
                         color = LumisBlue,
                         style = MaterialTheme.typography.labelLarge
                     )

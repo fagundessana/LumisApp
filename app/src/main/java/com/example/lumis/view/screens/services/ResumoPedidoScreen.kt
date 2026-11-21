@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +71,7 @@ fun ResumoPedidoScreen(
     extras: List<String>,
     total: Double,
     endereco: String = "",
+    profissional: String = "",
     formaPagamentoInicial: String = "A combinar no atendimento",
     onFormaPagamentoChange: (String) -> Unit = {},
     onConfirm: (formaPagamento: String) -> Unit = {},
@@ -103,7 +105,7 @@ fun ResumoPedidoScreen(
 
             // Categoria
             Text(
-                text = "FINALIZAR",
+                text = stringResource(R.string.finish).uppercase(),
                 color = LumisBlue,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
@@ -112,7 +114,7 @@ fun ResumoPedidoScreen(
 
             // Título
             Text(
-                text = "Resumo do pedido",
+                text = stringResource(R.string.order_summary),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = LumisTextPrimary
@@ -128,20 +130,21 @@ fun ResumoPedidoScreen(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Detalhes do Serviço",
+                        text = stringResource(R.string.service_details),
                         color = LumisBlue,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(16.dp))
 
-                    RowBetween("Tipo de Limpeza", servico)
-                    RowBetween("Data", data)
-                    RowBetween("Horário", horario)
-                    RowBetween("Quartos / Banheiros", "$quartos | $banheiros")
-                    RowBetween("Tamanho", tamanho)
-                    RowBetween("Endereço", endereco)
-                    RowBetween("Adicionais", extras.joinToString(", "))
+                    RowBetween(stringResource(R.string.cleaning_type), servico)
+                    RowBetween(stringResource(R.string.date), data)
+                    RowBetween(stringResource(R.string.time), horario)
+                    RowBetween(stringResource(R.string.rooms_and_bathrooms), "$quartos | $banheiros")
+                    RowBetween(stringResource(R.string.size), tamanho)
+                    RowBetween(stringResource(R.string.address), endereco)
+                    if (profissional.isNotBlank()) RowBetween(stringResource(R.string.professional), profissional)
+                    RowBetween(stringResource(R.string.add_ons), extras.joinToString(", "))
                 }
             }
 
@@ -156,17 +159,17 @@ fun ResumoPedidoScreen(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Detalhamento de Preço",
+                        text = stringResource(R.string.price_breakdown),
                         color = LumisBlue,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(16.dp))
 
-                    RowBetween("Limpeza $servico", "R$ 220,00")
+                    RowBetween(stringResource(R.string.cleaning_named, servico), "R$ 220,00")
                     extras.forEach { extra ->
                         RowBetween(
-                            nome = "Adicional: $extra",
+                            nome = stringResource(R.string.add_on_named, extra),
                             valor = "+ R$ "
                         )
                     }
@@ -180,7 +183,7 @@ fun ResumoPedidoScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Total Geral",
+                            text = stringResource(R.string.grand_total),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = LumisTextPrimary
@@ -206,21 +209,27 @@ fun ResumoPedidoScreen(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Forma de pagamento",
+                        text = stringResource(R.string.payment_method),
                         color = LumisBlue,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    listOf("A combinar no atendimento", "Dinheiro", "Pix", "Cartão de débito", "Cartão de crédito").forEach { opcao ->
+                    listOf(
+                        "A combinar no atendimento" to stringResource(R.string.arrange_during_service),
+                        "Dinheiro" to stringResource(R.string.cash),
+                        "Pix" to stringResource(R.string.pix),
+                        "Cartão de débito" to stringResource(R.string.debit_card),
+                        "Cartão de crédito" to stringResource(R.string.credit_card)
+                    ).forEach { (opcao, rotulo) ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = formaPagamento == opcao, onClick = {
                                 formaPagamento = opcao
                                 onFormaPagamentoChange(opcao)
                             })
-                            Text(opcao, color = LumisTextPrimary, fontSize = 13.sp)
+                            Text(rotulo, color = LumisTextPrimary, fontSize = 13.sp)
                         }
                     }
-                    Text("A seleção registra apenas a preferência. O aplicativo não processa pagamentos.", fontSize = 11.sp, color = LumisTextSecondary)
+                    Text(stringResource(R.string.payment_choice_notice), fontSize = 11.sp, color = LumisTextSecondary)
                 }
             }
 
@@ -237,11 +246,11 @@ fun ResumoPedidoScreen(
             ) {
                 BotaoContinuar(
                     onClick = { onConfirm(formaPagamento) },
-                    texto = "Continuar para pagamento"
+                    texto = stringResource(R.string.continue_to_payment)
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Na próxima etapa você verá uma simulação; nenhuma cobrança real será feita.",
+                    text = stringResource(R.string.next_step_simulation_notice),
                     fontSize = 11.sp,
                     color = LumisTextSecondary,
                     modifier = Modifier.fillMaxWidth(),

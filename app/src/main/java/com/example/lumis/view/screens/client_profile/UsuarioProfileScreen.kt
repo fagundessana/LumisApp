@@ -42,11 +42,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.lumis.R
 import com.example.lumis.view.screens.employee_profile.ProfileColors
+import com.example.lumis.controller.ModoIdioma
+import com.example.lumis.view.components.IdiomaSelector
 import java.io.File
 
 data class UsuarioProfile(
@@ -55,8 +58,13 @@ data class UsuarioProfile(
     val fotoUrl: String? = null,
     val biografia: String = "",
     val bannerUrl: String? = null,
-    val planoAtivo: String? = null
+    val planoAtivo: String? = null,
+    val totalAgendamentos: Int = 0,
+    val totalConcluidos: Int = 0,
+    val atividadesRecentes: List<AtividadePerfil> = emptyList()
 )
+
+data class AtividadePerfil(val servico: String, val data: String, val status: String)
 
 @Composable
 fun UsuarioProfileScreen(
@@ -66,7 +74,9 @@ fun UsuarioProfileScreen(
     onMembroLumisClick: () -> Unit = {},
     onNotificacoesClick: () -> Unit = {},
     onServicosClick: () -> Unit = {},
-    onAgendaClick: () -> Unit = {}
+    onAgendaClick: () -> Unit = {},
+    modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
+    onModoIdiomaChange: (ModoIdioma) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(ProfileColors.Background),
@@ -87,6 +97,11 @@ fun UsuarioProfileScreen(
                             Text(profile.biografia, color = ProfileColors.TextSecondary)
                         }
                     }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ResumoPerfil(stringResource(R.string.scheduled_services_short), profile.totalAgendamentos.toString(), Modifier.weight(1f))
+                    ResumoPerfil(stringResource(R.string.status_completed), profile.totalConcluidos.toString(), Modifier.weight(1f))
                 }
 
                 Surface(
@@ -115,9 +130,53 @@ fun UsuarioProfileScreen(
                 }
 
                 Text(stringResource(R.string.quick_access), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
-                AtalhoPerfil(Icons.Outlined.CleaningServices, stringResource(R.string.services), onServicosClick)
-                AtalhoPerfil(Icons.Outlined.CalendarMonth, stringResource(R.string.nav_schedule), onAgendaClick)
-                AtalhoPerfil(Icons.Outlined.Notifications, stringResource(R.string.notifications), onNotificacoesClick)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    AtalhoPerfil(Icons.Outlined.CleaningServices, stringResource(R.string.services), onServicosClick, Modifier.weight(1f))
+                    AtalhoPerfil(Icons.Outlined.CalendarMonth, stringResource(R.string.nav_schedule), onAgendaClick, Modifier.weight(1f))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    AtalhoPerfil(Icons.Outlined.Notifications, stringResource(R.string.notifications), onNotificacoesClick, Modifier.weight(1f))
+                    AtalhoPerfil(Icons.Outlined.WorkspacePremium, stringResource(R.string.plans), onMembroLumisClick, Modifier.weight(1f))
+                }
+
+                if (profile.atividadesRecentes.isNotEmpty()) {
+                    Text(stringResource(R.string.recent_activity), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Surface(
+                        shape = RoundedCornerShape(18.dp),
+                        color = ProfileColors.CardBackground,
+                        border = BorderStroke(1.dp, ProfileColors.Divider)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                            profile.atividadesRecentes.forEachIndexed { index, atividade ->
+                                Row(Modifier.fillMaxWidth().padding(vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.CleaningServices, null, tint = ProfileColors.PrimaryDark)
+                                    }
+                                    Spacer(Modifier.width(10.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(atividade.servico, fontWeight = FontWeight.Medium, color = ProfileColors.TextPrimary)
+                                        Text(atividade.data, color = ProfileColors.TextSecondary)
+                                    }
+                                    Text(
+                                        stringResource(
+                                            when (atividade.status) {
+                                                "Cancelado" -> R.string.status_cancelled
+                                                "Concluído" -> R.string.status_completed
+                                                else -> R.string.status_scheduled
+                                            }
+                                        ),
+                                        color = ProfileColors.PrimaryDark,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                if (index != profile.atividadesRecentes.lastIndex) {
+                                    Box(Modifier.fillMaxWidth().height(1.dp).background(ProfileColors.Divider))
+                                }
+                            }
+                        }
+                    }
+                }
+                IdiomaSelector(modoIdioma, onModoIdiomaChange)
 
                 Button(
                     onClick = onEditarClick,
@@ -141,7 +200,7 @@ private fun CabecalhoCliente(
     onEditarClick: () -> Unit,
     onConfigClick: () -> Unit
 ) {
-    Box(Modifier.fillMaxWidth().height(270.dp)) {
+    Box(Modifier.fillMaxWidth().height(292.dp)) {
         if (!profile.bannerUrl.isNullOrBlank() && File(profile.bannerUrl).exists()) {
             AsyncImage(File(profile.bannerUrl), null, Modifier.fillMaxWidth().aspectRatio(2f), contentScale = ContentScale.Crop)
         } else {
@@ -150,9 +209,19 @@ private fun CabecalhoCliente(
                     .background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary)))
             )
         }
-        Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.End) {
-            IconButton(onClick = onEditarClick) { Icon(Icons.Outlined.Edit, stringResource(R.string.edit_profile), tint = Color.White) }
-            IconButton(onClick = onConfigClick) { Icon(Icons.Outlined.Settings, stringResource(R.string.settings), tint = Color.White) }
+        Row(Modifier.fillMaxWidth().padding(18.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(ProfileColors.Primary), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.lumis), "Lumis", tint = Color.White, modifier = Modifier.size(25.dp))
+            }
+            Row {
+                IconButton(onClick = onEditarClick, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(ProfileColors.CardBackground.copy(alpha = 0.82f))) {
+                    Icon(Icons.Outlined.Edit, stringResource(R.string.edit_profile), tint = ProfileColors.PrimaryDark)
+                }
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = onConfigClick, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(ProfileColors.CardBackground.copy(alpha = 0.82f))) {
+                    Icon(Icons.Outlined.Settings, stringResource(R.string.settings), tint = ProfileColors.PrimaryDark)
+                }
+            }
         }
         Surface(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp).fillMaxWidth(),
@@ -174,6 +243,7 @@ private fun CabecalhoCliente(
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(profile.nome, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Text(stringResource(R.string.lumis_client), color = ProfileColors.PrimaryDark, fontWeight = FontWeight.SemiBold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.LocationOn, null, Modifier.size(16.dp), tint = ProfileColors.Primary)
                         Spacer(Modifier.width(3.dp))
@@ -186,18 +256,28 @@ private fun CabecalhoCliente(
 }
 
 @Composable
-private fun AtalhoPerfil(icon: ImageVector, titulo: String, onClick: () -> Unit) {
+private fun AtalhoPerfil(icon: ImageVector, titulo: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
+        modifier = modifier.height(92.dp),
         shape = RoundedCornerShape(16.dp),
         color = ProfileColors.CardBackground,
         border = BorderStroke(1.dp, ProfileColors.Divider)
     ) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.fillMaxSize().padding(14.dp), verticalArrangement = Arrangement.Center) {
             Icon(icon, null, tint = ProfileColors.Primary)
-            Spacer(Modifier.width(12.dp))
-            Text(titulo, Modifier.weight(1f), color = ProfileColors.TextPrimary, fontWeight = FontWeight.Medium)
-            Icon(Icons.Outlined.ChevronRight, null, tint = ProfileColors.TextSecondary)
+            Spacer(Modifier.height(8.dp))
+            Text(titulo, color = ProfileColors.TextPrimary, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+@Composable
+private fun ResumoPerfil(titulo: String, valor: String, modifier: Modifier = Modifier) {
+    Surface(modifier, shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(valor, color = ProfileColors.PrimaryDark, fontWeight = FontWeight.Bold)
+            Text(titulo, color = ProfileColors.TextSecondary)
         }
     }
 }

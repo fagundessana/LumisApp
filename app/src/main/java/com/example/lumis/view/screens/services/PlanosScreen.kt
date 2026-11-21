@@ -14,6 +14,9 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 import com.example.lumis.view.components.BotaoContinuar
 import com.example.lumis.view.components.LumisTopBar
 import com.example.lumis.view.components.LumisPageTitle
@@ -48,53 +53,71 @@ data class Plano(
 @Composable
 fun PlanosScreen(
     onVoltarServicos: () -> Unit = {},
-    onAssinarPlano: (Plano) -> Unit = {},
+    onAssinarPlano: (Plano, String) -> Unit = { _, _ -> },
     onNotificationsClick: () -> Unit = {}
 ) {
     var sel by remember { mutableStateOf("regular") }
+    var limpezasPersonalizadas by remember { mutableIntStateOf(3) }
+    var mostrarPagamento by remember { mutableStateOf(false) }
+    var formaPagamento by remember { mutableStateOf("Pix") }
+    val valorPersonalizado = 12_990L + (limpezasPersonalizadas - 2) * 6_000L
     val lista = listOf(
         Plano(
             id = "basico",
-            nome = "Plano Básico",
-            descricao = "Perfeito para quem busca praticidade com economia",
+            nome = stringResource(R.string.basic_plan),
+            descricao = stringResource(R.string.basic_plan_description),
             preco = "R$ 99,90",
             valorCentavos = 9_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
-                "2 limpezas/mês (até 4 cômodos)",
-                "1 serviço especializado por trimestre",
-                "Atendimento em até 3 dias úteis",
-                "Dicas mensais de organização"
+                stringResource(R.string.basic_feature_1),
+                stringResource(R.string.basic_feature_2),
+                stringResource(R.string.basic_feature_3),
+                stringResource(R.string.basic_feature_4)
             )
         ),
         Plano(
             id = "regular",
-            nome = "Plano Regular",
-            descricao = "Equilíbrio perfeito e o mais escolhido",
+            nome = stringResource(R.string.regular_plan),
+            descricao = stringResource(R.string.regular_plan_description),
             preco = "R$ 179,90",
             valorCentavos = 17_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
-                "3 limpezas/mês (até 4 cômodos)",
-                "2 serviços especializados por trimestre",
-                "Atendimento em até 2 dias úteis",
-                "Suporte prioritário por WhatsApp"
+                stringResource(R.string.regular_feature_1),
+                stringResource(R.string.regular_feature_2),
+                stringResource(R.string.regular_feature_3),
+                stringResource(R.string.regular_feature_4)
             ),
             popular = true
         ),
         Plano(
             id = "premium",
-            nome = "Plano Premium",
-            descricao = "Conforto total e suporte prioritário",
+            nome = stringResource(R.string.premium_plan),
+            descricao = stringResource(R.string.premium_plan_description),
             preco = "R$ 399,90",
             valorCentavos = 39_990,
             precoPeriodo = "/mês",
             caracteristicas = listOf(
-                "Limpeza semanal dedicada",
-                "Todos os serviços especializados inclusos",
-                "Atendimento em até 24h",
-                "Equipe fixa ou exclusiva",
-                "Tudo do plano regular + benefícios extras"
+                stringResource(R.string.premium_feature_1),
+                stringResource(R.string.premium_feature_2),
+                stringResource(R.string.premium_feature_3),
+                stringResource(R.string.premium_feature_4),
+                stringResource(R.string.premium_feature_5)
+            )
+        ),
+        Plano(
+            id = "personalizado",
+            nome = stringResource(R.string.custom_plan),
+            descricao = stringResource(R.string.custom_plan_description),
+            preco = "R$ ${"%.2f".format(valorPersonalizado / 100.0).replace('.', ',')}",
+            valorCentavos = valorPersonalizado,
+            precoPeriodo = "/mês",
+            caracteristicas = listOf(
+                stringResource(R.string.custom_feature_1, limpezasPersonalizadas),
+                stringResource(R.string.custom_feature_2),
+                stringResource(R.string.custom_feature_3),
+                stringResource(R.string.custom_feature_4)
             )
         )
     )
@@ -129,9 +152,9 @@ fun PlanosScreen(
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                     ) {
                         LumisPageTitle(
-                            eyebrow = "PLANOS LUMIS",
-                            title = "Escolha o plano ideal para você",
-                            subtitle = "Compare os benefícios e encontre a frequência que combina com sua rotina."
+                            eyebrow = stringResource(R.string.lumis_plans).uppercase(),
+                            title = stringResource(R.string.choose_ideal_plan),
+                            subtitle = stringResource(R.string.compare_plan_benefits)
                         )
                     }
                 }
@@ -144,6 +167,22 @@ fun PlanosScreen(
                         onClick = { sel = plano.id }
                     )
                 }
+                if (sel == "personalizado") {
+                    item {
+                        Column(Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+                            Text(stringResource(R.string.cleanings_per_month_question), fontWeight = FontWeight.Bold, color = LumisTextPrimary)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                (2..4).forEach { quantidade ->
+                                    androidx.compose.material3.FilterChip(
+                                        selected = limpezasPersonalizadas == quantidade,
+                                        onClick = { limpezasPersonalizadas = quantidade },
+                                        label = { Text("$quantidade") }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
                                 // FAQ
                 item {
@@ -152,7 +191,7 @@ fun PlanosScreen(
                         modifier = Modifier.padding(horizontal = 20.dp)
                     ) {
                         Text(
-                            text = "PERGUNTAS FREQUENTES",
+                            text = stringResource(R.string.faq).uppercase(),
                             color = LumisGreen,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
@@ -160,18 +199,18 @@ fun PlanosScreen(
                         Spacer(Modifier.height(8.dp))
 
                         FAQItem(
-                            pergunta = "Os produtos de limpeza estão incluídos?",
-                            resposta = "Sim, todos os planos incluem produtos eco-friendly de alta qualidade. Não há custo adicional."
+                            pergunta = stringResource(R.string.faq_products_question),
+                            resposta = stringResource(R.string.faq_products_answer)
                         )
                         Spacer(Modifier.height(6.dp))
                         FAQItem(
-                            pergunta = "Posso cancelar quando quiser?",
-                            resposta = "Sim, sem multa ou fidelidade. Cancelamento gratuito até 24h antes do agendamento."
+                            pergunta = stringResource(R.string.faq_cancel_question),
+                            resposta = stringResource(R.string.faq_cancel_answer)
                         )
                         Spacer(Modifier.height(6.dp))
                         FAQItem(
-                            pergunta = "Funciona em qualquer residência?",
-                            resposta = "Sim, atendemos casas, apartamentos e coberturas. Para terrenos/empresas, fale conosco."
+                            pergunta = stringResource(R.string.faq_home_question),
+                            resposta = stringResource(R.string.faq_home_answer)
                         )
                     }
                 }
@@ -180,9 +219,40 @@ fun PlanosScreen(
             // Botão CTA Principal
             CtaComprar(
                 planoSelecionado = lista.find { it.id == sel } ?: lista[1],
-                onAssinar = onAssinarPlano
+                onAssinar = { mostrarPagamento = true }
             )
         }
+    }
+
+    if (mostrarPagamento) {
+        AlertDialog(
+            onDismissRequest = { mostrarPagamento = false },
+            title = { Text(stringResource(R.string.how_to_pay)) },
+            text = {
+                Column {
+                    listOf(
+                        "Pix" to R.string.pix,
+                        "Cartão de crédito" to R.string.credit_card,
+                        "Cartão de débito" to R.string.debit_card
+                    ).forEach { (opcao, rotulo) ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { formaPagamento = opcao }.padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(selected = formaPagamento == opcao, onClick = { formaPagamento = opcao })
+                            Text(stringResource(rotulo), color = LumisTextPrimary)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarPagamento = false
+                    onAssinarPlano(lista.first { it.id == sel }, formaPagamento)
+                }) { Text(stringResource(R.string.continue_label)) }
+            },
+            dismissButton = { TextButton(onClick = { mostrarPagamento = false }) { Text(stringResource(R.string.cancel)) } }
+        )
     }
 }
 
@@ -239,7 +309,7 @@ private fun PlanCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            "Mais popular",
+                            stringResource(R.string.most_popular),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = LumisGreen
@@ -343,7 +413,7 @@ private fun FAQItem(pergunta: String, resposta: String) {
 // ============================================================
 
 @Composable
-private fun CtaComprar(planoSelecionado: Plano, onAssinar: (Plano) -> Unit) {
+private fun CtaComprar(planoSelecionado: Plano, onAssinar: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
@@ -352,8 +422,8 @@ private fun CtaComprar(planoSelecionado: Plano, onAssinar: (Plano) -> Unit) {
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
             BotaoContinuar(
-                onClick = { onAssinar(planoSelecionado) },
-                texto = "Assinar o ${planoSelecionado.nome} — ${planoSelecionado.preco}${planoSelecionado.precoPeriodo}"
+                onClick = onAssinar,
+                texto = stringResource(R.string.subscribe_plan_cta, planoSelecionado.nome, planoSelecionado.preco, planoSelecionado.precoPeriodo)
             )
         }
     }

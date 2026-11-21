@@ -64,7 +64,7 @@ import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.R
 
-private enum class PainelCidade { ECO_PONTOS, DADOS }
+private enum class PainelCidade { ECO_PONTOS, GUIA }
 
 private data class Ecoponto(
     val nome: String,
@@ -83,6 +83,7 @@ private val ecopontos = listOf(
 @Composable
 fun CidadeConscienteScreen(
     modifier: Modifier = Modifier,
+    localizacao: String = "",
     onNotificationsClick: () -> Unit = {}
 ) {
     var painel by rememberSaveable { mutableStateOf(PainelCidade.ECO_PONTOS) }
@@ -107,12 +108,12 @@ fun CidadeConscienteScreen(
                     subtitle = stringResource(R.string.city_care_subtitle)
                 )
             }
-            item { ImpactoHeroCard() }
+            item { ImpactoHeroCard(localizacao) }
             item {
                 AcoesCidade(
                     painel = painel,
                     onEcopontos = { painel = PainelCidade.ECO_PONTOS },
-                    onDados = { painel = PainelCidade.DADOS }
+                    onDados = { painel = PainelCidade.GUIA }
                 )
             }
             item {
@@ -123,7 +124,7 @@ fun CidadeConscienteScreen(
                 ) { destino ->
                     when (destino) {
                         PainelCidade.ECO_PONTOS -> EcopontosCard(onSelect = { pontoSelecionado = it })
-                        PainelCidade.DADOS -> DadosAmbientaisCard()
+                        PainelCidade.GUIA -> DadosAmbientaisCard()
                     }
                 }
             }
@@ -137,7 +138,7 @@ fun CidadeConscienteScreen(
 }
 
 @Composable
-private fun ImpactoHeroCard() {
+private fun ImpactoHeroCard(localizacao: String) {
     Surface(shape = RoundedCornerShape(24.dp), color = Color.Transparent) {
         Column(
             modifier = Modifier
@@ -157,15 +158,22 @@ private fun ImpactoHeroCard() {
                 }
                 Spacer(Modifier.size(12.dp))
                 Column {
-                    Text(stringResource(R.string.community_impact), color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.labelLarge)
-                    Text("1.284 kg reciclados", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.sustainable_guide), color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        if (localizacao.isBlank()) stringResource(R.string.cleaner_neighborhood) else localizacao,
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
+            Text(stringResource(R.string.city_hero_explanation), color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ImpactoMetrica("178", stringResource(R.string.active_points), Modifier.weight(1f))
-                ImpactoMetrica("92%", stringResource(R.string.on_time_collections), Modifier.weight(1f))
-                ImpactoMetrica("+18%", stringResource(R.string.this_month), Modifier.weight(1f))
+                ImpactoMetrica("1", stringResource(R.string.separate), Modifier.weight(1f))
+                ImpactoMetrica("2", stringResource(R.string.clean), Modifier.weight(1f))
+                ImpactoMetrica("3", stringResource(R.string.deliver), Modifier.weight(1f))
             }
         }
     }
@@ -194,7 +202,7 @@ private fun AcoesCidade(
         Text(stringResource(R.string.what_do_you_need), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             AcaoCidadeButton(Icons.Outlined.LocationOn, stringResource(R.string.ecopoints), painel == PainelCidade.ECO_PONTOS, onEcopontos, Modifier.weight(1f))
-            AcaoCidadeButton(Icons.Outlined.Eco, stringResource(R.string.impact), painel == PainelCidade.DADOS, onDados, Modifier.weight(1f))
+            AcaoCidadeButton(Icons.Outlined.Eco, stringResource(R.string.disposal_guide), painel == PainelCidade.GUIA, onDados, Modifier.weight(1f))
         }
     }
 }
@@ -303,12 +311,12 @@ private fun DadosAmbientaisCard() {
         border = BorderStroke(1.dp, LumisBorder)
     ) {
         Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(stringResource(R.string.monthly_environmental_data), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
-            DadoAmbiental("Resíduos desviados de aterros", "1.284 kg", 0.78f)
-            DadoAmbiental("Materiais reaproveitados", "846 kg", 0.62f)
-            DadoAmbiental("Emissões de CO₂ evitadas", "312 kg", 0.48f)
+            Text(stringResource(R.string.disposal_guide), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
+            GuiaDescarte(stringResource(R.string.paper_and_cardboard), stringResource(R.string.paper_disposal_tip))
+            GuiaDescarte(stringResource(R.string.glass_and_metal), stringResource(R.string.glass_disposal_tip))
+            GuiaDescarte(stringResource(R.string.electronics), stringResource(R.string.electronics_disposal_tip))
             Text(
-                stringResource(R.string.environmental_estimate_notice),
+                stringResource(R.string.ecopoints_demo_notice),
                 style = MaterialTheme.typography.bodySmall,
                 color = LumisTextSecondary
             )
@@ -317,14 +325,16 @@ private fun DadosAmbientaisCard() {
 }
 
 @Composable
-private fun DadoAmbiental(label: String, valor: String, progresso: Float) {
-    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, style = MaterialTheme.typography.bodyMedium, color = LumisTextPrimary)
-            Text(valor, style = MaterialTheme.typography.labelLarge, color = LumisGreenDark)
-        }
-        Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(LumisGreenLight)) {
-            Box(Modifier.fillMaxWidth(progresso).height(8.dp).clip(CircleShape).background(LumisGreen))
+private fun GuiaDescarte(titulo: String, descricao: String) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(LumisGreenLight).padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Outlined.Recycling, null, tint = LumisGreenDark)
+        Spacer(Modifier.size(12.dp))
+        Column {
+            Text(titulo, style = MaterialTheme.typography.titleSmall, color = LumisTextPrimary)
+            Text(descricao, style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
         }
     }
 }

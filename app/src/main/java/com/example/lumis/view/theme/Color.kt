@@ -6,7 +6,7 @@ import com.example.lumis.view.theme.TemaApp.corTema
 // Marca. Estes tokens espelham o design system do site da Lumis.
 val LumisGreen = Color(0xFF50BF87)
 val LumisGreenDark = Color(0xFF317252)
-val LumisGreenLight: Color get() = corTema(claro = Color(0xFFE7F5EC), escuro = Color(0xFF1F3A2E))
+val LumisGreenLight: Color get() = corTema(claro = Color(0xFFE7F5EC), escuro = Color(0xFF203C2F))
 val LumisTeal = Color(0xFF3DBEA9)
 val LumisTealLight: Color get() = corTema(claro = Color(0xFFE6F7F4), escuro = Color(0xFF1C3A35))
 val LumisBlueAccent = Color(0xFF508ABF)
@@ -15,11 +15,11 @@ val LumisBlue = Color(0xFF508ABF)
 val LumisGreySecondary: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFF9A9A9A))
 
 // Neutros
-val LumisBackground: Color get() = corTema(claro = Color(0xFFF9F9FB), escuro = Color(0xFF1A1A1A))
-val LumisSurface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF242424))
-val LumisBorder: Color get() = corTema(claro = Color(0xFFE7E9EC), escuro = Color(0xFF3A3A3C))
-val LumisTextPrimary: Color get() = corTema(claro = Color(0xFF1A1A1A), escuro = Color(0xFFE0E0E0))
-val LumisTextSecondary: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFFA0A0A0))
+val LumisBackground: Color get() = corTema(claro = Color(0xFFF9F9FB), escuro = Color(0xFF101713))
+val LumisSurface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF1A241F))
+val LumisBorder: Color get() = corTema(claro = Color(0xFFE7E9EC), escuro = Color(0xFF34443B))
+val LumisTextPrimary: Color get() = corTema(claro = Color(0xFF1A1A1A), escuro = Color(0xFFF0F7F3))
+val LumisTextSecondary: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFFABB8B1))
 val LumisTextTertiary: Color get() = corTema(claro = Color(0xFFAEB4B8), escuro = Color(0xFF6E7479))
 
 // Estados
@@ -28,7 +28,7 @@ val LumisDisabledToggle: Color get() = corTema(claro = Color(0xFFD8DBDD), escuro
 
 // Paleta da Home (branch Douglas)
 object LumisColors {
-    val Background: Color get() = corTema(claro = Color(0xFFF9F9FB), escuro = Color(0xFF1E1E1E))
+    val Background: Color get() = corTema(claro = Color(0xFFF9F9FB), escuro = Color(0xFF101713))
     val SecondaryText: Color get() = corTema(claro = Color(0xFF666666), escuro = Color(0xFFB0B0B0))
     val Primary = Color(0xFF50BF87)
     val Secondary = Color(0xFF3DBEA9)
@@ -49,5 +49,5 @@ object LumisColors {
     val InactiveNav = Color(0xFF999999)
     val Border: Color get() = corTema(claro = Color(0xFFE8E8EC), escuro = Color(0xFF3A3A3C))
     val Scrim = Color(0x99000000)
-    val Surface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF262626))
+    val Surface: Color get() = corTema(claro = Color(0xFFFFFFFF), escuro = Color(0xFF1A241F))
 }

@@ -15,6 +15,7 @@ import androidx.room.PrimaryKey
     tableName = "agendamentos",
     indices = [
         Index(value = ["usuarioId"], name = "index_agendamentos_usuarioId"),
+        Index(value = ["profissionalId"], name = "index_agendamentos_profissionalId"),
         Index(value = ["data", "horario"], name = "index_agendamentos_data_horario")
     ]
 )
@@ -22,6 +23,7 @@ data class Agendamento(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val usuarioId: Int,
+    val profissionalId: Int? = null,
     val servico: String,
     val data: String,
     val horario: String,

@@ -32,14 +32,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.lumis.R
 import com.example.lumis.view.screens.employee_profile.ProfileColors
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 
+@Composable
 fun ModoTema.rotulo(): String = when (this) {
-    ModoTema.CLARO -> "Claro"
-    ModoTema.ESCURO -> "Escuro"
-    ModoTema.SISTEMA -> "Sistema"
+    ModoTema.CLARO -> stringResource(R.string.theme_light)
+    ModoTema.ESCURO -> stringResource(R.string.theme_dark)
+    ModoTema.SISTEMA -> stringResource(R.string.theme_system)
 }
 
 // Card "Tema" exibido nas configurações; mostra o modo atual e abre o modal ao ser tocado.
@@ -81,7 +84,7 @@ fun TemaCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Tema",
+                    text = stringResource(R.string.theme),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = ProfileColors.TextPrimary
@@ -114,7 +117,7 @@ fun TemaDialog(
         shape = RoundedCornerShape(24.dp),
         title = {
             Text(
-                text = "Tema",
+                text = stringResource(R.string.theme),
                 fontWeight = FontWeight.Bold,
                 color = ProfileColors.TextPrimary
             )
@@ -149,7 +152,7 @@ fun TemaDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "Fechar", color = ProfileColors.Primary)
+                Text(text = stringResource(R.string.close), color = ProfileColors.Primary)
             }
         }
     )

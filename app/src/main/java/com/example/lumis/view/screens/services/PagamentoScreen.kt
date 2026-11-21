@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import com.example.lumis.R
+import java.time.YearMonth
 
 enum class ContextoPagamento { AGENDAMENTO, PLANO }
 
@@ -84,8 +86,8 @@ fun PagamentoScreen(
     fun simularPagamento() {
         erro = when {
             usaCartao && titular.isBlank() -> erroTitular
-            usaCartao && numeroCartao.filter(Char::isDigit).length < 16 -> erroNumero
-            usaCartao && validade.length < 5 -> erroValidade
+            usaCartao && !cartaoValido(numeroCartao) -> erroNumero
+            usaCartao && !validadeValida(validade) -> erroValidade
             usaCartao && cvv.length < 3 -> erroCvv
             else -> null
         }
@@ -125,6 +127,15 @@ fun PagamentoScreen(
                     }
 
                     if (!aprovado && usaCartao) {
+                        TextButton(
+                            onClick = {
+                                titular = "LUMIS DEMO"
+                                numeroCartao = "4242 4242 4242 4242"
+                                validade = "12/30"
+                                cvv = "123"
+                                erro = null
+                            }
+                        ) { Text(stringResource(R.string.fill_test_data)) }
                         OutlinedTextField(titular, { titular = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.cardholder_name)) }, singleLine = true)
                         OutlinedTextField(
                             numeroCartao,
@@ -200,4 +211,26 @@ private fun formatarCartao(valor: String): String = valor.filter(Char::isDigit).
 private fun formatarValidade(valor: String): String {
     val numeros = valor.filter(Char::isDigit).take(4)
     return if (numeros.length > 2) "${numeros.take(2)}/${numeros.drop(2)}" else numeros
+}
+
+private fun cartaoValido(valor: String): Boolean {
+    val numeros = valor.filter(Char::isDigit)
+    if (numeros.length !in 13..19) return false
+    val soma = numeros.reversed().mapIndexed { index, caractere ->
+        var numero = caractere.digitToInt()
+        if (index % 2 == 1) {
+            numero *= 2
+            if (numero > 9) numero -= 9
+        }
+        numero
+    }.sum()
+    return soma % 10 == 0
+}
+
+private fun validadeValida(valor: String): Boolean {
+    val partes = valor.split('/')
+    val mes = partes.getOrNull(0)?.toIntOrNull() ?: return false
+    val ano = partes.getOrNull(1)?.toIntOrNull()?.let { 2000 + it } ?: return false
+    if (mes !in 1..12) return false
+    return YearMonth.of(ano, mes) >= YearMonth.now()
 }

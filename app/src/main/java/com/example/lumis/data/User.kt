@@ -33,5 +33,7 @@ data class User(
 
     val experiencia: String = "",
 
-    val valorMinimoCentavos: Long = 0
+    val valorMinimoCentavos: Long = 0,
+
+    val isDemo: Boolean = false
 )

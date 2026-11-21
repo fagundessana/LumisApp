@@ -26,6 +26,17 @@ data class PopularService(
     val isHighlight: Boolean = false
 )
 
+data class ProfessionalUi(
+    val id: Int,
+    val nome: String,
+    val especialidades: String,
+    val localizacao: String,
+    val valorMinimoCentavos: Long,
+    val mediaAvaliacoes: Double?,
+    val quantidadeAvaliacoes: Int,
+    val favorito: Boolean
+)
+
 // Atalhos exibidos na Home. Cada item corresponde a um serviço realmente disponível.
 object HomePreviewData {
     val categories = listOf(

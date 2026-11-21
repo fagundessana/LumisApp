@@ -10,6 +10,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +38,11 @@ import com.example.lumis.view.theme.LumisBorder
 import com.example.lumis.view.theme.LumisSurface
 import com.example.lumis.view.theme.LumisTextPrimary
 import com.example.lumis.view.theme.*
-import java.util.Calendar
+import com.example.lumis.R
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 // ============================================================
 // PALETA (usa as mesmas da Claud e da servicesScreen)
@@ -44,30 +56,21 @@ private val CinzaTexto = LumisTextSecondary
 // TELA DE AGENDAMENTO
 // ============================================================
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendamentoScreen(
     servicoSelecionado: String? = null,
     onBack: () -> Unit = {},
-    onConfirm: (dia: Int, horario: String) -> Unit = { _, _ -> },
+    onConfirm: (data: String, horario: String) -> Unit = { _, _ -> },
     onNotificationsClick: () -> Unit = {}
 ) {
 
-    // Data atual / padrão (usando Calendar para compatibilidade com API 24)
-    val cal = Calendar.getInstance()
-    val hojeAno = cal.get(Calendar.YEAR)
-    val hojeMes = cal.get(Calendar.MONTH) + 1 // Calendar.MONTH é 0-based
-    val hojeDia = cal.get(Calendar.DAY_OF_MONTH)
-    val diasNoMes = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-
-    var ano by remember { mutableStateOf(hojeAno) }
-    var mes by remember { mutableStateOf(hojeMes) }
-    var diaSelecionado by remember { mutableStateOf(hojeDia) }
+    val hoje = LocalDate.now()
+    var dataSelecionada by remember { mutableStateOf(hoje) }
+    var mostrarCalendario by remember { mutableStateOf(false) }
 
     // Horário selecionado
     var horarioSelecionado by remember { mutableStateOf("10:00") }
-
-    // Dias do mês atual
-    val dias = (1..diasNoMes).toList()
 
     // Horários disponíveis
     val horarios = listOf("08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00")
@@ -96,14 +99,14 @@ fun AgendamentoScreen(
         ) {
             // Título
             Text(
-                text = "AGENDAMENTO",
+                text = stringResource(R.string.scheduling).uppercase(),
                 color = AzulLumis,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Quando você precisa?",
+                text = stringResource(R.string.when_do_you_need),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = LumisTextPrimary
@@ -111,28 +114,38 @@ fun AgendamentoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mês atual
             Text(
-                text = formatarMes(mes, ano),
-                fontSize = 16.sp,
+                text = stringResource(R.string.choose_service_date),
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = LumisTextPrimary
+                color = LumisTextSecondary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // CALENDÁRIO
-            CalendarioBox(
-                dias = dias,
-                diaAtual = diaSelecionado,
-                onDiaSelecionado = { diaSelecionado = it }
-            )
+            Surface(
+                onClick = { mostrarCalendario = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = LumisSurface,
+                border = androidx.compose.foundation.BorderStroke(1.dp, LumisBorder)
+            ) {
+                Column(Modifier.padding(18.dp)) {
+                    Text(
+                        dataSelecionada.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        color = LumisTextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(stringResource(R.string.tap_to_open_calendar), color = LumisTextSecondary, fontSize = 12.sp)
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // HORÁRIO
             Text(
-                text = "Horário de Início",
+                text = stringResource(R.string.start_time),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = LumisTextSecondary
@@ -172,9 +185,35 @@ fun AgendamentoScreen(
         // BOTÃO CONTINUAR
         // -------------------------------------------------
         BotaoContinuar(
-            onClick = { onConfirm(diaSelecionado, horarioSelecionado) },
+            onClick = {
+                onConfirm(dataSelecionada.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), horarioSelecionado)
+            },
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
         )
+    }
+
+    if (mostrarCalendario) {
+        val hojeUtc = hoje.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+        val estadoCalendario = rememberDatePickerState(
+            initialSelectedDateMillis = dataSelecionada.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis >= hojeUtc
+            }
+        )
+        DatePickerDialog(
+            onDismissRequest = { mostrarCalendario = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    estadoCalendario.selectedDateMillis?.let {
+                        dataSelecionada = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
+                    }
+                    mostrarCalendario = false
+                }) { Text(stringResource(R.string.confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarCalendario = false }) { Text(stringResource(R.string.cancel)) }
+            }
+        ) { DatePicker(state = estadoCalendario) }
     }
 }
 

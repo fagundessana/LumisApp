@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.lumis.data.AppDatabase
+import com.example.lumis.data.Agendamento
 import com.example.lumis.data.User
 
 // Número máximo de caracteres da biografia do perfil.
@@ -42,6 +43,100 @@ class AuthController(context: Context) {
 
     fun abrirLogin() {
         rotaAuth = AuthRoute.LOGIN
+    }
+
+    suspend fun garantirDadosDemo() {
+        val demonstrativos = listOf(
+            User(
+                email = "ana.demo@lumis.app",
+                nomeUsuario = "Ana Beatriz Santos",
+                senha = "Lumis@Ana1",
+                tipoUsuario = "Profissional",
+                localizacao = "São Paulo, SP",
+                telefone = "(11) 99911-2401",
+                biografia = "Especialista em limpeza residencial cuidadosa e organização de ambientes.",
+                especialidades = "Limpeza padrão, organização e limpeza pesada",
+                regiaoAtuacao = "São Paulo — Zona Sul e Centro",
+                experiencia = "5 anos de experiência",
+                valorMinimoCentavos = 12_000,
+                isDemo = true
+            ),
+            User(
+                email = "carlos.demo@lumis.app",
+                nomeUsuario = "Carlos Henrique Lima",
+                senha = "Lumis@Carlos1",
+                tipoUsuario = "Profissional",
+                localizacao = "São Paulo, SP",
+                telefone = "(11) 99922-3512",
+                biografia = "Atendimento ágil para escritórios, mudanças e limpezas de maior porte.",
+                especialidades = "Limpeza pesada, pós-mudança e comercial",
+                regiaoAtuacao = "São Paulo e ABC Paulista",
+                experiencia = "7 anos de experiência",
+                valorMinimoCentavos = 18_000,
+                isDemo = true
+            ),
+            User(
+                email = "mariana.demo@lumis.app",
+                nomeUsuario = "Mariana Costa",
+                senha = "Lumis@Mariana1",
+                tipoUsuario = "Profissional",
+                localizacao = "Curitiba, PR",
+                telefone = "(41) 99880-4623",
+                biografia = "Foco em hospedagens, preparação entre reservas e padrão de hotelaria.",
+                especialidades = "Airbnb, temporada e limpeza padrão",
+                regiaoAtuacao = "Curitiba e região metropolitana",
+                experiencia = "4 anos de experiência",
+                valorMinimoCentavos = 15_000,
+                isDemo = true
+            ),
+            User(
+                email = "cliente.demo@lumis.app",
+                nomeUsuario = "Cliente Demonstração",
+                senha = "Lumis@Cliente1",
+                tipoUsuario = "Cliente",
+                localizacao = "São Paulo, SP",
+                biografia = "Conta preparada para demonstrar o fluxo completo do aplicativo.",
+                isDemo = true
+            )
+        )
+
+        demonstrativos.forEach { usuarioDemo ->
+            if (database.userDao().buscarPorEmail(usuarioDemo.email) == null) {
+                database.userDao().inserir(usuarioDemo)
+            }
+        }
+
+        val clienteDemo = database.userDao().buscarPorEmail("cliente.demo@lumis.app") ?: return
+        val avaliacoesDemo = mapOf(
+            "ana.demo@lumis.app" to listOf(5, 5),
+            "carlos.demo@lumis.app" to listOf(5, 4),
+            "mariana.demo@lumis.app" to listOf(5, 5)
+        )
+
+        avaliacoesDemo.forEach { (email, avaliacoes) ->
+            val profissional = database.userDao().buscarPorEmail(email) ?: return@forEach
+            if (database.agendamentoDao().listarPorProfissional(profissional.id).isEmpty()) {
+                avaliacoes.forEachIndexed { indice, estrelas ->
+                    database.agendamentoDao().inserir(
+                        Agendamento(
+                            usuarioId = clienteDemo.id,
+                            profissionalId = profissional.id,
+                            servico = if (indice == 0) "Limpeza padrão" else "Limpeza pesada",
+                            data = if (indice == 0) "12/10/2026" else "26/10/2026",
+                            horario = if (indice == 0) "09:00" else "14:00",
+                            quartos = 2,
+                            banheiros = 1,
+                            tamanhoImovel = "Médio",
+                            endereco = "Endereço de demonstração",
+                            formaPagamento = "Pix",
+                            totalCentavos = profissional.valorMinimoCentavos,
+                            status = "Concluído",
+                            avaliacao = estrelas
+                        )
+                    )
+                }
+            }
+        }
     }
 
     fun abrirCadastro() {

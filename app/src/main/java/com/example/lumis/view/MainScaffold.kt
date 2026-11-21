@@ -22,10 +22,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.lumis.controller.AuthController
+import com.example.lumis.controller.ModoIdioma
 import com.example.lumis.data.Agendamento
 import com.example.lumis.data.AgendamentoRepository
 import com.example.lumis.data.AppDatabase
 import com.example.lumis.data.AssinaturaPlano
+import com.example.lumis.data.ProfissionalFavorito
 import com.example.lumis.data.User
 import com.example.lumis.model.Servico
 import com.example.lumis.view.components.AgendaTab
@@ -35,12 +37,14 @@ import com.example.lumis.view.components.NavItem
 import com.example.lumis.view.screens.auth.ContaScreen
 import com.example.lumis.view.screens.city.CidadeConscienteScreen
 import com.example.lumis.view.screens.client_profile.UsuarioProfile
+import com.example.lumis.view.screens.client_profile.AtividadePerfil
 import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
 import com.example.lumis.view.screens.notifications.NotificationsScreen
 import com.example.lumis.view.screens.profile.EditarPerfilScreen
 import com.example.lumis.view.screens.home.HomeScreen
+import com.example.lumis.view.screens.home.model.ProfessionalUi
 import com.example.lumis.view.screens.services.AgendamentoScreen
 import com.example.lumis.view.screens.services.ConfiguracaoImovelScreen
 import com.example.lumis.view.screens.services.PlanosScreen
@@ -52,7 +56,6 @@ import com.example.lumis.view.screens.services.ServicesScreen
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.ModoTema
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 sealed class LumisTela {
     data class Principal(val aba: NavItem) : LumisTela()
@@ -62,7 +65,7 @@ sealed class LumisTela {
     data object Adicionais : LumisTela()
     data object Resumo : LumisTela()
     data object Pagamento : LumisTela()
-    data class PagamentoPlano(val planoId: String, val nome: String, val valorCentavos: Long) : LumisTela()
+    data class PagamentoPlano(val planoId: String, val nome: String, val valorCentavos: Long, val formaPagamento: String) : LumisTela()
     data object Conta : LumisTela()
     data object EditarPerfil : LumisTela()
     data object Notificacoes : LumisTela()
@@ -74,7 +77,9 @@ fun MainScaffold(
     authController: AuthController,
     onLogout: () -> Unit,
     modoTema: ModoTema = ModoTema.SISTEMA,
-    onModoTemaChange: (ModoTema) -> Unit = {}
+    onModoTemaChange: (ModoTema) -> Unit = {},
+    modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
+    onModoIdiomaChange: (ModoIdioma) -> Unit = {}
 ) {
     val context = LocalContext.current
     val database = remember(context) { AppDatabase.getDatabase(context) }
@@ -83,6 +88,7 @@ fun MainScaffold(
     }
     val scope = rememberCoroutineScope()
     val assinaturaPlanoDao = remember(database) { database.assinaturaPlanoDao() }
+    val favoritoDao = remember(database) { database.profissionalFavoritoDao() }
 
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
@@ -99,11 +105,34 @@ fun MainScaffold(
     var formaPagamento by remember { mutableStateOf("A combinar no atendimento") }
     var enderecoImovel by remember { mutableStateOf("") }
     var assinaturaAtiva by remember { mutableStateOf<AssinaturaPlano?>(null) }
+    var profissionaisHome by remember { mutableStateOf<List<ProfessionalUi>>(emptyList()) }
+    var profissionalSelecionadoId by remember { mutableStateOf<Int?>(null) }
+
+    suspend fun carregarProfissionais() {
+        val favoritos = favoritoDao.listarIds(usuario.id).toSet()
+        profissionaisHome = database.userDao().listarProfissionais().map { profissional ->
+            ProfessionalUi(
+                id = profissional.id,
+                nome = profissional.nomeUsuario,
+                especialidades = profissional.especialidades.ifBlank { "Limpeza profissional" },
+                localizacao = profissional.regiaoAtuacao.ifBlank { profissional.localizacao },
+                valorMinimoCentavos = profissional.valorMinimoCentavos,
+                mediaAvaliacoes = database.agendamentoDao().mediaAvaliacoes(profissional.id),
+                quantidadeAvaliacoes = database.agendamentoDao().quantidadeAvaliacoes(profissional.id),
+                favorito = profissional.id in favoritos
+            )
+        }
+        if (profissionalSelecionadoId == null) profissionalSelecionadoId = profissionaisHome.firstOrNull()?.id
+    }
 
     LaunchedEffect(usuario.id, agendamentoRepository) {
         assinaturaAtiva = assinaturaPlanoDao.buscarPorUsuario(usuario.id)
-        registrosAgenda = agendamentoRepository
-            .listarPorUsuario(usuario.id)
+        carregarProfissionais()
+        registrosAgenda = (if (usuario.tipoUsuario == "Cliente") {
+            agendamentoRepository.listarPorUsuario(usuario.id)
+        } else {
+            agendamentoRepository.listarPorProfissional(usuario.id)
+        })
             .map { salvo ->
                 AgendamentoRegistro(
                     id = salvo.id,
@@ -183,9 +212,28 @@ fun MainScaffold(
                             onSeeAllServices = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onDiscountClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                             onCategoryClick = { abrirServicoPorLegenda(it) },
-                            onServiceClick = { abrirServicoPorLegenda(it) }
+                            onServiceClick = { abrirServicoPorLegenda(it) },
+                            profissionais = profissionaisHome,
+                            onFavoritoClick = { profissionalId ->
+                                scope.launch {
+                                    val favorito = ProfissionalFavorito(usuario.id, profissionalId)
+                                    if (profissionaisHome.firstOrNull { it.id == profissionalId }?.favorito == true) {
+                                        favoritoDao.remover(favorito)
+                                    } else {
+                                        favoritoDao.inserir(favorito)
+                                    }
+                                    carregarProfissionais()
+                                }
+                            },
+                            onProfissionalClick = { profissionalId ->
+                                profissionalSelecionadoId = profissionalId
+                                irPara(LumisTela.Principal(NavItem.EXPLORAR))
+                            }
                         )
-                        NavItem.CIDADE -> CidadeConscienteScreen(onNotificationsClick = { irPara(LumisTela.Notificacoes) })
+                        NavItem.CIDADE -> CidadeConscienteScreen(
+                            localizacao = usuario.localizacao,
+                            onNotificationsClick = { irPara(LumisTela.Notificacoes) }
+                        )
                         NavItem.AGENDA -> AgendaTab(
                             registros = registrosAgenda,
                             onAvaliar = { id, estrelas ->
@@ -199,21 +247,30 @@ fun MainScaffold(
                             },
                             onCancelar = { id ->
                                 scope.launch {
-                                    if (agendamentoRepository.atualizarStatus(id, usuario.id, "Cancelado")) {
+                                    val atualizado = if (usuario.tipoUsuario == "Cliente")
+                                        agendamentoRepository.atualizarStatus(id, usuario.id, "Cancelado")
+                                    else agendamentoRepository.atualizarStatusComoProfissional(id, usuario.id, "Cancelado")
+                                    if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Cancelado") else it }
                                     }
                                 }
                             },
                             onConcluir = { id ->
                                 scope.launch {
-                                    if (agendamentoRepository.atualizarStatus(id, usuario.id, "Concluído")) {
+                                    val atualizado = if (usuario.tipoUsuario == "Cliente")
+                                        agendamentoRepository.atualizarStatus(id, usuario.id, "Concluído")
+                                    else agendamentoRepository.atualizarStatusComoProfissional(id, usuario.id, "Concluído")
+                                    if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Concluído") else it }
                                     }
                                 }
                             },
                             onReagendar = { id, data, horario ->
                                 scope.launch {
-                                    if (agendamentoRepository.reagendar(id, usuario.id, data, horario)) {
+                                    val atualizado = if (usuario.tipoUsuario == "Cliente")
+                                        agendamentoRepository.reagendar(id, usuario.id, data, horario)
+                                    else agendamentoRepository.reagendarComoProfissional(id, usuario.id, data, horario)
+                                    if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(data = data, horario = horario) else it }
                                     } else {
                                         Toast.makeText(context, "Esse horário já está ocupado.", Toast.LENGTH_SHORT).show()
@@ -230,14 +287,19 @@ fun MainScaffold(
                                     fotoUrl = usuario.fotoPerfilPath.ifBlank { null },
                                     biografia = usuario.biografia,
                                     bannerUrl = usuario.bannerPerfilPath.ifBlank { null },
-                                    planoAtivo = assinaturaAtiva?.nomePlano
+                                    planoAtivo = assinaturaAtiva?.nomePlano,
+                                    totalAgendamentos = registrosAgenda.size,
+                                    totalConcluidos = registrosAgenda.count { it.status == "Concluído" },
+                                    atividadesRecentes = registrosAgenda.take(3).map { AtividadePerfil(it.servico, it.data, it.status) }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
                                 onMembroLumisClick = { irPara(LumisTela.Planos) },
                                 onNotificacoesClick = { irPara(LumisTela.Notificacoes) },
                                 onServicosClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
-                                onAgendaClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) }
+                                onAgendaClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
+                                modoIdioma = modoIdioma,
+                                onModoIdiomaChange = onModoIdiomaChange
                             )
                         } else {
                             FuncionarioProfileScreen(
@@ -257,7 +319,9 @@ fun MainScaffold(
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
-                                onCalendarioClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) }
+                                onCalendarioClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
+                                modoIdioma = modoIdioma,
+                                onModoIdiomaChange = onModoIdiomaChange
                             )
                         }
                         NavItem.EXPLORAR -> ServicesScreen(
@@ -267,24 +331,24 @@ fun MainScaffold(
                                 irPara(LumisTela.Agendamento(servico))
                             },
                             servicoInicial = servicoInicial,
+                            profissionais = profissionaisHome,
+                            profissionalSelecionadoId = profissionalSelecionadoId,
+                            onSelecionarProfissional = { profissionalSelecionadoId = it },
                             onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                         )
                     }
                     is LumisTela.Planos -> PlanosScreen(
                         onVoltarServicos = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
-                        onAssinarPlano = { plano ->
-                            irPara(LumisTela.PagamentoPlano(plano.id, plano.nome, plano.valorCentavos))
+                        onAssinarPlano = { plano, forma ->
+                            irPara(LumisTela.PagamentoPlano(plano.id, plano.nome, plano.valorCentavos, forma))
                         },
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Agendamento -> AgendamentoScreen(
                         servicoSelecionado = tela.servico.nome,
                         onBack = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
-                        onConfirm = { dia, hora ->
-                            val cal = Calendar.getInstance()
-                            val mesAtual = cal.get(Calendar.MONTH) + 1
-                            val anoAtual = cal.get(Calendar.YEAR)
-                            dataEscolhida = "$dia/${mesAtual.toString().padStart(2, '0')}/$anoAtual"
+                        onConfirm = { data, hora ->
+                            dataEscolhida = data
                             horarioEscolhido = hora
                             irPara(LumisTela.Imovel)
                         },
@@ -331,6 +395,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         extras = extrasEscolhidos,
                         total = totalPedido,
                         endereco = enderecoImovel,
+                        profissional = profissionaisHome.firstOrNull { it.id == profissionalSelecionadoId }?.nome.orEmpty(),
                         formaPagamentoInicial = formaPagamento,
                         onFormaPagamentoChange = { formaPagamento = it },
                         onBack = { irPara(LumisTela.Adicionais) },
@@ -349,6 +414,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                             if (servico != null) {
                                 val novoAgendamento = Agendamento(
                                     usuarioId = usuario.id,
+                                    profissionalId = profissionalSelecionadoId,
                                     servico = servico.nome,
                                     data = dataEscolhida,
                                     horario = horarioEscolhido,
@@ -394,7 +460,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.PagamentoPlano -> PagamentoScreen(
-                        formaPagamento = "Cartão de crédito",
+                        formaPagamento = tela.formaPagamento,
                         total = tela.valorCentavos / 100.0,
                         contexto = ContextoPagamento.PLANO,
                         onBack = { irPara(LumisTela.Planos) },
