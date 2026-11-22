@@ -55,7 +55,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import com.example.lumis.R
-import java.time.YearMonth
 
 enum class ContextoPagamento { AGENDAMENTO, PLANO }
 
@@ -78,20 +77,9 @@ fun PagamentoScreen(
     val scope = rememberCoroutineScope()
     val usaCartao = formaPagamento.contains("Cartão", ignoreCase = true)
     val usaPix = formaPagamento.equals("Pix", ignoreCase = true)
-    val erroTitular = stringResource(R.string.cardholder_required)
-    val erroNumero = stringResource(R.string.card_number_invalid)
-    val erroValidade = stringResource(R.string.expiry_required)
-    val erroCvv = stringResource(R.string.cvv_required)
-
     fun simularPagamento() {
-        erro = when {
-            usaCartao && titular.isBlank() -> erroTitular
-            usaCartao && !cartaoValido(numeroCartao) -> erroNumero
-            usaCartao && !validadeValida(validade) -> erroValidade
-            usaCartao && cvv.length < 3 -> erroCvv
-            else -> null
-        }
-        if (erro != null) return
+        // Fluxo exclusivamente demonstrativo: qualquer conteúdo é aceito e nada é armazenado.
+        erro = null
         processando = true
         scope.launch {
             delay(1_000)
@@ -205,32 +193,9 @@ fun PagamentoScreen(
         }
     }
 }
-
 private fun formatarCartao(valor: String): String = valor.filter(Char::isDigit).take(16).chunked(4).joinToString(" ")
 
 private fun formatarValidade(valor: String): String {
     val numeros = valor.filter(Char::isDigit).take(4)
     return if (numeros.length > 2) "${numeros.take(2)}/${numeros.drop(2)}" else numeros
-}
-
-private fun cartaoValido(valor: String): Boolean {
-    val numeros = valor.filter(Char::isDigit)
-    if (numeros.length !in 13..19) return false
-    val soma = numeros.reversed().mapIndexed { index, caractere ->
-        var numero = caractere.digitToInt()
-        if (index % 2 == 1) {
-            numero *= 2
-            if (numero > 9) numero -= 9
-        }
-        numero
-    }.sum()
-    return soma % 10 == 0
-}
-
-private fun validadeValida(valor: String): Boolean {
-    val partes = valor.split('/')
-    val mes = partes.getOrNull(0)?.toIntOrNull() ?: return false
-    val ano = partes.getOrNull(1)?.toIntOrNull()?.let { 2000 + it } ?: return false
-    if (mes !in 1..12) return false
-    return YearMonth.of(ano, mes) >= YearMonth.now()
 }

@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
@@ -75,8 +77,14 @@ data class FuncionarioProfile(
     val experiencia: String = "",
     val valorMinimoCentavos: Long = 0,
     val mediaAvaliacoes: Double? = null,
-    val quantidadeAvaliacoes: Int = 0
+    val quantidadeAvaliacoes: Int = 0,
+    val totalAtendimentos: Int = 0,
+    val totalConcluidos: Int = 0,
+    val recebidoCentavos: Long = 0,
+    val proximosAtendimentos: List<ProximoAtendimento> = emptyList()
 )
+
+data class ProximoAtendimento(val cliente: String, val servico: String, val data: String, val horario: String)
 
 @Composable
 fun FuncionarioProfileScreen(
@@ -94,6 +102,41 @@ fun FuncionarioProfileScreen(
         item { CabecalhoProfissional(profile, onEditarClick, onConfigClick) }
         item {
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ResumoPrivado(Icons.Outlined.CalendarMonth, profile.totalAtendimentos.toString(), stringResource(R.string.appointments_label), Modifier.weight(1f))
+                    ResumoPrivado(Icons.Outlined.TaskAlt, profile.totalConcluidos.toString(), stringResource(R.string.completed_label), Modifier.weight(1f))
+                    ResumoPrivado(
+                        Icons.Outlined.AccountBalanceWallet,
+                        "R$ %.0f".format(profile.recebidoCentavos / 100.0),
+                        stringResource(R.string.received_label),
+                        Modifier.weight(1f)
+                    )
+                }
+
+                if (profile.proximosAtendimentos.isNotEmpty()) {
+                    Surface(
+                        onClick = onCalendarioClick,
+                        shape = RoundedCornerShape(18.dp),
+                        color = ProfileColors.CardBackground,
+                        border = BorderStroke(1.dp, ProfileColors.Divider)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(stringResource(R.string.next_appointments), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                            profile.proximosAtendimentos.take(2).forEach { item ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.CalendarMonth, null, tint = ProfileColors.PrimaryDark)
+                                    }
+                                    Spacer(Modifier.width(10.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(item.cliente, fontWeight = FontWeight.SemiBold, color = ProfileColors.TextPrimary)
+                                        Text(stringResource(R.string.service_date_time, item.servico, item.data, item.horario), color = ProfileColors.TextSecondary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 if (profile.mediaAvaliacoes != null) {
                     Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
                         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -124,16 +167,6 @@ fun FuncionarioProfileScreen(
                 }
                 IdiomaSelector(modoIdioma, onModoIdiomaChange)
 
-                Button(
-                    onClick = onCalendarioClick,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ProfileColors.Primary)
-                ) {
-                    Icon(Icons.Outlined.CalendarMonth, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.open_schedule), fontWeight = FontWeight.Bold)
-                }
                 Spacer(Modifier.height(20.dp))
             }
         }
@@ -142,7 +175,7 @@ fun FuncionarioProfileScreen(
 
 @Composable
 private fun CabecalhoProfissional(profile: FuncionarioProfile, onEditarClick: () -> Unit, onConfigClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(270.dp)) {
+    Box(Modifier.fillMaxWidth().height(292.dp)) {
         if (!profile.bannerPath.isNullOrBlank() && File(profile.bannerPath).exists()) {
             AsyncImage(File(profile.bannerPath), null, Modifier.fillMaxWidth().aspectRatio(2f), contentScale = ContentScale.Crop)
         } else {
@@ -167,6 +200,7 @@ private fun CabecalhoProfissional(profile: FuncionarioProfile, onEditarClick: ()
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(profile.nome, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Text(stringResource(R.string.verified_professional), color = ProfileColors.PrimaryDark, fontWeight = FontWeight.SemiBold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.LocationOn, null, Modifier.size(16.dp), tint = ProfileColors.Primary)
                         Text(profile.localizacao, color = ProfileColors.TextSecondary)
@@ -174,6 +208,23 @@ private fun CabecalhoProfissional(profile: FuncionarioProfile, onEditarClick: ()
                     if (profile.telefone.isNotBlank()) Text(profile.telefone, color = ProfileColors.TextSecondary)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ResumoPrivado(
+    icone: androidx.compose.ui.graphics.vector.ImageVector,
+    valor: String,
+    legenda: String,
+    modifier: Modifier
+) {
+    Surface(modifier, shape = RoundedCornerShape(16.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+        Column(Modifier.padding(12.dp)) {
+            Icon(icone, null, Modifier.size(20.dp), tint = ProfileColors.Primary)
+            Spacer(Modifier.height(5.dp))
+            Text(valor, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary, maxLines = 1)
+            Text(legenda, color = ProfileColors.TextSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall, maxLines = 1)
         }
     }
 }

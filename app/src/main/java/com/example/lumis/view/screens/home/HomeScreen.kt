@@ -45,7 +45,8 @@ fun HomeScreen(
     onServiceClick: (String) -> Unit = {},
     profissionais: List<ProfessionalUi> = emptyList(),
     onFavoritoClick: (Int) -> Unit = {},
-    onProfissionalClick: (Int) -> Unit = {}
+    onProfissionalClick: (Int) -> Unit = {},
+    onContratarProfissional: (Int) -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -93,7 +94,8 @@ fun HomeScreen(
                 RecommendedSection(
                     profissionais = profissionais,
                     onFavoritoClick = onFavoritoClick,
-                    onContratarClick = onProfissionalClick
+                    onPerfilClick = onProfissionalClick,
+                    onContratarClick = onContratarProfissional
                 )
             }
         }

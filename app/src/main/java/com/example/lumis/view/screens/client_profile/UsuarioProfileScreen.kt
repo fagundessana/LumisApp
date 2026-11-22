@@ -27,6 +27,8 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material.icons.outlined.CleaningServices
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -61,10 +63,15 @@ data class UsuarioProfile(
     val planoAtivo: String? = null,
     val totalAgendamentos: Int = 0,
     val totalConcluidos: Int = 0,
-    val atividadesRecentes: List<AtividadePerfil> = emptyList()
+    val atividadesRecentes: List<AtividadePerfil> = emptyList(),
+    val favoritos: List<FavoritoPerfil> = emptyList(),
+    val avaliacoesRecentes: List<AvaliacaoPerfil> = emptyList(),
+    val historico: List<AtividadePerfil> = emptyList()
 )
 
 data class AtividadePerfil(val servico: String, val data: String, val status: String)
+data class FavoritoPerfil(val id: Int, val nome: String, val avaliacao: Double?)
+data class AvaliacaoPerfil(val profissional: String, val estrelas: Int, val data: String)
 
 @Composable
 fun UsuarioProfileScreen(
@@ -75,6 +82,7 @@ fun UsuarioProfileScreen(
     onNotificacoesClick: () -> Unit = {},
     onServicosClick: () -> Unit = {},
     onAgendaClick: () -> Unit = {},
+    onProfissionalClick: (Int) -> Unit = {},
     modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
     onModoIdiomaChange: (ModoIdioma) -> Unit = {}
 ) {
@@ -129,14 +137,72 @@ fun UsuarioProfileScreen(
                     }
                 }
 
-                Text(stringResource(R.string.quick_access), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AtalhoPerfil(Icons.Outlined.CleaningServices, stringResource(R.string.services), onServicosClick, Modifier.weight(1f))
-                    AtalhoPerfil(Icons.Outlined.CalendarMonth, stringResource(R.string.nav_schedule), onAgendaClick, Modifier.weight(1f))
+                if (profile.favoritos.isNotEmpty()) {
+                    Text(stringResource(R.string.favorite_professionals), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        profile.favoritos.forEach { favorito ->
+                            Surface(
+                                onClick = { onProfissionalClick(favorito.id) },
+                                shape = RoundedCornerShape(16.dp), color = ProfileColors.CardBackground,
+                                border = BorderStroke(1.dp, ProfileColors.Divider)
+                            ) {
+                                Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(42.dp).clip(CircleShape).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Outlined.Person, null, tint = ProfileColors.PrimaryDark)
+                                    }
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(favorito.nome, Modifier.weight(1f), fontWeight = FontWeight.SemiBold, color = ProfileColors.TextPrimary)
+                                    favorito.avaliacao?.let {
+                                        Icon(Icons.Filled.Star, null, Modifier.size(18.dp), tint = Color(0xFFFFB800))
+                                        Text(" %.1f".format(it), color = ProfileColors.TextSecondary)
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    Icon(Icons.Filled.Favorite, null, tint = Color(0xFFE45869))
+                                }
+                            }
+                        }
+                    }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AtalhoPerfil(Icons.Outlined.Notifications, stringResource(R.string.notifications), onNotificacoesClick, Modifier.weight(1f))
-                    AtalhoPerfil(Icons.Outlined.WorkspacePremium, stringResource(R.string.plans), onMembroLumisClick, Modifier.weight(1f))
+
+                if (profile.avaliacoesRecentes.isNotEmpty()) {
+                    Text(stringResource(R.string.recent_ratings), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Surface(shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground, border = BorderStroke(1.dp, ProfileColors.Divider)) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                            profile.avaliacoesRecentes.forEach { avaliacao ->
+                                Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(avaliacao.profissional, fontWeight = FontWeight.SemiBold, color = ProfileColors.TextPrimary)
+                                        Text(avaliacao.data, color = ProfileColors.TextSecondary)
+                                    }
+                                    repeat(avaliacao.estrelas) { Icon(Icons.Filled.Star, null, Modifier.size(18.dp), tint = Color(0xFFFFB800)) }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (profile.historico.isNotEmpty()) {
+                    Text(stringResource(R.string.service_history), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+                    Surface(
+                        onClick = onAgendaClick,
+                        shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground,
+                        border = BorderStroke(1.dp, ProfileColors.Divider)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            profile.historico.take(3).forEach { item ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Outlined.CleaningServices, null, tint = ProfileColors.Primary)
+                                    Spacer(Modifier.width(10.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(item.servico, fontWeight = FontWeight.SemiBold, color = ProfileColors.TextPrimary)
+                                        Text(item.data, color = ProfileColors.TextSecondary)
+                                    }
+                                    Text(if (item.status == "Concluído") "Concluído" else "Cancelado", color = ProfileColors.PrimaryDark)
+                                }
+                            }
+                            Text(stringResource(R.string.view_full_history), color = ProfileColors.PrimaryDark, fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
 
                 if (profile.atividadesRecentes.isNotEmpty()) {
@@ -178,16 +244,6 @@ fun UsuarioProfileScreen(
                 }
                 IdiomaSelector(modoIdioma, onModoIdiomaChange)
 
-                Button(
-                    onClick = onEditarClick,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ProfileColors.Primary)
-                ) {
-                    Icon(Icons.Outlined.Edit, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.edit_profile), fontWeight = FontWeight.Bold)
-                }
                 Spacer(Modifier.height(20.dp))
             }
         }

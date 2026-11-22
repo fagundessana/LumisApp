@@ -114,9 +114,29 @@ val MIGRATION_9_10 = object : Migration(9, 10) {
     }
 }
 
+/** Adiciona a central de notificações sem alterar usuários ou agendamentos existentes. */
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `notificacoes` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `usuarioId` INTEGER NOT NULL,
+                `tipo` TEXT NOT NULL,
+                `titulo` TEXT NOT NULL,
+                `descricao` TEXT NOT NULL,
+                `criadoEmMillis` INTEGER NOT NULL,
+                `lida` INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_notificacoes_usuarioId` ON `notificacoes` (`usuarioId`)")
+    }
+}
+
 @Database(
-    entities = [User::class, Agendamento::class, AssinaturaPlano::class, ProfissionalFavorito::class],
-    version = 10,
+    entities = [User::class, Agendamento::class, AssinaturaPlano::class, ProfissionalFavorito::class, Notificacao::class],
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -124,6 +144,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun agendamentoDao(): AgendamentoDao
     abstract fun assinaturaPlanoDao(): AssinaturaPlanoDao
     abstract fun profissionalFavoritoDao(): ProfissionalFavoritoDao
+    abstract fun notificacaoDao(): NotificacaoDao
 
     companion object {
         @Volatile
@@ -144,7 +165,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_6_7,
                     MIGRATION_7_8,
                     MIGRATION_8_9,
-                    MIGRATION_9_10
+                    MIGRATION_9_10,
+                    MIGRATION_10_11
                 ).build()
 
                 INSTANCE = instance

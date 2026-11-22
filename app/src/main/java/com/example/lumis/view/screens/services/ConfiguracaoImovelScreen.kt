@@ -77,6 +77,9 @@ fun ConfiguracaoImovelScreen(
     onNotificationsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val mensagemCepInvalido = stringResource(R.string.invalid_cep)
+    val mensagemAguardeCep = stringResource(R.string.wait_cep)
+    val mensagemEnderecoIncompleto = stringResource(R.string.complete_address)
     var quartos by remember { mutableIntStateOf(quartosInicial) }
     var banheiros by remember { mutableIntStateOf(banheirosInicial) }
     var tamanhoSelecionado by remember { mutableStateOf(tamanhoInicial) }
@@ -167,7 +170,14 @@ fun ConfiguracaoImovelScreen(
                     )
                     OutlinedTextField(logradouro, { logradouro = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.street)) }, singleLine = true)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedTextField(numero, { numero = it }, Modifier.weight(0.38f), label = { Text(stringResource(R.string.number)) }, singleLine = true)
+                        OutlinedTextField(
+                            numero,
+                            { numero = it },
+                            Modifier.weight(0.38f),
+                            label = { Text(stringResource(R.string.number)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
                         OutlinedTextField(complemento, { complemento = it }, Modifier.weight(0.62f), label = { Text(stringResource(R.string.complement)) }, singleLine = true)
                     }
                     OutlinedTextField(bairro, { bairro = it }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.neighborhood)) }, singleLine = true)
@@ -183,11 +193,11 @@ fun ConfiguracaoImovelScreen(
             BotaoContinuar(onClick = {
                 val enderecoCompleto = montarEndereco(logradouro, numero, complemento, bairro, cidade, uf, cep)
                 when {
-                    cepNumerico.length != 8 -> Toast.makeText(context, context.getString(R.string.invalid_cep), Toast.LENGTH_SHORT).show()
-                    buscandoCep -> Toast.makeText(context, context.getString(R.string.wait_cep), Toast.LENGTH_SHORT).show()
+                    cepNumerico.length != 8 -> Toast.makeText(context, mensagemCepInvalido, Toast.LENGTH_SHORT).show()
+                    buscandoCep -> Toast.makeText(context, mensagemAguardeCep, Toast.LENGTH_SHORT).show()
                     erroCep != null -> Toast.makeText(context, erroCep, Toast.LENGTH_SHORT).show()
                     logradouro.isBlank() || numero.isBlank() || bairro.isBlank() || cidade.isBlank() || uf.isBlank() ->
-                        Toast.makeText(context, context.getString(R.string.complete_address), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, mensagemEnderecoIncompleto, Toast.LENGTH_SHORT).show()
                     else -> onConfirm(quartos, banheiros, tamanhoSelecionado, enderecoCompleto)
                 }
             })

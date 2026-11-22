@@ -74,11 +74,27 @@ private data class Ecoponto(
     val materiais: String
 )
 
-private val ecopontos = listOf(
-    Ecoponto("Ecoponto Praça Verde", "Av. das Palmeiras, 240", "650 m", "Aberto até 18h", "Papel, plástico, vidro e metal"),
-    Ecoponto("Coleta Comunitária Centro", "Rua XV de Novembro, 88", "1,2 km", "Aberto até 17h", "Eletrônicos, pilhas e recicláveis"),
-    Ecoponto("Ponto Limpo Municipal", "Rua das Acácias, 510", "2,4 km", "Abre amanhã às 8h", "Móveis, entulho leve e recicláveis")
-)
+private fun ecopontosDemonstrativos(localizacao: String): List<Ecoponto> {
+    val exterior = listOf("usa", "estados unidos", "united states", "new york", "miami", "orlando").any { localizacao.contains(it, true) }
+    val curitiba = localizacao.contains("curitiba", true)
+    return when {
+        exterior -> listOf(
+            Ecoponto("Community Drop-off Downtown", "120 Green St", "650 m", "Open until 6 PM", "Paper, glass, metal and electronics"),
+            Ecoponto("Neighborhood Recycling Hub", "88 Central Ave", "1.2 km", "Open until 5 PM", "Batteries and recyclables"),
+            Ecoponto("Municipal Reuse Center", "510 Park Road", "2.4 km", "Opens tomorrow at 8 AM", "Furniture and recyclables")
+        )
+        curitiba -> listOf(
+            Ecoponto("Ecoponto Centro", "Rua André de Barros, 240", "650 m", "Aberto até 18h", "Papel, plástico, vidro e metal"),
+            Ecoponto("Coleta Comunitária Batel", "Av. Sete de Setembro, 88", "1,2 km", "Aberto até 17h", "Eletrônicos, pilhas e recicláveis"),
+            Ecoponto("Ponto Limpo Portão", "Rua João Bettega, 510", "2,4 km", "Abre amanhã às 8h", "Móveis e recicláveis")
+        )
+        else -> listOf(
+            Ecoponto("Ecoponto Centro", "Av. das Palmeiras, 240", "650 m", "Aberto até 18h", "Papel, plástico, vidro e metal"),
+            Ecoponto("Coleta Comunitária Vila Verde", "Rua XV de Novembro, 88", "1,2 km", "Aberto até 17h", "Eletrônicos, pilhas e recicláveis"),
+            Ecoponto("Ponto Limpo Parque Sul", "Rua das Acácias, 510", "2,4 km", "Abre amanhã às 8h", "Móveis e recicláveis")
+        )
+    }
+}
 
 @Composable
 fun CidadeConscienteScreen(
@@ -88,6 +104,7 @@ fun CidadeConscienteScreen(
 ) {
     var painel by rememberSaveable { mutableStateOf(PainelCidade.ECO_PONTOS) }
     var pontoSelecionado by remember { mutableStateOf<Ecoponto?>(null) }
+    val ecopontos = remember(localizacao) { ecopontosDemonstrativos(localizacao) }
 
     Column(
         modifier = modifier
@@ -108,7 +125,7 @@ fun CidadeConscienteScreen(
                     subtitle = stringResource(R.string.city_care_subtitle)
                 )
             }
-            item { ImpactoHeroCard(localizacao) }
+            item { ImpactoHeroCard(localizacao, ecopontos.size) }
             item {
                 AcoesCidade(
                     painel = painel,
@@ -123,7 +140,7 @@ fun CidadeConscienteScreen(
                     label = "painelCidade"
                 ) { destino ->
                     when (destino) {
-                        PainelCidade.ECO_PONTOS -> EcopontosCard(onSelect = { pontoSelecionado = it })
+                        PainelCidade.ECO_PONTOS -> EcopontosCard(ecopontos, onSelect = { pontoSelecionado = it })
                         PainelCidade.GUIA -> DadosAmbientaisCard()
                     }
                 }
@@ -138,7 +155,7 @@ fun CidadeConscienteScreen(
 }
 
 @Composable
-private fun ImpactoHeroCard(localizacao: String) {
+private fun ImpactoHeroCard(localizacao: String, quantidade: Int) {
     Surface(shape = RoundedCornerShape(24.dp), color = Color.Transparent) {
         Column(
             modifier = Modifier
@@ -158,9 +175,9 @@ private fun ImpactoHeroCard(localizacao: String) {
                 }
                 Spacer(Modifier.size(12.dp))
                 Column {
-                    Text(stringResource(R.string.sustainable_guide), color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.conscious_city), color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.labelLarge)
                     Text(
-                        if (localizacao.isBlank()) stringResource(R.string.cleaner_neighborhood) else localizacao,
+                        stringResource(R.string.nearby_points_count, quantidade),
                         color = Color.White,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
@@ -168,7 +185,11 @@ private fun ImpactoHeroCard(localizacao: String) {
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.city_hero_explanation), color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (localizacao.isBlank()) "Defina sua localização para personalizar a demonstração."
+                else "Referência para ${localizacao}. Os locais exibidos são demonstrativos.",
+                color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 ImpactoMetrica("1", stringResource(R.string.separate), Modifier.weight(1f))
@@ -235,7 +256,7 @@ private fun AcaoCidadeButton(
 }
 
 @Composable
-private fun EcopontosCard(onSelect: (Ecoponto) -> Unit) {
+private fun EcopontosCard(ecopontos: List<Ecoponto>, onSelect: (Ecoponto) -> Unit) {
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = LumisSurface,
@@ -245,7 +266,7 @@ private fun EcopontosCard(onSelect: (Ecoponto) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.nearby_ecopoints), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
-                    Text(stringResource(R.string.sorted_by_location), style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
+                    Text("${stringResource(R.string.demo_data)} • ${stringResource(R.string.sorted_by_location)}", style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
                 }
                 Surface(shape = CircleShape, color = LumisGreenLight) {
                     Icon(Icons.Outlined.LocationOn, null, Modifier.padding(9.dp).size(20.dp), LumisGreenDark)

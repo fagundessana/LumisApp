@@ -28,6 +28,7 @@ import com.example.lumis.data.AgendamentoRepository
 import com.example.lumis.data.AppDatabase
 import com.example.lumis.data.AssinaturaPlano
 import com.example.lumis.data.ProfissionalFavorito
+import com.example.lumis.data.Notificacao
 import com.example.lumis.data.User
 import com.example.lumis.model.Servico
 import com.example.lumis.view.components.AgendaTab
@@ -38,11 +39,15 @@ import com.example.lumis.view.screens.auth.ContaScreen
 import com.example.lumis.view.screens.city.CidadeConscienteScreen
 import com.example.lumis.view.screens.client_profile.UsuarioProfile
 import com.example.lumis.view.screens.client_profile.AtividadePerfil
+import com.example.lumis.view.screens.client_profile.FavoritoPerfil
+import com.example.lumis.view.screens.client_profile.AvaliacaoPerfil
 import com.example.lumis.view.screens.client_profile.UsuarioProfileScreen
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfile
 import com.example.lumis.view.screens.employee_profile.FuncionarioProfileScreen
+import com.example.lumis.view.screens.employee_profile.ProximoAtendimento
 import com.example.lumis.view.screens.notifications.NotificationsScreen
 import com.example.lumis.view.screens.profile.EditarPerfilScreen
+import com.example.lumis.view.screens.profile.PerfilPublicoScreen
 import com.example.lumis.view.screens.home.HomeScreen
 import com.example.lumis.view.screens.home.model.ProfessionalUi
 import com.example.lumis.view.screens.services.AgendamentoScreen
@@ -69,6 +74,12 @@ sealed class LumisTela {
     data object Conta : LumisTela()
     data object EditarPerfil : LumisTela()
     data object Notificacoes : LumisTela()
+    data class PerfilPublico(
+        val pessoa: User,
+        val mediaAvaliacoes: Double?,
+        val quantidadeAvaliacoes: Int,
+        val totalConcluidos: Int
+    ) : LumisTela()
 }
 
 @Composable
@@ -89,6 +100,7 @@ fun MainScaffold(
     val scope = rememberCoroutineScope()
     val assinaturaPlanoDao = remember(database) { database.assinaturaPlanoDao() }
     val favoritoDao = remember(database) { database.profissionalFavoritoDao() }
+    val notificacaoDao = remember(database) { database.notificacaoDao() }
 
     var telaAtual by remember { mutableStateOf<LumisTela>(LumisTela.Principal(NavItem.HOME)) }
 
@@ -107,6 +119,58 @@ fun MainScaffold(
     var assinaturaAtiva by remember { mutableStateOf<AssinaturaPlano?>(null) }
     var profissionaisHome by remember { mutableStateOf<List<ProfessionalUi>>(emptyList()) }
     var profissionalSelecionadoId by remember { mutableStateOf<Int?>(null) }
+    var notificacoes by remember { mutableStateOf<List<Notificacao>>(emptyList()) }
+
+    suspend fun carregarNotificacoes() {
+        notificacoes = notificacaoDao.listarPorUsuario(usuario.id)
+    }
+
+    suspend fun notificar(usuarioId: Int, tipo: String, titulo: String, descricao: String) {
+        notificacaoDao.inserir(Notificacao(usuarioId = usuarioId, tipo = tipo, titulo = titulo, descricao = descricao))
+        if (usuarioId == usuario.id) carregarNotificacoes()
+    }
+
+    suspend fun abrirPerfilPublico(id: Int) {
+        val pessoa = database.userDao().buscarPorId(id) ?: return
+        val agendamentos = if (pessoa.tipoUsuario == "Cliente") {
+            agendamentoRepository.listarPorUsuario(pessoa.id)
+        } else {
+            agendamentoRepository.listarPorProfissional(pessoa.id)
+        }
+        telaAtual = LumisTela.PerfilPublico(
+                pessoa = pessoa,
+                mediaAvaliacoes = if (pessoa.tipoUsuario == "Cliente") null else database.agendamentoDao().mediaAvaliacoes(pessoa.id),
+                quantidadeAvaliacoes = if (pessoa.tipoUsuario == "Cliente") 0 else database.agendamentoDao().quantidadeAvaliacoes(pessoa.id),
+                totalConcluidos = agendamentos.count { it.status == "Concluído" }
+            )
+    }
+
+    suspend fun carregarAgenda() {
+        val salvos = if (usuario.tipoUsuario == "Cliente") {
+            agendamentoRepository.listarPorUsuario(usuario.id)
+        } else {
+            agendamentoRepository.listarPorProfissional(usuario.id)
+        }
+        registrosAgenda = salvos.map { salvo ->
+            val contraparteId = if (usuario.tipoUsuario == "Cliente") salvo.profissionalId else salvo.usuarioId
+            val contraparte = contraparteId?.let { database.userDao().buscarPorId(it) }
+            AgendamentoRegistro(
+                id = salvo.id,
+                usuarioId = salvo.usuarioId,
+                profissionalId = salvo.profissionalId,
+                contraparteId = contraparteId,
+                contraparteNome = contraparte?.nomeUsuario.orEmpty(),
+                servico = salvo.servico,
+                data = salvo.data,
+                horario = salvo.horario,
+                endereco = salvo.endereco,
+                extras = salvo.extras.split('\n').filter { it.isNotBlank() },
+                total = salvo.totalCentavos / 100.0,
+                status = salvo.status,
+                avaliacao = salvo.avaliacao
+            )
+        }
+    }
 
     suspend fun carregarProfissionais() {
         val favoritos = favoritoDao.listarIds(usuario.id).toSet()
@@ -128,26 +192,8 @@ fun MainScaffold(
     LaunchedEffect(usuario.id, agendamentoRepository) {
         assinaturaAtiva = assinaturaPlanoDao.buscarPorUsuario(usuario.id)
         carregarProfissionais()
-        registrosAgenda = (if (usuario.tipoUsuario == "Cliente") {
-            agendamentoRepository.listarPorUsuario(usuario.id)
-        } else {
-            agendamentoRepository.listarPorProfissional(usuario.id)
-        })
-            .map { salvo ->
-                AgendamentoRegistro(
-                    id = salvo.id,
-                    servico = salvo.servico,
-                    data = salvo.data,
-                    horario = salvo.horario,
-                    endereco = salvo.endereco,
-                    extras = salvo.extras
-                        .split('\n')
-                        .filter { it.isNotBlank() },
-                    total = salvo.totalCentavos / 100.0,
-                    status = salvo.status,
-                    avaliacao = salvo.avaliacao
-                )
-            }
+        carregarAgenda()
+        carregarNotificacoes()
     }
 
     fun irPara(nova: LumisTela) {
@@ -217,15 +263,28 @@ fun MainScaffold(
                             onFavoritoClick = { profissionalId ->
                                 scope.launch {
                                     val favorito = ProfissionalFavorito(usuario.id, profissionalId)
-                                    if (profissionaisHome.firstOrNull { it.id == profissionalId }?.favorito == true) {
+                                    val profissional = profissionaisHome.firstOrNull { it.id == profissionalId }
+                                    val removendo = profissional?.favorito == true
+                                    if (removendo) {
                                         favoritoDao.remover(favorito)
                                     } else {
                                         favoritoDao.inserir(favorito)
+                                    }
+                                    profissional?.let {
+                                        notificar(
+                                            usuario.id,
+                                            if (removendo) "DESFAVORITO" else "FAVORITO",
+                                            if (removendo) "Profissional removido dos favoritos" else "Profissional adicionado aos favoritos",
+                                            "${it.nome} foi ${if (removendo) "removido dos" else "adicionado aos"} favoritos."
+                                        )
                                     }
                                     carregarProfissionais()
                                 }
                             },
                             onProfissionalClick = { profissionalId ->
+                                scope.launch { abrirPerfilPublico(profissionalId) }
+                            },
+                            onContratarProfissional = { profissionalId ->
                                 profissionalSelecionadoId = profissionalId
                                 irPara(LumisTela.Principal(NavItem.EXPLORAR))
                             }
@@ -236,47 +295,73 @@ fun MainScaffold(
                         )
                         NavItem.AGENDA -> AgendaTab(
                             registros = registrosAgenda,
+                            usuarioEhCliente = usuario.tipoUsuario == "Cliente",
                             onAvaliar = { id, estrelas ->
                                 scope.launch {
+                                    val registro = registrosAgenda.firstOrNull { it.id == id }
                                     if (agendamentoRepository.avaliar(id, usuario.id, estrelas)) {
                                         registrosAgenda = registrosAgenda.map { registro ->
                                             if (registro.id == id) registro.copy(avaliacao = estrelas) else registro
+                                        }
+                                        registro?.let {
+                                            notificar(usuario.id, "AVALIACAO", "Avaliação registrada", "Você avaliou ${it.contraparteNome.ifBlank { "o profissional" }} com $estrelas estrelas.")
+                                            it.profissionalId?.takeIf { profissionalId -> profissionalId != usuario.id }?.let { profissionalId ->
+                                                notificar(profissionalId, "AVALIACAO", "Nova avaliação recebida", "${usuario.nomeUsuario} avaliou o atendimento com $estrelas estrelas.")
+                                            }
+                                            carregarProfissionais()
                                         }
                                     }
                                 }
                             },
                             onCancelar = { id ->
                                 scope.launch {
+                                    val registro = registrosAgenda.firstOrNull { it.id == id }
                                     val atualizado = if (usuario.tipoUsuario == "Cliente")
                                         agendamentoRepository.atualizarStatus(id, usuario.id, "Cancelado")
                                     else agendamentoRepository.atualizarStatusComoProfissional(id, usuario.id, "Cancelado")
                                     if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Cancelado") else it }
+                                        registro?.let {
+                                            notificar(usuario.id, "CANCELAMENTO", "Agendamento cancelado", "${it.servico} de ${it.data} às ${it.horario} foi cancelado.")
+                                            it.contraparteId?.let { outro -> notificar(outro, "CANCELAMENTO", "Agendamento cancelado", "${it.servico} de ${it.data} às ${it.horario} foi cancelado por ${usuario.nomeUsuario}.") }
+                                        }
                                     }
                                 }
                             },
                             onConcluir = { id ->
                                 scope.launch {
+                                    val registro = registrosAgenda.firstOrNull { it.id == id }
                                     val atualizado = if (usuario.tipoUsuario == "Cliente")
                                         agendamentoRepository.atualizarStatus(id, usuario.id, "Concluído")
                                     else agendamentoRepository.atualizarStatusComoProfissional(id, usuario.id, "Concluído")
                                     if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(status = "Concluído") else it }
+                                        registro?.let {
+                                            notificar(usuario.id, "CONCLUSAO", "Serviço concluído", "${it.servico} foi marcado como concluído.")
+                                            it.contraparteId?.let { outro -> notificar(outro, "CONCLUSAO", "Serviço concluído", "${it.servico} com ${usuario.nomeUsuario} foi concluído.") }
+                                        }
                                     }
                                 }
                             },
                             onReagendar = { id, data, horario ->
                                 scope.launch {
+                                    val registro = registrosAgenda.firstOrNull { it.id == id }
                                     val atualizado = if (usuario.tipoUsuario == "Cliente")
                                         agendamentoRepository.reagendar(id, usuario.id, data, horario)
                                     else agendamentoRepository.reagendarComoProfissional(id, usuario.id, data, horario)
                                     if (atualizado) {
                                         registrosAgenda = registrosAgenda.map { if (it.id == id) it.copy(data = data, horario = horario) else it }
+                                        registro?.let {
+                                            val mudanca = "De ${it.data} • ${it.horario} para $data • $horario."
+                                            notificar(usuario.id, "REAGENDAMENTO", "Agendamento alterado", mudanca)
+                                            it.contraparteId?.let { outro -> notificar(outro, "REAGENDAMENTO", "Agendamento alterado", "$mudanca Alterado por ${usuario.nomeUsuario}.") }
+                                        }
                                     } else {
                                         Toast.makeText(context, "Esse horário já está ocupado.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
+                            onAbrirPerfil = { id -> scope.launch { abrirPerfilPublico(id) } },
                             onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                         )
                         NavItem.PERFIL -> if (usuario.tipoUsuario == "Cliente") {
@@ -290,7 +375,12 @@ fun MainScaffold(
                                     planoAtivo = assinaturaAtiva?.nomePlano,
                                     totalAgendamentos = registrosAgenda.size,
                                     totalConcluidos = registrosAgenda.count { it.status == "Concluído" },
-                                    atividadesRecentes = registrosAgenda.take(3).map { AtividadePerfil(it.servico, it.data, it.status) }
+                                    atividadesRecentes = registrosAgenda.take(3).map { AtividadePerfil(it.servico, it.data, it.status) },
+                                    favoritos = profissionaisHome.filter { it.favorito }.map { FavoritoPerfil(it.id, it.nome, it.mediaAvaliacoes) },
+                                    avaliacoesRecentes = registrosAgenda.filter { it.avaliacao != null }.take(3).map {
+                                        AvaliacaoPerfil(it.contraparteNome.ifBlank { "Profissional" }, it.avaliacao ?: 0, it.data)
+                                    },
+                                    historico = registrosAgenda.filter { it.status != "Agendado" }.take(3).map { AtividadePerfil(it.servico, it.data, it.status) }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
@@ -298,6 +388,7 @@ fun MainScaffold(
                                 onNotificacoesClick = { irPara(LumisTela.Notificacoes) },
                                 onServicosClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
                                 onAgendaClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
+                                onProfissionalClick = { id -> scope.launch { abrirPerfilPublico(id) } },
                                 modoIdioma = modoIdioma,
                                 onModoIdiomaChange = onModoIdiomaChange
                             )
@@ -315,7 +406,13 @@ fun MainScaffold(
                                     experiencia = usuario.experiencia,
                                     valorMinimoCentavos = usuario.valorMinimoCentavos,
                                     mediaAvaliacoes = registrosAgenda.mapNotNull { it.avaliacao }.takeIf { it.isNotEmpty() }?.average(),
-                                    quantidadeAvaliacoes = registrosAgenda.count { it.avaliacao != null }
+                                    quantidadeAvaliacoes = registrosAgenda.count { it.avaliacao != null },
+                                    totalAtendimentos = registrosAgenda.size,
+                                    totalConcluidos = registrosAgenda.count { it.status == "Concluído" },
+                                    recebidoCentavos = (registrosAgenda.filter { it.status == "Concluído" }.sumOf { it.total } * 100).toLong(),
+                                    proximosAtendimentos = registrosAgenda.filter { it.status == "Agendado" }.take(2).map {
+                                        ProximoAtendimento(it.contraparteNome.ifBlank { "Cliente" }, it.servico, it.data, it.horario)
+                                    }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
@@ -429,23 +526,23 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                 scope.launch {
                                     try {
                                         agendamentoRepository.salvar(novoAgendamento)
-                                        registrosAgenda = agendamentoRepository
-                                            .listarPorUsuario(usuario.id)
-                                            .map { salvo ->
-                                                AgendamentoRegistro(
-                                                    id = salvo.id,
-                                                    servico = salvo.servico,
-                                                    data = salvo.data,
-                                                    horario = salvo.horario,
-                                                    endereco = salvo.endereco,
-                                                    extras = salvo.extras
-                                                        .split('\n')
-                                                        .filter { it.isNotBlank() },
-                                                    total = salvo.totalCentavos / 100.0,
-                                                    status = salvo.status,
-                                                    avaliacao = salvo.avaliacao
-                                                )
-                                            }
+                                        val profissional = profissionalSelecionadoId?.let { database.userDao().buscarPorId(it) }
+                                        val valor = "R$ %.2f".format(totalPedido).replace('.', ',')
+                                        notificar(
+                                            usuario.id,
+                                            "AGENDAMENTO",
+                                            "Limpeza confirmada",
+                                            "$dataEscolhida • $horarioEscolhido • ${profissional?.nomeUsuario ?: "Profissional a definir"} • $valor"
+                                        )
+                                        profissional?.let {
+                                            notificar(
+                                                it.id,
+                                                "AGENDAMENTO",
+                                                "Novo atendimento",
+                                                "$dataEscolhida • $horarioEscolhido • ${usuario.nomeUsuario} • $valor"
+                                            )
+                                        }
+                                        carregarAgenda()
                                         irPara(LumisTela.Principal(NavItem.AGENDA))
                                     } catch (erro: Exception) {
                                         Toast.makeText(
@@ -497,7 +594,39 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Notificacoes -> NotificationsScreen(
-                        onBack = { irPara(LumisTela.Principal(NavItem.PERFIL)) }
+                        notificacoes = notificacoes,
+                        onBack = { irPara(LumisTela.Principal(NavItem.HOME)) },
+                        onMarcarLida = { id ->
+                            scope.launch {
+                                notificacaoDao.marcarComoLida(id, usuario.id)
+                                carregarNotificacoes()
+                            }
+                        },
+                        onMarcarTodas = {
+                            scope.launch {
+                                notificacaoDao.marcarTodasComoLidas(usuario.id)
+                                carregarNotificacoes()
+                            }
+                        }
+                    )
+                    is LumisTela.PerfilPublico -> PerfilPublicoScreen(
+                        pessoa = tela.pessoa,
+                        mediaAvaliacoes = tela.mediaAvaliacoes,
+                        quantidadeAvaliacoes = tela.quantidadeAvaliacoes,
+                        totalConcluidos = tela.totalConcluidos,
+                        onVoltar = {
+                            irPara(
+                                LumisTela.Principal(
+                                    if (usuario.tipoUsuario == "Cliente") NavItem.HOME else NavItem.AGENDA
+                                )
+                            )
+                        },
+                        onContratar = if (tela.pessoa.tipoUsuario != "Cliente" && usuario.tipoUsuario == "Cliente") {
+                            {
+                                profissionalSelecionadoId = tela.pessoa.id
+                                irPara(LumisTela.Principal(NavItem.EXPLORAR))
+                            }
+                        } else null
                     )
                 }
                 }
@@ -508,6 +637,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                     is LumisTela.Principal -> tela.aba
                     is LumisTela.Conta -> NavItem.PERFIL
                     is LumisTela.EditarPerfil -> NavItem.PERFIL
+                    is LumisTela.PerfilPublico -> if (usuario.tipoUsuario == "Cliente") NavItem.HOME else NavItem.AGENDA
                     else -> NavItem.EXPLORAR
                 },
                 onSelect = { novaAba -> telaAtual = LumisTela.Principal(novaAba) }

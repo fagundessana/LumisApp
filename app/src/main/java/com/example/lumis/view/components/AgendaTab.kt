@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
@@ -26,6 +27,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +63,10 @@ import java.time.format.DateTimeFormatter
 
 data class AgendamentoRegistro(
     val id: Long,
+    val usuarioId: Int = 0,
+    val profissionalId: Int? = null,
+    val contraparteId: Int? = null,
+    val contraparteNome: String = "",
     val servico: String,
     val data: String,
     val horario: String,
@@ -73,12 +80,16 @@ data class AgendamentoRegistro(
 @Composable
 fun AgendaTab(
     registros: List<AgendamentoRegistro> = emptyList(),
+    usuarioEhCliente: Boolean = true,
     onAvaliar: (Long, Int) -> Unit = { _, _ -> },
     onCancelar: (Long) -> Unit = {},
     onConcluir: (Long) -> Unit = {},
     onReagendar: (Long, String, String) -> Unit = { _, _, _ -> },
+    onAbrirPerfil: (Int) -> Unit = {},
     onNotificationsClick: () -> Unit = {}
 ) {
+    var mostrarHistorico by remember { mutableStateOf(false) }
+    val exibidos = if (mostrarHistorico) registros.filter { it.status != "Agendado" } else registros.filter { it.status == "Agendado" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -102,9 +113,16 @@ fun AgendaTab(
                 fontSize = 13.sp,
                 color = LumisTextSecondary
             )
+            Spacer(Modifier.height(14.dp))
+            Surface(shape = RoundedCornerShape(50), color = LumisSurface) {
+                Row(Modifier.fillMaxWidth().padding(4.dp)) {
+                    AbaAgenda("Próximos", !mostrarHistorico, Modifier.weight(1f)) { mostrarHistorico = false }
+                    AbaAgenda("Histórico", mostrarHistorico, Modifier.weight(1f)) { mostrarHistorico = true }
+                }
+            }
         }
 
-        if (registros.isEmpty()) {
+        if (exibidos.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -122,13 +140,13 @@ fun AgendaTab(
                         modifier = Modifier.size(56.dp)
                     )
                     Text(
-                        text = stringResource(R.string.no_appointments),
+                        text = if (mostrarHistorico) "Nenhum serviço no histórico" else stringResource(R.string.no_appointments),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = LumisTextPrimary
                     )
                     Text(
-                        text = stringResource(R.string.no_appointments_hint),
+                        text = if (mostrarHistorico) "Serviços concluídos e cancelados aparecerão aqui." else stringResource(R.string.no_appointments_hint),
                         fontSize = 13.sp,
                         color = LumisTextSecondary,
                         modifier = Modifier.padding(horizontal = 32.dp)
@@ -145,11 +163,22 @@ fun AgendaTab(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(registros.reversed()) { item ->
-                    CardAgendamento(item, onAvaliar, onCancelar, onConcluir, onReagendar)
+                items(exibidos.reversed(), key = { it.id }) { item ->
+                    CardAgendamento(item, usuarioEhCliente, onAvaliar, onCancelar, onConcluir, onReagendar, onAbrirPerfil)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AbaAgenda(texto: String, selecionada: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Box(
+        modifier.clip(RoundedCornerShape(50)).background(if (selecionada) LumisGreen else Color.Transparent)
+            .clickable(onClick = onClick).padding(vertical = 11.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(texto, fontWeight = FontWeight.Bold, color = if (selecionada) Color.White else LumisTextPrimary)
     }
 }
 
@@ -157,10 +186,12 @@ fun AgendaTab(
 @Composable
 private fun CardAgendamento(
     item: AgendamentoRegistro,
+    permitirAvaliar: Boolean,
     onAvaliar: (Long, Int) -> Unit,
     onCancelar: (Long) -> Unit,
     onConcluir: (Long) -> Unit,
-    onReagendar: (Long, String, String) -> Unit
+    onReagendar: (Long, String, String) -> Unit,
+    onAbrirPerfil: (Int) -> Unit
 ) {
     var mostrarReagendamento by remember { mutableStateOf(false) }
     var mostrarHorarios by remember { mutableStateOf(false) }
@@ -215,6 +246,21 @@ private fun CardAgendamento(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            if (item.contraparteNome.isNotBlank()) {
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                        .clickable(enabled = item.contraparteId != null) { item.contraparteId?.let(onAbrirPerfil) }
+                        .background(LumisGreenLight).padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Outlined.Person, null, tint = LumisGreen)
+                    Spacer(Modifier.width(8.dp))
+                    Text(item.contraparteNome, Modifier.weight(1f), fontWeight = FontWeight.SemiBold, color = LumisTextPrimary)
+                    Text(stringResource(R.string.view_profile), fontSize = 11.sp, color = LumisGreen)
+                }
+                Spacer(Modifier.height(10.dp))
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -280,7 +326,7 @@ private fun CardAgendamento(
                 }
             }
 
-            if (item.status == "Concluído") {
+            if (item.status == "Concluído" && permitirAvaliar) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = stringResource(if (item.avaliacao == null) R.string.rate_service else R.string.your_rating),

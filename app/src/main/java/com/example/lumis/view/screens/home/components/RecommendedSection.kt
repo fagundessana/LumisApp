@@ -45,6 +45,7 @@ import com.example.lumis.view.theme.LumisColors
 fun RecommendedSection(
     profissionais: List<ProfessionalUi>,
     onFavoritoClick: (Int) -> Unit,
+    onPerfilClick: (Int) -> Unit,
     onContratarClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -59,15 +60,21 @@ fun RecommendedSection(
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(end = 4.dp)) {
             items(profissionais, key = { it.id }) { profissional ->
-                ProfessionalCard(profissional, { onFavoritoClick(profissional.id) }, { onContratarClick(profissional.id) })
+                ProfessionalCard(
+                    profissional,
+                    { onFavoritoClick(profissional.id) },
+                    { onPerfilClick(profissional.id) },
+                    { onContratarClick(profissional.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ProfessionalCard(profissional: ProfessionalUi, onFavorito: () -> Unit, onContratar: () -> Unit) {
+private fun ProfessionalCard(profissional: ProfessionalUi, onFavorito: () -> Unit, onPerfil: () -> Unit, onContratar: () -> Unit) {
     Surface(
+        onClick = onPerfil,
         shape = RoundedCornerShape(20.dp),
         color = LumisColors.Surface,
         border = androidx.compose.foundation.BorderStroke(1.dp, LumisColors.Border),
