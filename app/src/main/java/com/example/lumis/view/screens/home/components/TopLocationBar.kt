@@ -28,11 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lumis.view.theme.LumisColors
 import com.example.lumis.view.theme.Montserrat
 import com.example.lumis.view.theme.Questrial
+import com.example.lumis.view.components.LocalTemNotificacoesNaoLidas
+import com.example.lumis.R
 
 @Composable
 fun TopLocationBar(
@@ -44,10 +47,9 @@ fun TopLocationBar(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         color = LumisColors.Surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, LumisColors.Border),
         onClick = onLocationClick
     ) {
         Row(
@@ -59,15 +61,15 @@ fun TopLocationBar(
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(CircleShape)
-                    .background(LumisColors.CardTint),
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(LumisColors.Primary),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Place,
-                    contentDescription = "Localização",
-                    tint = LumisColors.Primary,
-                    modifier = Modifier.size(20.dp)
+                    painter = painterResource(R.drawable.lumis),
+                    contentDescription = "Logo Lumis",
+                    tint = androidx.compose.ui.graphics.Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -114,21 +116,33 @@ private fun CircleIconButton(
     modifier: Modifier = Modifier,
     badge: @Composable (() -> Unit)? = null
 ) {
-    Surface(
-        onClick = onClick,
-        shape = CircleShape,
-        color = LumisColors.Surface,
-        border = BorderStroke(1.dp, LumisColors.Border),
-        modifier = modifier.size(38.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = LumisColors.Tertiary,
-                modifier = Modifier.size(20.dp)
+    val temNaoLidas = LocalTemNotificacoesNaoLidas.current
+    Box(modifier.size(42.dp)) {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(12.dp),
+            color = LumisColors.CardTint,
+            border = BorderStroke(1.dp, LumisColors.Border),
+            modifier = Modifier.size(40.dp).align(Alignment.Center)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = contentDescription,
+                    tint = LumisColors.Tertiary,
+                    modifier = Modifier.size(20.dp)
+                )
+                badge?.invoke()
+            }
+        }
+        if (temNaoLidas) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(androidx.compose.ui.graphics.Color(0xFFE45869))
             )
-            badge?.invoke()
         }
     }
 }

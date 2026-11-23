@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import com.example.lumis.view.components.AgendaTab
 import com.example.lumis.view.components.AgendamentoRegistro
 import com.example.lumis.view.components.BottomNavBar
 import com.example.lumis.view.components.NavItem
+import com.example.lumis.view.components.LocalTemNotificacoesNaoLidas
 import com.example.lumis.view.screens.auth.ContaScreen
 import com.example.lumis.view.screens.city.CidadeConscienteScreen
 import com.example.lumis.view.screens.client_profile.UsuarioProfile
@@ -61,6 +63,9 @@ import com.example.lumis.view.screens.services.ServicesScreen
 import com.example.lumis.view.theme.LumisBackground
 import com.example.lumis.view.theme.ModoTema
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 sealed class LumisTela {
     data class Principal(val aba: NavItem) : LumisTela()
@@ -229,6 +234,7 @@ fun MainScaffold(
         irPara(LumisTela.Principal(NavItem.EXPLORAR))
     }
 
+    CompositionLocalProvider(LocalTemNotificacoesNaoLidas provides notificacoes.any { !it.lida }) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -375,19 +381,23 @@ fun MainScaffold(
                                     planoAtivo = assinaturaAtiva?.nomePlano,
                                     totalAgendamentos = registrosAgenda.size,
                                     totalConcluidos = registrosAgenda.count { it.status == "Concluído" },
-                                    atividadesRecentes = registrosAgenda.take(3).map { AtividadePerfil(it.servico, it.data, it.status) },
+                                    atividadesRecentes = notificacoes.take(6).map {
+                                        AtividadePerfil(
+                                            it.titulo,
+                                            SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(it.criadoEmMillis)),
+                                            it.tipo
+                                        )
+                                    }.ifEmpty {
+                                        registrosAgenda.take(3).map { AtividadePerfil(it.servico, it.data, it.status) }
+                                    },
                                     favoritos = profissionaisHome.filter { it.favorito }.map { FavoritoPerfil(it.id, it.nome, it.mediaAvaliacoes) },
                                     avaliacoesRecentes = registrosAgenda.filter { it.avaliacao != null }.take(3).map {
                                         AvaliacaoPerfil(it.contraparteNome.ifBlank { "Profissional" }, it.avaliacao ?: 0, it.data)
-                                    },
-                                    historico = registrosAgenda.filter { it.status != "Agendado" }.take(3).map { AtividadePerfil(it.servico, it.data, it.status) }
+                                    }
                                 ),
                                 onEditarClick = { irPara(LumisTela.EditarPerfil) },
                                 onConfigClick = { irPara(LumisTela.Conta) },
                                 onMembroLumisClick = { irPara(LumisTela.Planos) },
-                                onNotificacoesClick = { irPara(LumisTela.Notificacoes) },
-                                onServicosClick = { irPara(LumisTela.Principal(NavItem.EXPLORAR)) },
-                                onAgendaClick = { irPara(LumisTela.Principal(NavItem.AGENDA)) },
                                 onProfissionalClick = { id -> scope.launch { abrirPerfilPublico(id) } },
                                 modoIdioma = modoIdioma,
                                 onModoIdiomaChange = onModoIdiomaChange
@@ -571,6 +581,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                                 )
                                 assinaturaPlanoDao.salvar(assinatura)
                                 assinaturaAtiva = assinatura
+                                notificar(usuario.id, "PLANO", "Plano ativado", "${tela.nome} foi ativado no seu perfil.")
                                 Toast.makeText(context, "${tela.nome} ativado com sucesso.", Toast.LENGTH_LONG).show()
                                 irPara(LumisTela.Principal(NavItem.PERFIL))
                             }
@@ -590,7 +601,12 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         usuario = usuario,
                         authController = authController,
                         onVoltar = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
-                        onSalvo = { irPara(LumisTela.Principal(NavItem.PERFIL)) },
+                        onSalvo = {
+                            scope.launch {
+                                notificar(usuario.id, "PERFIL", "Perfil atualizado", "Suas informações de perfil foram salvas.")
+                            }
+                            irPara(LumisTela.Principal(NavItem.PERFIL))
+                        },
                         onNotificationsClick = { irPara(LumisTela.Notificacoes) }
                     )
                     is LumisTela.Notificacoes -> NotificationsScreen(
@@ -614,6 +630,7 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                         mediaAvaliacoes = tela.mediaAvaliacoes,
                         quantidadeAvaliacoes = tela.quantidadeAvaliacoes,
                         totalConcluidos = tela.totalConcluidos,
+                        onNotificacoes = { irPara(LumisTela.Notificacoes) },
                         onVoltar = {
                             irPara(
                                 LumisTela.Principal(
@@ -643,5 +660,6 @@ is LumisTela.Imovel -> ConfiguracaoImovelScreen(
                 onSelect = { novaAba -> telaAtual = LumisTela.Principal(novaAba) }
             )
         }
+    }
     }
 }

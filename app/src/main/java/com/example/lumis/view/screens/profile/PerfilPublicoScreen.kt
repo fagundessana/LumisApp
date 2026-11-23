@@ -33,6 +33,7 @@ fun PerfilPublicoScreen(
     quantidadeAvaliacoes: Int = 0,
     totalConcluidos: Int = 0,
     onVoltar: () -> Unit,
+    onNotificacoes: () -> Unit = {},
     onContratar: (() -> Unit)? = null
 ) {
     val profissional = pessoa.tipoUsuario != "Cliente"
@@ -46,9 +47,23 @@ fun PerfilPublicoScreen(
                 if (pessoa.bannerPerfilPath.isNotBlank() && File(pessoa.bannerPerfilPath).exists()) {
                     AsyncImage(File(pessoa.bannerPerfilPath), null, Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
                 } else {
-                    Box(Modifier.fillMaxWidth().height(160.dp).background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary))))
+                    Box(
+                        Modifier.fillMaxWidth().height(160.dp)
+                            .background(Brush.linearGradient(listOf(ProfileColors.PrimaryDark, ProfileColors.Primary, androidx.compose.ui.graphics.Color(0xFF78D3A5))))
+                    ) {
+                        Box(
+                            Modifier.size(150.dp).align(Alignment.CenterEnd).offset(x = 28.dp, y = 18.dp)
+                                .clip(CircleShape).background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.08f))
+                        )
+                        Icon(
+                            Icons.Outlined.CleaningServices,
+                            null,
+                            Modifier.size(82.dp).align(Alignment.CenterEnd).padding(end = 24.dp),
+                            tint = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.18f)
+                        )
+                    }
                 }
-                LumisTopBar(onBack = onVoltar)
+                LumisTopBar(onBack = onVoltar, onNotificationsClick = onNotificacoes, sobreImagem = true)
                 Surface(
                     Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp).fillMaxWidth(),
                     shape = RoundedCornerShape(22.dp), color = ProfileColors.CardBackground, shadowElevation = 4.dp
@@ -81,14 +96,8 @@ fun PerfilPublicoScreen(
                     }
                     ResumoPublico(Icons.Outlined.TaskAlt, totalConcluidos.toString(), stringResource(R.string.services_completed_count), Modifier.weight(1f))
                 }
-                if (pessoa.biografia.isNotBlank()) InformacaoPublica(stringResource(R.string.about), pessoa.biografia)
                 if (profissional) {
-                    InformacaoPublica(stringResource(R.string.specialties), pessoa.especialidades.ifBlank { stringResource(R.string.not_provided_plural) })
-                    InformacaoPublica(stringResource(R.string.experience), pessoa.experiencia.ifBlank { stringResource(R.string.not_provided_singular) })
-                    InformacaoPublica(stringResource(R.string.service_region), pessoa.regiaoAtuacao.ifBlank { pessoa.localizacao })
-                    if (pessoa.valorMinimoCentavos > 0) {
-                        InformacaoPublica(stringResource(R.string.minimum_price), stringResource(R.string.price_per_service, "%.2f".format(pessoa.valorMinimoCentavos / 100.0).replace('.', ',')))
-                    }
+                    PerfilProfissionalCard(pessoa)
                     onContratar?.let { contratar ->
                         Button(
                             onClick = contratar, Modifier.fillMaxWidth().height(52.dp),
@@ -100,12 +109,62 @@ fun PerfilPublicoScreen(
                         }
                     }
                 } else {
+                    if (pessoa.biografia.isNotBlank()) InformacaoPublica(stringResource(R.string.about), pessoa.biografia)
                     Text(
                         stringResource(R.string.public_profile_privacy),
                         color = ProfileColors.TextSecondary, style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PerfilProfissionalCard(pessoa: User) {
+    val sobre = pessoa.biografia.ifBlank { stringResource(R.string.add_profile_intro) }
+    val especialidades = pessoa.especialidades.ifBlank { stringResource(R.string.not_provided_plural) }
+    val experiencia = pessoa.experiencia.ifBlank { stringResource(R.string.not_provided_singular) }
+    val regiao = pessoa.regiaoAtuacao.ifBlank { pessoa.localizacao.ifBlank { stringResource(R.string.location_not_provided) } }
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = ProfileColors.CardBackground,
+        border = BorderStroke(1.dp, ProfileColors.Divider)
+    ) {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(stringResource(R.string.professional_profile), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(stringResource(R.string.about), style = MaterialTheme.typography.labelLarge, color = ProfileColors.PrimaryDark)
+                Text(sobre, color = ProfileColors.TextSecondary)
+            }
+            HorizontalDivider(color = ProfileColors.Divider)
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(stringResource(R.string.specialties), style = MaterialTheme.typography.labelLarge, color = ProfileColors.PrimaryDark)
+                Text(especialidades, color = ProfileColors.TextPrimary)
+            }
+            InformacaoLinha(Icons.Outlined.WorkHistory, stringResource(R.string.experience), experiencia)
+            InformacaoLinha(Icons.Outlined.LocationOn, stringResource(R.string.service_region), regiao)
+            if (pessoa.valorMinimoCentavos > 0) {
+                InformacaoLinha(
+                    Icons.Outlined.Payments,
+                    stringResource(R.string.minimum_price),
+                    stringResource(R.string.price_per_service, "%.2f".format(pessoa.valorMinimoCentavos / 100.0).replace('.', ','))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InformacaoLinha(icone: androidx.compose.ui.graphics.vector.ImageVector, titulo: String, valor: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
+            Icon(icone, null, Modifier.size(20.dp), tint = ProfileColors.PrimaryDark)
+        }
+        Spacer(Modifier.width(11.dp))
+        Column {
+            Text(titulo, style = MaterialTheme.typography.labelMedium, color = ProfileColors.TextSecondary)
+            Text(valor, color = ProfileColors.TextPrimary, fontWeight = FontWeight.Medium)
         }
     }
 }

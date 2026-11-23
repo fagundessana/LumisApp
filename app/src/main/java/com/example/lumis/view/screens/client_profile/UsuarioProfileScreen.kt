@@ -22,11 +22,14 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material.icons.outlined.CleaningServices
+import androidx.compose.material.icons.outlined.EventAvailable
+import androidx.compose.material.icons.outlined.EventRepeat
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
@@ -65,8 +68,7 @@ data class UsuarioProfile(
     val totalConcluidos: Int = 0,
     val atividadesRecentes: List<AtividadePerfil> = emptyList(),
     val favoritos: List<FavoritoPerfil> = emptyList(),
-    val avaliacoesRecentes: List<AvaliacaoPerfil> = emptyList(),
-    val historico: List<AtividadePerfil> = emptyList()
+    val avaliacoesRecentes: List<AvaliacaoPerfil> = emptyList()
 )
 
 data class AtividadePerfil(val servico: String, val data: String, val status: String)
@@ -79,9 +81,6 @@ fun UsuarioProfileScreen(
     onEditarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {},
     onMembroLumisClick: () -> Unit = {},
-    onNotificacoesClick: () -> Unit = {},
-    onServicosClick: () -> Unit = {},
-    onAgendaClick: () -> Unit = {},
     onProfissionalClick: (Int) -> Unit = {},
     modoIdioma: ModoIdioma = ModoIdioma.SISTEMA,
     onModoIdiomaChange: (ModoIdioma) -> Unit = {}
@@ -181,30 +180,6 @@ fun UsuarioProfileScreen(
                     }
                 }
 
-                if (profile.historico.isNotEmpty()) {
-                    Text(stringResource(R.string.service_history), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
-                    Surface(
-                        onClick = onAgendaClick,
-                        shape = RoundedCornerShape(18.dp), color = ProfileColors.CardBackground,
-                        border = BorderStroke(1.dp, ProfileColors.Divider)
-                    ) {
-                        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            profile.historico.take(3).forEach { item ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Outlined.CleaningServices, null, tint = ProfileColors.Primary)
-                                    Spacer(Modifier.width(10.dp))
-                                    Column(Modifier.weight(1f)) {
-                                        Text(item.servico, fontWeight = FontWeight.SemiBold, color = ProfileColors.TextPrimary)
-                                        Text(item.data, color = ProfileColors.TextSecondary)
-                                    }
-                                    Text(if (item.status == "Concluído") "Concluído" else "Cancelado", color = ProfileColors.PrimaryDark)
-                                }
-                            }
-                            Text(stringResource(R.string.view_full_history), color = ProfileColors.PrimaryDark, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-
                 if (profile.atividadesRecentes.isNotEmpty()) {
                     Text(stringResource(R.string.recent_activity), fontWeight = FontWeight.Bold, color = ProfileColors.TextPrimary)
                     Surface(
@@ -216,7 +191,7 @@ fun UsuarioProfileScreen(
                             profile.atividadesRecentes.forEachIndexed { index, atividade ->
                                 Row(Modifier.fillMaxWidth().padding(vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Box(Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(ProfileColors.PrimaryLight), contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Outlined.CleaningServices, null, tint = ProfileColors.PrimaryDark)
+                                        Icon(iconeAtividade(atividade.status), null, tint = ProfileColors.PrimaryDark)
                                     }
                                     Spacer(Modifier.width(10.dp))
                                     Column(Modifier.weight(1f)) {
@@ -224,13 +199,7 @@ fun UsuarioProfileScreen(
                                         Text(atividade.data, color = ProfileColors.TextSecondary)
                                     }
                                     Text(
-                                        stringResource(
-                                            when (atividade.status) {
-                                                "Cancelado" -> R.string.status_cancelled
-                                                "Concluído" -> R.string.status_completed
-                                                else -> R.string.status_scheduled
-                                            }
-                                        ),
+                                        stringResource(rotuloAtividade(atividade.status)),
                                         color = ProfileColors.PrimaryDark,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -248,6 +217,27 @@ fun UsuarioProfileScreen(
             }
         }
     }
+}
+
+private fun iconeAtividade(tipo: String): ImageVector = when (tipo) {
+    "FAVORITO", "DESFAVORITO" -> Icons.Outlined.FavoriteBorder
+    "REAGENDAMENTO" -> Icons.Outlined.EventRepeat
+    "CONCLUSAO", "Concluído" -> Icons.Outlined.TaskAlt
+    "AGENDAMENTO", "Agendado" -> Icons.Outlined.EventAvailable
+    "PERFIL" -> Icons.Outlined.Person
+    "PLANO" -> Icons.Outlined.WorkspacePremium
+    else -> Icons.Outlined.CleaningServices
+}
+
+private fun rotuloAtividade(tipo: String): Int = when (tipo) {
+    "FAVORITO", "DESFAVORITO" -> R.string.activity_favorite
+    "REAGENDAMENTO" -> R.string.activity_rescheduled
+    "AVALIACAO" -> R.string.activity_rating
+    "PERFIL" -> R.string.activity_profile
+    "PLANO" -> R.string.activity_plan
+    "CONCLUSAO", "Concluído" -> R.string.status_completed
+    "CANCELAMENTO", "Cancelado" -> R.string.status_cancelled
+    else -> R.string.status_scheduled
 }
 
 @Composable

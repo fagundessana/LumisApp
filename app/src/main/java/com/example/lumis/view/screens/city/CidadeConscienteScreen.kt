@@ -1,5 +1,8 @@
 package com.example.lumis.view.screens.city
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -28,12 +31,15 @@ import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,38 +70,11 @@ import com.example.lumis.view.theme.LumisTextSecondary
 import com.example.lumis.view.theme.LumisTheme
 import com.example.lumis.view.theme.ModoTema
 import com.example.lumis.R
+import com.example.lumis.data.EcopontoOsm
+import com.example.lumis.data.LocalizacaoHelper
+import com.example.lumis.data.OverpassEcopontoRepository
 
 private enum class PainelCidade { ECO_PONTOS, GUIA }
-
-private data class Ecoponto(
-    val nome: String,
-    val endereco: String,
-    val distancia: String,
-    val horario: String,
-    val materiais: String
-)
-
-private fun ecopontosDemonstrativos(localizacao: String): List<Ecoponto> {
-    val exterior = listOf("usa", "estados unidos", "united states", "new york", "miami", "orlando").any { localizacao.contains(it, true) }
-    val curitiba = localizacao.contains("curitiba", true)
-    return when {
-        exterior -> listOf(
-            Ecoponto("Community Drop-off Downtown", "120 Green St", "650 m", "Open until 6 PM", "Paper, glass, metal and electronics"),
-            Ecoponto("Neighborhood Recycling Hub", "88 Central Ave", "1.2 km", "Open until 5 PM", "Batteries and recyclables"),
-            Ecoponto("Municipal Reuse Center", "510 Park Road", "2.4 km", "Opens tomorrow at 8 AM", "Furniture and recyclables")
-        )
-        curitiba -> listOf(
-            Ecoponto("Ecoponto Centro", "Rua André de Barros, 240", "650 m", "Aberto até 18h", "Papel, plástico, vidro e metal"),
-            Ecoponto("Coleta Comunitária Batel", "Av. Sete de Setembro, 88", "1,2 km", "Aberto até 17h", "Eletrônicos, pilhas e recicláveis"),
-            Ecoponto("Ponto Limpo Portão", "Rua João Bettega, 510", "2,4 km", "Abre amanhã às 8h", "Móveis e recicláveis")
-        )
-        else -> listOf(
-            Ecoponto("Ecoponto Centro", "Av. das Palmeiras, 240", "650 m", "Aberto até 18h", "Papel, plástico, vidro e metal"),
-            Ecoponto("Coleta Comunitária Vila Verde", "Rua XV de Novembro, 88", "1,2 km", "Aberto até 17h", "Eletrônicos, pilhas e recicláveis"),
-            Ecoponto("Ponto Limpo Parque Sul", "Rua das Acácias, 510", "2,4 km", "Abre amanhã às 8h", "Móveis e recicláveis")
-        )
-    }
-}
 
 @Composable
 fun CidadeConscienteScreen(
@@ -102,9 +82,36 @@ fun CidadeConscienteScreen(
     localizacao: String = "",
     onNotificationsClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val mensagemPermissao = stringResource(R.string.location_permission_needed)
+    val mensagemErroBusca = stringResource(R.string.ecopoints_search_error)
     var painel by rememberSaveable { mutableStateOf(PainelCidade.ECO_PONTOS) }
-    var pontoSelecionado by remember { mutableStateOf<Ecoponto?>(null) }
-    val ecopontos = remember(localizacao) { ecopontosDemonstrativos(localizacao) }
+    var pontoSelecionado by remember { mutableStateOf<EcopontoOsm?>(null) }
+    var ecopontos by remember { mutableStateOf<List<EcopontoOsm>>(emptyList()) }
+    var carregando by remember { mutableStateOf(false) }
+    var erroBusca by remember { mutableStateOf<String?>(null) }
+    var tentativa by remember { mutableStateOf(0) }
+    val pedirLocalizacao = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissoes ->
+        if (permissoes.values.any { it }) tentativa++
+        else erroBusca = mensagemPermissao
+    }
+
+    LaunchedEffect(tentativa) {
+        if (!LocalizacaoHelper.temAlgumaPermissao(context)) {
+            erroBusca = mensagemPermissao
+            return@LaunchedEffect
+        }
+        carregando = true
+        erroBusca = null
+        runCatching {
+            val coordenadas = LocalizacaoHelper.obterCoordenadasAtuais(context)
+            OverpassEcopontoRepository.buscarProximos(coordenadas.latitude, coordenadas.longitude)
+        }.onSuccess { ecopontos = it }
+            .onFailure { erroBusca = mensagemErroBusca }
+        carregando = false
+    }
 
     Column(
         modifier = modifier
@@ -125,7 +132,7 @@ fun CidadeConscienteScreen(
                     subtitle = stringResource(R.string.city_care_subtitle)
                 )
             }
-            item { ImpactoHeroCard(localizacao, ecopontos.size) }
+            item { ImpactoHeroCard(localizacao, ecopontos.size, carregando) }
             item {
                 AcoesCidade(
                     painel = painel,
@@ -140,7 +147,19 @@ fun CidadeConscienteScreen(
                     label = "painelCidade"
                 ) { destino ->
                     when (destino) {
-                        PainelCidade.ECO_PONTOS -> EcopontosCard(ecopontos, onSelect = { pontoSelecionado = it })
+                        PainelCidade.ECO_PONTOS -> EcopontosCard(
+                            ecopontos = ecopontos,
+                            carregando = carregando,
+                            erro = erroBusca,
+                            precisaPermissao = !LocalizacaoHelper.temAlgumaPermissao(context),
+                            onPermissao = {
+                                pedirLocalizacao.launch(
+                                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+                                )
+                            },
+                            onTentarNovamente = { tentativa++ },
+                            onSelect = { pontoSelecionado = it }
+                        )
                         PainelCidade.GUIA -> DadosAmbientaisCard()
                     }
                 }
@@ -155,7 +174,7 @@ fun CidadeConscienteScreen(
 }
 
 @Composable
-private fun ImpactoHeroCard(localizacao: String, quantidade: Int) {
+private fun ImpactoHeroCard(localizacao: String, quantidade: Int, carregando: Boolean) {
     Surface(shape = RoundedCornerShape(24.dp), color = Color.Transparent) {
         Column(
             modifier = Modifier
@@ -177,7 +196,8 @@ private fun ImpactoHeroCard(localizacao: String, quantidade: Int) {
                 Column {
                     Text(stringResource(R.string.conscious_city), color = Color.White.copy(alpha = 0.82f), style = MaterialTheme.typography.labelLarge)
                     Text(
-                        stringResource(R.string.nearby_points_count, quantidade),
+                        if (carregando) stringResource(R.string.searching_ecopoints)
+                        else stringResource(R.string.nearby_points_count, quantidade),
                         color = Color.White,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
@@ -186,8 +206,8 @@ private fun ImpactoHeroCard(localizacao: String, quantidade: Int) {
             }
             Spacer(Modifier.height(16.dp))
             Text(
-                if (localizacao.isBlank()) "Defina sua localização para personalizar a demonstração."
-                else "Referência para ${localizacao}. Os locais exibidos são demonstrativos.",
+                if (localizacao.isBlank()) stringResource(R.string.gps_ecopoints_hint)
+                else stringResource(R.string.osm_location_reference, localizacao),
                 color = Color.White.copy(alpha = 0.9f), style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(14.dp))
@@ -256,7 +276,15 @@ private fun AcaoCidadeButton(
 }
 
 @Composable
-private fun EcopontosCard(ecopontos: List<Ecoponto>, onSelect: (Ecoponto) -> Unit) {
+private fun EcopontosCard(
+    ecopontos: List<EcopontoOsm>,
+    carregando: Boolean,
+    erro: String?,
+    precisaPermissao: Boolean,
+    onPermissao: () -> Unit,
+    onTentarNovamente: () -> Unit,
+    onSelect: (EcopontoOsm) -> Unit
+) {
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = LumisSurface,
@@ -266,23 +294,50 @@ private fun EcopontosCard(ecopontos: List<Ecoponto>, onSelect: (Ecoponto) -> Uni
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.nearby_ecopoints), style = MaterialTheme.typography.titleMedium, color = LumisTextPrimary)
-                    Text("${stringResource(R.string.demo_data)} • ${stringResource(R.string.sorted_by_location)}", style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
+                    Text(stringResource(R.string.osm_live_data), style = MaterialTheme.typography.bodySmall, color = LumisTextSecondary)
                 }
                 Surface(shape = CircleShape, color = LumisGreenLight) {
                     Icon(Icons.Outlined.LocationOn, null, Modifier.padding(9.dp).size(20.dp), LumisGreenDark)
                 }
             }
             Spacer(Modifier.height(8.dp))
-            ecopontos.forEachIndexed { index, ponto ->
-                EcopontoRow(ponto, onClick = { onSelect(ponto) })
-                if (index != ecopontos.lastIndex) Box(Modifier.fillMaxWidth().height(1.dp).background(LumisBorder))
+            when {
+                carregando -> Box(Modifier.fillMaxWidth().padding(28.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = LumisGreen)
+                }
+                erro != null -> EstadoEcopontos(
+                    erro,
+                    if (precisaPermissao) stringResource(R.string.allow_location) else stringResource(R.string.try_again),
+                    if (precisaPermissao) onPermissao else onTentarNovamente
+                )
+                ecopontos.isEmpty() -> EstadoEcopontos(
+                    stringResource(R.string.no_ecopoints_found),
+                    stringResource(R.string.try_again),
+                    onTentarNovamente
+                )
+                else -> ecopontos.forEachIndexed { index, ponto ->
+                    EcopontoRow(ponto, onClick = { onSelect(ponto) })
+                    if (index != ecopontos.lastIndex) Box(Modifier.fillMaxWidth().height(1.dp).background(LumisBorder))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun EcopontoRow(ponto: Ecoponto, onClick: () -> Unit) {
+private fun EstadoEcopontos(mensagem: String, acao: String, onClick: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = 22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(mensagem, color = LumisTextSecondary, style = MaterialTheme.typography.bodyMedium)
+        Button(onClick = onClick) { Text(acao) }
+    }
+}
+
+@Composable
+private fun EcopontoRow(ponto: EcopontoOsm, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -295,7 +350,7 @@ private fun EcopontoRow(ponto: Ecoponto, onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(ponto.nome, color = LumisTextPrimary, style = MaterialTheme.typography.titleSmall)
             Text(
-                "${ponto.endereco} • ${ponto.distancia}",
+                "${ponto.endereco} • ${formatarDistancia(ponto.distanciaMetros)}",
                 color = LumisTextSecondary,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
@@ -308,7 +363,7 @@ private fun EcopontoRow(ponto: Ecoponto, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EcopontoDialog(ponto: Ecoponto, onDismiss: () -> Unit) {
+private fun EcopontoDialog(ponto: EcopontoOsm, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Outlined.Recycling, contentDescription = null, tint = LumisGreen) },
@@ -316,13 +371,16 @@ private fun EcopontoDialog(ponto: Ecoponto, onDismiss: () -> Unit) {
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(ponto.endereco, color = LumisTextPrimary)
-                Text("${ponto.distancia} • ${ponto.horario}", color = LumisGreenDark)
+                Text("${formatarDistancia(ponto.distanciaMetros)} • ${ponto.horario}", color = LumisGreenDark)
                 Text(stringResource(R.string.accepts_materials, ponto.materiais), color = LumisTextSecondary)
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.got_it)) } }
     )
 }
+
+private fun formatarDistancia(metros: Int): String =
+    if (metros < 1_000) "$metros m" else "%.1f km".format(metros / 1_000.0).replace('.', ',')
 
 @Composable
 private fun DadosAmbientaisCard() {
