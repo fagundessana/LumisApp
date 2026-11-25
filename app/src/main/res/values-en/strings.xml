@@ -248,7 +248,7 @@
     <string name="glass_disposal_tip">Rinse quickly and protect sharp items.</string>
     <string name="electronics">Electronics and batteries</string>
     <string name="electronics_disposal_tip">Never use regular trash; take them to a specialized collection point.</string>
-    <string name="ecopoints_demo_notice">Locations come from OpenStreetMap. Confirm the address, accepted materials, and opening hours before leaving.</string>
+    <string name="ecopoints_demo_notice">The collection points shown are for demonstration. Confirm the address and opening hours before leaving.</string>
     <string name="service_standard_description">Complete routine cleaning with vacuuming, dust removal, and general sanitizing.</string>
     <string name="service_deep_description">Deep cleaning focused on grease, grout, and built-up dirt.</string>
     <string name="service_moving_description">Prepares the property for moving in or handing over the keys.</string>
@@ -283,15 +283,6 @@
     <string name="public_profile_privacy">This profile only shows public information. Contact details and addresses remain private.</string>
     <string name="demo_data">Demonstration data</string>
     <string name="nearby_points_count">%1$d drop-off points near you</string>
-    <string name="searching_ecopoints">Searching for nearby drop-off points…</string>
-    <string name="gps_ecopoints_hint">Use your device location to find real nearby points.</string>
-    <string name="osm_location_reference">Near %1$s, using OpenStreetMap data.</string>
-    <string name="osm_live_data">OpenStreetMap • sorted by actual distance</string>
-    <string name="location_permission_needed">Allow location access to find nearby drop-off points.</string>
-    <string name="ecopoints_search_error">We could not load drop-off points. Check your connection and try again.</string>
-    <string name="no_ecopoints_found">No recycling points were found within this radius.</string>
-    <string name="allow_location">Allow location</string>
-    <string name="try_again">Try again</string>
     <string name="activity_favorite">Favorites</string>
     <string name="activity_rescheduled">Rescheduled</string>
     <string name="activity_rating">Rating</string>

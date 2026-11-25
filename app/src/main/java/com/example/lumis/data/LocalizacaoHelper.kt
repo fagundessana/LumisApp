@@ -26,8 +26,6 @@ import kotlin.coroutines.resume
 
 object LocalizacaoHelper {
 
-    data class Coordenadas(val latitude: Double, val longitude: Double)
-
     fun temAlgumaPermissao(context: Context): Boolean {
         return temAproximada(context) || temExata(context)
     }
@@ -51,16 +49,6 @@ object LocalizacaoHelper {
      * com mensagem amigável para exibir na UI.
      */
     suspend fun obterRegiaoAtual(context: Context): String {
-        val local = obterLocalAtual(context)
-        return formatarRegiao(context, local.latitude, local.longitude)
-    }
-
-    suspend fun obterCoordenadasAtuais(context: Context): Coordenadas {
-        val local = obterLocalAtual(context)
-        return Coordenadas(local.latitude, local.longitude)
-    }
-
-    private suspend fun obterLocalAtual(context: Context): Location {
         val exata = temExata(context)
         val aproximada = temAproximada(context)
         if (!exata && !aproximada) {
@@ -84,9 +72,12 @@ object LocalizacaoHelper {
             null
         }
 
-        return local ?: run {
+        if (local == null) {
             throw IllegalStateException("Não consegui obter sua posição. Ative o GPS e tente de novo.")
         }
+
+        // 2) Converte lat/lon em "Cidade, Estado".
+        return formatarRegiao(context, local.latitude, local.longitude)
     }
 
     @Suppress("MissingPermission")

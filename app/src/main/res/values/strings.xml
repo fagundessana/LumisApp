@@ -247,7 +247,7 @@
     <string name="glass_disposal_tip">Lave rapidamente e proteja itens cortantes.</string>
     <string name="electronics">Eletrônicos e pilhas</string>
     <string name="electronics_disposal_tip">Nunca descarte no lixo comum; leve a um ponto especializado.</string>
-    <string name="ecopoints_demo_notice">Os locais vêm do OpenStreetMap. Confirme endereço, materiais e horário antes de sair.</string>
+    <string name="ecopoints_demo_notice">Os ecopontos exibidos são demonstrativos. Confirme endereço e horário antes de sair.</string>
     <string name="service_standard_description">Limpeza completa de rotina, com aspiração, remoção de pó e higienização geral.</string>
     <string name="service_deep_description">Limpeza profunda de gorduras, rejuntes e sujeiras acumuladas.</string>
     <string name="service_moving_description">Prepara o imóvel para entrar ou para a entrega das chaves.</string>
@@ -282,15 +282,6 @@
     <string name="public_profile_privacy">Este perfil mostra apenas informações públicas. Dados de contato e endereço permanecem privados.</string>
     <string name="demo_data">Dados demonstrativos</string>
     <string name="nearby_points_count">%1$d ecopontos perto de você</string>
-    <string name="searching_ecopoints">Buscando ecopontos próximos…</string>
-    <string name="gps_ecopoints_hint">Use a localização do aparelho para encontrar pontos reais próximos.</string>
-    <string name="osm_location_reference">Próximo de %1$s, usando dados do OpenStreetMap.</string>
-    <string name="osm_live_data">OpenStreetMap • ordenados pela distância real</string>
-    <string name="location_permission_needed">Permita a localização para encontrar ecopontos próximos.</string>
-    <string name="ecopoints_search_error">Não foi possível consultar os ecopontos agora. Verifique sua conexão e tente novamente.</string>
-    <string name="no_ecopoints_found">Nenhum ponto de reciclagem foi encontrado neste raio.</string>
-    <string name="allow_location">Permitir localização</string>
-    <string name="try_again">Tentar novamente</string>
     <string name="activity_favorite">Favoritos</string>
     <string name="activity_rescheduled">Reagendado</string>
     <string name="activity_rating">Avaliação</string>
